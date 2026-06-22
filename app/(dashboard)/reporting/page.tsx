@@ -1,0 +1,167 @@
+"use client";
+
+import { useState } from "react";
+import {
+  DollarSign,
+  ShoppingCart,
+  TrendingDown,
+  TrendingUp,
+  Package,
+  Users,
+  Sparkles,
+  HandCoins,
+  AlertTriangle,
+  Download,
+  Loader2,
+  FileSpreadsheet,
+  type LucideIcon,
+} from "lucide-react";
+import { useGuardedPage } from "@/hooks/use-guarded-page";
+import { useTranslation } from "@/hooks/use-translation";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/shared/page-header";
+import { DateRangePicker } from "@/components/shared/date-range-picker";
+import { RevenueReport } from "@/components/reports/revenue-report";
+import { OrdersReport } from "@/components/reports/orders-report";
+import { CustomersReport } from "@/components/reports/customers-report";
+import { ServicesReport } from "@/components/reports/services-report";
+import { CommissionReport } from "@/components/reports/commission-report";
+import { OutstandingReport } from "@/components/reports/outstanding-report";
+import { PaymentCollectionReport } from "@/components/reports/payment-collection-report";
+import { ExpensesReport } from "@/components/reports/expenses-report";
+import { ProfitReport } from "@/components/reports/profit-report";
+import { InventoryReport } from "@/components/reports/inventory-report";
+import { MonthlyPnlReport } from "@/components/reports/monthly-pnl-report";
+import { getDateRangePreset } from "@/lib/constants";
+import { exportAllToXlsx } from "@/lib/export-utils";
+
+interface TabItem {
+  value: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+export default function ReportingPage() {
+  const { shouldRender } = useGuardedPage("reports", "read", "/laundry/orders");
+  const { t } = useTranslation();
+
+  const thisMonth = getDateRangePreset("thisMonth");
+  const [from, setFrom] = useState(thisMonth.from);
+  const [to, setTo] = useState(thisMonth.to);
+  const [activeTab, setActiveTab] = useState("revenue");
+  const [exporting, setExporting] = useState(false);
+
+  if (!shouldRender) return null;
+
+  const tabItems: TabItem[] = [
+    { value: "revenue", label: t("reporting.revenue"), icon: DollarSign },
+    { value: "orders", label: t("reporting.orders"), icon: ShoppingCart },
+    { value: "expenses", label: t("reporting.expenses"), icon: TrendingDown },
+    { value: "profit", label: t("reporting.profit"), icon: TrendingUp },
+    { value: "inventory", label: t("reporting.inventory"), icon: Package },
+    { value: "customers", label: t("reporting.customers"), icon: Users },
+    { value: "services", label: t("reporting.services"), icon: Sparkles },
+    { value: "commission", label: t("reporting.commission"), icon: HandCoins },
+    { value: "outstanding", label: t("reporting.outstanding"), icon: AlertTriangle },
+    { value: "monthlyPnl", label: "Laporan Bulanan", icon: FileSpreadsheet },
+  ];
+
+  async function handleExportAll() {
+    setExporting(true);
+    try {
+      await exportAllToXlsx(from, to, t);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title={t("reporting.title")} description={t("reporting.description")} />
+
+      {/* Sub-navigation tabs */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex overflow-x-auto gap-1 p-1 bg-muted rounded-lg scrollbar-none">
+            {tabItems.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTab(tab.value)}
+                  className={`shrink-0 flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Filter + Export */}
+      <div className="bg-muted/30 border border-border/60 rounded-xl p-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <DateRangePicker from={from} to={to} onFromChange={setFrom} onToChange={setTo} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportAll}
+            disabled={exporting}
+            className="w-full sm:w-auto shrink-0"
+          >
+            {exporting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Download className="size-4" />
+            )}
+            {exporting ? t("common.saving") : t("reporting.exportAll")}
+          </Button>
+        </div>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsContent value="revenue">
+          <RevenueReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="orders">
+          <OrdersReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="expenses">
+          <ExpensesReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="profit">
+          <ProfitReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="inventory">
+          <InventoryReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="customers">
+          <CustomersReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="services">
+          <ServicesReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="commission">
+          <CommissionReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="outstanding">
+          <OutstandingReport from={from} to={to} />
+        </TabsContent>
+        <TabsContent value="monthlyPnl">
+          <MonthlyPnlReport />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

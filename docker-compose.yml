@@ -1,0 +1,80 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: posadmin
+      POSTGRES_PASSWORD: poslocal
+      POSTGRES_DB: pos_saas
+    ports:
+      - "5437:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U posadmin -d pos_saas"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - pos-saas
+
+  # Run Prisma migrations on startup
+  init-db:
+    build:
+      context: .
+      target: deps
+    environment:
+      DATABASE_URL: "postgresql://posadmin:poslocal@db:5432/pos_saas?schema=public"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - pos-saas
+    command: ["npx", "prisma", "db", "push"]
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      args:
+        # ponytail: NEXT_PUBLIC_* must be present at BUILD time, not just runtime —
+        # Next.js inlines them into the client bundle during `next build`.
+        NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED: ${NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED:-true}
+        NEXT_PUBLIC_MIDTRANS_CLIENT_KEY: ${NEXT_PUBLIC_MIDTRANS_CLIENT_KEY:-}
+        NEXT_PUBLIC_MIDTRANS_ENV: ${NEXT_PUBLIC_MIDTRANS_ENV:-sandbox}
+    restart: unless-stopped
+    ports:
+      - "3007:3000"
+    environment:
+      DATABASE_URL: "postgresql://posadmin:poslocal@db:5432/pos_saas?schema=public"
+      AUTH_SECRET: ${AUTH_SECRET:-change-this-in-production}
+      AUTH_URL: ${AUTH_URL:-http://localhost:3007}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3007}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED: ${NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED:-true}
+      PLATFORM_DOMAIN: ${PLATFORM_DOMAIN:-localhost}
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
+      MIDTRANS_CLIENT_KEY: ${MIDTRANS_CLIENT_KEY:-}
+      MIDTRANS_ENV: ${MIDTRANS_ENV:-sandbox}
+      NEXT_PUBLIC_MIDTRANS_CLIENT_KEY: ${NEXT_PUBLIC_MIDTRANS_CLIENT_KEY:-}
+      NEXT_PUBLIC_MIDTRANS_ENV: ${NEXT_PUBLIC_MIDTRANS_ENV:-sandbox}
+      # ponytail: best-effort ticket email — no-op if unset, errors swallowed in sendEmail
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      init-db:
+        condition: service_completed_successfully
+    networks:
+      - pos-saas
+    command: ["node", "server.js"]
+
+networks:
+  pos-saas:
+    name: pos-saas-net
+    driver: bridge
