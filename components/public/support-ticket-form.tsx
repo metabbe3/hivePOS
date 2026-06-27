@@ -29,16 +29,16 @@ export function SupportTicketForm({ tenantSlug = "" }: { tenantSlug?: string }) 
         tenantSlug,
       };
       if (payload.subject.length < 5) {
-        throw new Error("Subject must be at least 5 characters");
+        throw new Error("Subjek terlalu pendek — minimal 5 huruf.");
       }
       if (payload.description.length < 10) {
-        throw new Error("Description must be at least 10 characters");
+        throw new Error("Deskripsi terlalu pendek — minimal 10 huruf.");
       }
       if (!payload.submitterName) {
-        throw new Error("Name is required");
+        throw new Error("Nama wajib diisi.");
       }
       if (!payload.submitterEmail.includes("@")) {
-        throw new Error("Valid email is required");
+        throw new Error("Format email salah.");
       }
 
       const res = await fetch("/api/public/tickets", {

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
@@ -12,31 +13,25 @@ export function ThemeToggle() {
       stored === "dark" ||
       (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
     setIsDark(isDarkMode);
+    document.documentElement.classList.toggle("dark", isDarkMode);
   }, []);
 
   function toggle() {
     const next = !isDark;
     setIsDark(next);
-    if (next) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={toggle}
-      className="p-2 rounded-lg hover:bg-[var(--color-muted)] transition-colors"
-      aria-label="Toggle theme"
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="h-8 w-8 rounded-lg text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
     >
-      {isDark ? (
-        <Sun className="w-5 h-5 text-[var(--color-warning)]" />
-      ) : (
-        <Moon className="w-5 h-5 text-[var(--color-primary)]" />
-      )}
-    </button>
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </Button>
   );
 }

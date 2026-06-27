@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
   // Marking it external lets Node resolve it at runtime instead of bundling.
   serverExternalPackages: ["pg"],
   // Multi-tenant: allow subdomain-based routing
-  experimental: {},
+  experimental: {
+    // Tree-shake barrel imports so only the lucide icons / recharts components
+    // actually used ship to the client bundle — FCP win across all routes.
+    optimizePackageImports: ["lucide-react", "recharts"],
+  },
   async headers() {
     return [
       {

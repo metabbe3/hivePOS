@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "hivePOS — Aplikasi Kasir Online untuk Laundry";
+export const alt = "hivePOS — Kasir Laundry Ringan di Browser untuk UMKM";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -61,7 +61,7 @@ export default function OpenGraphImage() {
             lineHeight: 1.2,
           }}
         >
-          Aplikasi Kasir Online untuk Laundry
+          Kasir Laundry Ringan di Browser
         </div>
         <div
           style={{
@@ -71,7 +71,7 @@ export default function OpenGraphImage() {
             gap: 12,
           }}
         >
-          <span>Coba gratis 3 bulan</span>
+          <span>Gratis 1 outlet selamanya</span>
           <span>·</span>
           <span>hivepos.id</span>
         </div>

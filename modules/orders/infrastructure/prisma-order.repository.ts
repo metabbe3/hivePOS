@@ -56,6 +56,12 @@ function toOrderRecord(row: {
   };
 }
 
+/** Read settings.website.qrisImageUrl from the untyped Tenant.settings JSON. */
+function readQrisUrl(settings: unknown): string | null {
+  const s = settings as { website?: { qrisImageUrl?: string } } | null | undefined;
+  return s?.website?.qrisImageUrl ?? null;
+}
+
 /** Convert a raw Prisma order row (detail view) to the domain record. */
 function toOrderDetailRecord(row: {
   id: string;
@@ -94,6 +100,11 @@ function toOrderDetailRecord(row: {
     notes: string | null;
     paidAt: Date;
   }>;
+  branch: {
+    invoiceFooter: string | null;
+    printerPaperSize: string | null;
+    tenant: { settings: unknown };
+  };
 }): OrderDetailRecord {
   return {
     ...toOrderRecord(row),
@@ -101,6 +112,9 @@ function toOrderDetailRecord(row: {
     readyAt: row.readyAt,
     deliveredAt: row.deliveredAt,
     customerBalance: decimalToNumberRequired(row.customer.balance),
+    qrisUrl: readQrisUrl(row.branch.tenant.settings),
+    invoiceFooter: row.branch.invoiceFooter,
+    printerPaperSize: row.branch.printerPaperSize,
     orderItems: row.orderItems.map((i) => ({
       id: i.id,
       serviceId: i.serviceId,
@@ -126,6 +140,16 @@ const detailInclude = {
   customer: { select: { id: true, name: true, phone: true, balance: true } },
   orderItems: { include: { service: { select: { id: true, name: true } } } },
   payments: { orderBy: { createdAt: "desc" as const } },
+  // branch.invoiceFooter + tenant.settings.website.qrisImageUrl feed the
+  // WhatsApp receipt's {{terms}} / {{qrisLine}} blocks; branch.printerPaperSize
+  // drives the receipt page's thermal-paper width (read off the order itself).
+  branch: {
+    select: {
+      invoiceFooter: true,
+      printerPaperSize: true,
+      tenant: { select: { settings: true } },
+    },
+  },
 } satisfies Prisma.OrderInclude;
 
 export class PrismaOrderRepository implements OrderRepository {
@@ -216,6 +240,7 @@ export class PrismaOrderRepository implements OrderRepository {
         discountType: data.discountType,
         receivedAt: data.receivedAt,
         notes: data.notes,
+        clientId: data.clientId,
         orderItems: {
           create: data.items.map((item) => ({
             serviceId: item.serviceId,
@@ -381,6 +406,17 @@ export class PrismaOrderRepository implements OrderRepository {
     });
 
     return last ? parseSequence(last.orderNumber) : 0;
+  }
+
+  async findByClientId(clientId: string): Promise<OrderRecord | null> {
+    const row = await prisma.order.findUnique({
+      where: { clientId },
+      include: {
+        customer: { select: { name: true, phone: true } },
+        orderItems: { include: { service: true } },
+      },
+    });
+    return row ? toOrderRecord(row) : null;
   }
 }
 

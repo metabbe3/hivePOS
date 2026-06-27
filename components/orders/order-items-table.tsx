@@ -54,7 +54,7 @@ export function OrderItemsTable({ items, totalPcs }: Props) {
                         {item.garmentBreakdown.map((g, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center rounded-full bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-800 px-2 py-0.5 text-[11px] text-sky-700 dark:text-sky-300"
+                            className="inline-flex items-center rounded-full bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-800 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-300"
                           >
                             {g.name}: {g.qty}
                           </span>
@@ -108,7 +108,7 @@ export function OrderItemsTable({ items, totalPcs }: Props) {
                   {item.garmentBreakdown.map((g, i) => (
                     <span
                       key={i}
-                      className="inline-flex items-center rounded-full bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-800 px-2 py-0.5 text-[11px] text-sky-700 dark:text-sky-300"
+                      className="inline-flex items-center rounded-full bg-sky-50 dark:bg-sky-900/30 border border-sky-200 dark:border-sky-800 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-300"
                     >
                       {g.name}: {g.qty}
                     </span>

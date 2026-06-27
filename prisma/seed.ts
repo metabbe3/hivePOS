@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import pg from "pg";
 import "dotenv/config";
 import { seedDefaultRoles, backfillUserRoles } from "../lib/permissions/seed";
+import { TRIAL_DAYS } from "../lib/billing";
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL! });
 const adapter = new PrismaPg(pool);
@@ -98,9 +99,9 @@ async function main() {
           ownerName: "Demo Owner",
           ownerPhone: "081200000000",
           activeModules: ["laundry"],
-          // ponytail: 90 days = 3 bulan. Matches approve endpoint trial length.
           approvedAt: new Date(),
-          trialEndsAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+          trialEndsAt: new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000),
+          trialTier: "GROWTH",
         },
       });
 
@@ -142,7 +143,7 @@ async function main() {
             tenantId: tenant.id,
             planId: freePlan.id,
             status: "TRIAL",
-            currentPeriodEnd: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+            currentPeriodEnd: new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000),
           },
         });
       }

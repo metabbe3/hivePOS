@@ -40,7 +40,7 @@ export class CreateCheckoutService {
         tenantId,
       );
       if (!promoResult.valid || !promoResult.promoCode) {
-        throw new ValidationError(promoResult.error ?? "Invalid promo code");
+        throw new ValidationError(promoResult.error ?? "Kode promo tidak ditemukan.");
       }
       promoCodeId = promoResult.promoCode.id;
       promoCodeRow = promoResult.promoCode as unknown as PromoCodeRecord;

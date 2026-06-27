@@ -399,6 +399,7 @@ export const ModelName = {
   Service: 'Service',
   ServiceGroup: 'ServiceGroup',
   Order: 'Order',
+  OrderPhoto: 'OrderPhoto',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
   PickupRequest: 'PickupRequest',
@@ -411,7 +412,9 @@ export const ModelName = {
   PromoRedemption: 'PromoRedemption',
   SaaSPayment: 'SaaSPayment',
   FeatureFlag: 'FeatureFlag',
-  TenantFeatureFlag: 'TenantFeatureFlag'
+  TenantFeatureFlag: 'TenantFeatureFlag',
+  SystemSetting: 'SystemSetting',
+  TelemetryEvent: 'TelemetryEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -427,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "superAdmin" | "auditLog" | "errorLog" | "supportTicket" | "ticketComment" | "plan" | "tenant" | "subscription" | "branch" | "user" | "role" | "customer" | "service" | "serviceGroup" | "order" | "orderItem" | "payment" | "pickupRequest" | "depositTransaction" | "stockItem" | "stockMovement" | "expenseCategory" | "expense" | "promoCode" | "promoRedemption" | "saaSPayment" | "featureFlag" | "tenantFeatureFlag"
+    modelProps: "superAdmin" | "auditLog" | "errorLog" | "supportTicket" | "ticketComment" | "plan" | "tenant" | "subscription" | "branch" | "user" | "role" | "customer" | "service" | "serviceGroup" | "order" | "orderPhoto" | "orderItem" | "payment" | "pickupRequest" | "depositTransaction" | "stockItem" | "stockMovement" | "expenseCategory" | "expense" | "promoCode" | "promoRedemption" | "saaSPayment" | "featureFlag" | "tenantFeatureFlag" | "systemSetting" | "telemetryEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1541,6 +1544,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    OrderPhoto: {
+      payload: Prisma.$OrderPhotoPayload<ExtArgs>
+      fields: Prisma.OrderPhotoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderPhotoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderPhotoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>
+        }
+        findFirst: {
+          args: Prisma.OrderPhotoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderPhotoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>
+        }
+        findMany: {
+          args: Prisma.OrderPhotoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>[]
+        }
+        create: {
+          args: Prisma.OrderPhotoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>
+        }
+        createMany: {
+          args: Prisma.OrderPhotoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderPhotoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>[]
+        }
+        delete: {
+          args: Prisma.OrderPhotoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>
+        }
+        update: {
+          args: Prisma.OrderPhotoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderPhotoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderPhotoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderPhotoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderPhotoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPhotoPayload>
+        }
+        aggregate: {
+          args: Prisma.OrderPhotoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderPhoto>
+        }
+        groupBy: {
+          args: Prisma.OrderPhotoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderPhotoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderPhotoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderPhotoCountAggregateOutputType> | number
+        }
+      }
+    }
     OrderItem: {
       payload: Prisma.$OrderItemPayload<ExtArgs>
       fields: Prisma.OrderItemFieldRefs
@@ -2503,6 +2580,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SystemSetting: {
+      payload: Prisma.$SystemSettingPayload<ExtArgs>
+      fields: Prisma.SystemSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SystemSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SystemSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.SystemSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SystemSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        findMany: {
+          args: Prisma.SystemSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        create: {
+          args: Prisma.SystemSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        createMany: {
+          args: Prisma.SystemSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SystemSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.SystemSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        update: {
+          args: Prisma.SystemSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.SystemSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SystemSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SystemSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.SystemSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.SystemSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSystemSetting>
+        }
+        groupBy: {
+          args: Prisma.SystemSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SystemSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingCountAggregateOutputType> | number
+        }
+      }
+    }
+    TelemetryEvent: {
+      payload: Prisma.$TelemetryEventPayload<ExtArgs>
+      fields: Prisma.TelemetryEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TelemetryEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TelemetryEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>
+        }
+        findFirst: {
+          args: Prisma.TelemetryEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TelemetryEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>
+        }
+        findMany: {
+          args: Prisma.TelemetryEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>[]
+        }
+        create: {
+          args: Prisma.TelemetryEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>
+        }
+        createMany: {
+          args: Prisma.TelemetryEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TelemetryEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>[]
+        }
+        delete: {
+          args: Prisma.TelemetryEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>
+        }
+        update: {
+          args: Prisma.TelemetryEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.TelemetryEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TelemetryEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TelemetryEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.TelemetryEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelemetryEventPayload>
+        }
+        aggregate: {
+          args: Prisma.TelemetryEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTelemetryEvent>
+        }
+        groupBy: {
+          args: Prisma.TelemetryEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelemetryEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TelemetryEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelemetryEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2666,6 +2891,7 @@ export const TenantScalarFieldEnum = {
   isActive: 'isActive',
   approvedAt: 'approvedAt',
   trialEndsAt: 'trialEndsAt',
+  trialTier: 'trialTier',
   websiteEnabled: 'websiteEnabled',
   websitePublishedAt: 'websitePublishedAt',
   createdAt: 'createdAt',
@@ -2767,6 +2993,7 @@ export const CustomerScalarFieldEnum = {
   notes: 'notes',
   balance: 'balance',
   branchId: 'branchId',
+  clientId: 'clientId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2820,6 +3047,7 @@ export const OrderScalarFieldEnum = {
   notes: 'notes',
   module: 'module',
   branchId: 'branchId',
+  clientId: 'clientId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   receivedAt: 'receivedAt',
@@ -2829,6 +3057,24 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderPhotoScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  branchId: 'branchId',
+  kind: 'kind',
+  storagePath: 'storagePath',
+  bytes: 'bytes',
+  width: 'width',
+  height: 'height',
+  mime: 'mime',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderPhotoScalarFieldEnum = (typeof OrderPhotoScalarFieldEnum)[keyof typeof OrderPhotoScalarFieldEnum]
 
 
 export const OrderItemScalarFieldEnum = {
@@ -3040,6 +3286,27 @@ export const TenantFeatureFlagScalarFieldEnum = {
 export type TenantFeatureFlagScalarFieldEnum = (typeof TenantFeatureFlagScalarFieldEnum)[keyof typeof TenantFeatureFlagScalarFieldEnum]
 
 
+export const SystemSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
+export const TelemetryEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  kind: 'kind',
+  payload: 'payload',
+  createdAt: 'createdAt'
+} as const
+
+export type TelemetryEventScalarFieldEnum = (typeof TelemetryEventScalarFieldEnum)[keyof typeof TelemetryEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3054,6 +3321,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -3540,6 +3814,7 @@ export type GlobalOmitConfig = {
   service?: Prisma.ServiceOmit
   serviceGroup?: Prisma.ServiceGroupOmit
   order?: Prisma.OrderOmit
+  orderPhoto?: Prisma.OrderPhotoOmit
   orderItem?: Prisma.OrderItemOmit
   payment?: Prisma.PaymentOmit
   pickupRequest?: Prisma.PickupRequestOmit
@@ -3553,6 +3828,8 @@ export type GlobalOmitConfig = {
   saaSPayment?: Prisma.SaaSPaymentOmit
   featureFlag?: Prisma.FeatureFlagOmit
   tenantFeatureFlag?: Prisma.TenantFeatureFlagOmit
+  systemSetting?: Prisma.SystemSettingOmit
+  telemetryEvent?: Prisma.TelemetryEventOmit
 }
 
 /* Types for Logging */

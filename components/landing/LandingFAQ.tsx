@@ -23,7 +23,7 @@ export function LandingFAQ() {
             </div>
             <h2 className="font-display text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl md:text-5xl">
               Pertanyaan{" "}
-              <span className="bg-gradient-to-r from-indigo-600 to-secondary bg-clip-text text-transparent">
+              <span className="text-indigo-600">
                 Sering Ditanyakan
               </span>
             </h2>

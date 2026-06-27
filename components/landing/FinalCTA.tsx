@@ -39,14 +39,14 @@ export function FinalCTA() {
       <div className="relative mx-auto max-w-4xl px-6 text-center">
         <ScrollReveal>
           <h2 className="mb-6 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl md:text-6xl">
-            Siap Mengembangkan Bisnis Anda?
+            Buka Browser. Kasir Jalan.
           </h2>
         </ScrollReveal>
 
         <ScrollReveal delay={1}>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-indigo-100">
-            Laundry kami sendiri sudah pakai hivePOS sejak Juni 2026. Sekarang
-            giliran Anda. Gratis 14 hari. Tanpa kartu kredit.
+            Buka browser, langsung jalan. Gratis 1 outlet selamanya, tanpa kartu
+            kredit. Mulai hari ini, bukan bulan depan.
           </p>
         </ScrollReveal>
 

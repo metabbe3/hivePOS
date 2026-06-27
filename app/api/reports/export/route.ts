@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { withErrorHandler } from "@/modules/shared";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
-import { BUSINESS_NAME_KEY } from "@/lib/constants";
+import { BUSINESS_NAME_KEY, UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 
 const BUSINESS_NAME_FALLBACK = "hivePOS";
 import { buildDateFilter, formatCurrency } from "@/lib/format";
@@ -300,7 +300,7 @@ async function buildCommissionPdf(doc: jsPDF, dateFilter: { gte?: Date; lte?: Da
 
 async function buildOutstandingPdf(doc: jsPDF, where: object, branchIds: string[]) {
   const outstandingOrders = await prisma.order.findMany({
-    where: { paymentStatus: { in: ["PENDING", "PARTIAL"] }, ...where, branchId: { in: branchIds } },
+    where: { paymentStatus: { in: UNPAID_PAYMENT_STATUSES }, ...where, branchId: { in: branchIds } },
     select: {
       totalAmount: true, paidAmount: true, createdAt: true,
       customer: { select: { name: true, phone: true } },
@@ -533,7 +533,7 @@ async function buildPaymentCollectionPdf(
       orderBy: { createdAt: "asc" },
     }),
     prisma.order.findMany({
-      where: { paymentStatus: { in: ["PENDING", "PARTIAL"] }, branchId: { in: branchIds } },
+      where: { paymentStatus: { in: UNPAID_PAYMENT_STATUSES }, branchId: { in: branchIds } },
       select: {
         orderNumber: true,
         totalAmount: true,

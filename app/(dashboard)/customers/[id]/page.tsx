@@ -73,29 +73,23 @@ export default function CustomerDetailPage({
     return q.toString();
   };
 
-  // Fetch customer + orders
-  useEffect(() => {
-    if (!customerId) return;
-    const q = buildDateParams();
-    fetch(`/api/customers/${customerId}?${q}`)
-      .then((r) => r.json())
-      .then((res) => setCustomer(res.data))
-      .catch(() => toast.error(t("customerDetails.failedLoad")))
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customerId, dateFrom, dateTo]);
-
-  // Fetch stats
+  // Fetch customer + stats together — ponytail: previously two effects on the
+  // same deps, fired as separate re-renders. Promise.all collapses them.
   useEffect(() => {
     if (!customerId) return;
     let cancelled = false;
     const q = buildDateParams();
-    fetch(`/api/customers/${customerId}/stats?${q}`)
-      .then((r) => r.json())
-      .then((res) => {
-        if (!cancelled && res.data) setStats(res.data);
+    Promise.all([
+      fetch(`/api/customers/${customerId}?${q}`).then((r) => r.json()),
+      fetch(`/api/customers/${customerId}/stats?${q}`).then((r) => r.json()),
+    ])
+      .then(([c, s]) => {
+        if (cancelled) return;
+        setCustomer(c.data);
+        if (s.data) setStats(s.data);
       })
-      .catch(() => {});
+      .catch(() => toast.error(t("customerDetails.failedLoad")))
+      .finally(() => setLoading(false));
     return () => {
       cancelled = true;
     };

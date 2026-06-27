@@ -1,20 +1,11 @@
 import net from "net";
+import { getLineWidth, ESCPOS_CODE_PAGE } from "./printer-shared";
 
 // ESC/POS command helpers for thermal printers
 // Supports 80mm (48 chars/line) and 58mm (32 chars/line) paper
 
 const ESC = 0x1b;
 const GS = 0x1d;
-
-const PAPER_WIDTHS: Record<string, number> = {
-  "56mm": 30,
-  "58mm": 32,
-  "80mm": 48,
-};
-
-function getLineWidth(paperSize?: string): number {
-  return PAPER_WIDTHS[paperSize ?? "80mm"] ?? 48;
-}
 
 function cmd(...bytes: number[]): Buffer {
   return Buffer.from(bytes);
@@ -31,6 +22,9 @@ export class EscPosBuilder {
   /** Initialize / reset printer */
   init(): this {
     this.parts.push(cmd(ESC, 0x40)); // ESC @
+    // Select the WPC1252 character code table so latin1-encoded text renders
+    // correctly (Indonesian/Latin special chars). See printer-shared.ts.
+    this.parts.push(cmd(ESC, 0x74, ESCPOS_CODE_PAGE)); // ESC t n
     return this;
   }
 
@@ -52,9 +46,10 @@ export class EscPosBuilder {
     return this;
   }
 
-  /** Add a text line (auto-appends newline) */
+  /** Add a text line (auto-appends newline). latin1-encoded to match the
+   * WPC1252 code table selected in init() — ASCII bytes are unchanged. */
   text(str: string): this {
-    this.parts.push(Buffer.from(str + "\n", "utf-8"));
+    this.parts.push(Buffer.from(str + "\n", "latin1"));
     return this;
   }
 

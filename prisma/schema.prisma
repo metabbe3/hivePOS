@@ -202,8 +202,14 @@ model Tenant {
   isActive      Boolean  @default(true)
   /// ponytail: null = pending approval (just registered). Date = approved at that time.
   /// Pair with isActive: (null,false)=pending, (date,true)=active, (date,false)=suspended.
+  /// Normal signups are auto-approved now (trial granted at registration), so the
+  /// manual /approve endpoint is only for edge cases a super-admin re-pends.
   approvedAt    DateTime?
   trialEndsAt   DateTime?
+  /// Which tier a tenant trials during trialEndsAt: "GROWTH" | "PRO" | null.
+  /// Consulted by lib/billing.ts getTenantPlan while trialEndsAt > now; once it
+  /// passes, the plan recomputes from payment history (lazy revert to Free).
+  trialTier     String?
   /// Pro-tier public laundry website gate. False unless tenant is on Pro plan.
   websiteEnabled       Boolean  @default(false)
   /// SEO age signal + go-live timestamp. Null until first published.
@@ -219,6 +225,7 @@ model Tenant {
   saaSPayments  SaaSPayment[]
   pickupRequests PickupRequest[]
   featureFlags  TenantFeatureFlag[]
+  orderPhotos   OrderPhoto[]
 
   @@index([slug])
   @@index([ownerEmail])
@@ -395,6 +402,10 @@ model Customer {
   notes     String?
   balance   Decimal  @db.Decimal(12, 2) @default(0) // prepaid deposit
   branchId  String
+  // ponytail: optional client-side idempotency key for offline-created
+  // walk-in customers. Not unique — dedup happens via @@unique([branchId, phone])
+  // and the idempotent-create service checks for existing rows first.
+  clientId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -405,6 +416,8 @@ model Customer {
 
   @@unique([branchId, phone])
   @@index([branchId])
+  // List query sorts by createdAt (default) — composite covers branch + sort.
+  @@index([branchId, createdAt])
 }
 
 /// Service catalog — works for laundry, salon, cleaning, etc.
@@ -488,6 +501,11 @@ model Order {
   notes           String?
   module          BusinessModule @default(LAUNDRY)
   branchId        String
+  // ponytail: global unique — fine for v1, clientIds are random UUIDs so
+  // cross-tenant collision is astronomically unlikely. Upgrade to
+  // @@unique([tenantId, clientId]) only if a tenant somehow generates a
+  // collision (would indicate a UUID generation bug, not a real collision).
+  clientId        String?        @unique
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   receivedAt      DateTime?
@@ -501,6 +519,7 @@ model Order {
   payments   Payment[]
   depositTransactions DepositTransaction[]
   convertedFromPickup PickupRequest?
+  photos        OrderPhoto[]
 
   @@index([customerId])
   @@index([status])
@@ -508,6 +527,40 @@ model Order {
   @@index([createdAt])
   @@index([branchId])
   @@index([module])
+  // Composite indexes for the dashboard's branch+module+status counts and
+  // branch+module+date range scans (revenue/pipeline/sparkline).
+  @@index([branchId, module, status])
+  @@index([branchId, module, receivedAt])
+}
+
+/// Before/after/damage proof photo attached to an order ("foto bukti cucian").
+/// Stored compressed on local disk (PHOTO_UPLOAD_DIR); auto-deleted after
+/// PHOTO_TTL_DAYS via lib/photo-cleanup.ts. tenantId is denormalized so every
+/// query scopes without a branch join.
+model OrderPhoto {
+  id          String   @id @default(uuid())
+  tenantId    String
+  orderId     String
+  branchId    String?
+  /// "before" | "after" | "damage" — what the photo documents.
+  kind        String
+  /// Host-relative path under PHOTO_UPLOAD_DIR:
+  /// "{tenantId}/{orderNumber}/{kind}-{YYYYMMDDHHmmss}-{rand}.webp"
+  storagePath String
+  bytes       Int
+  width       Int?
+  height      Int?
+  mime        String
+  /// createdAt + PHOTO_TTL_DAYS. Cleanup unlinks the file + deletes the row once
+  /// this passes. Indexed with tenantId for the purge query.
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, expiresAt])
+  @@index([orderId])
 }
 
 model OrderItem {
@@ -720,6 +773,8 @@ model Expense {
 
   @@index([branchId])
   @@index([date])
+  // Dashboard + expenses page filter by branch + date range.
+  @@index([branchId, date])
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -840,3 +895,31 @@ model TenantFeatureFlag {
   @@unique([flagId, tenantId])
   @@index([tenantId])
 }
+
+/// Global key/value store for platform-level settings (force-update nonce,
+/// maintenance flags, etc). Key is the PK — one row per setting.
+model SystemSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/// Telemetry events for the super-admin Peripherals dashboard.
+/// Payload shape varies by `kind` — see lib/telemetry.ts for typed contracts.
+/// ponytail: flexible Json payload over rigid columns — kinds are added in
+/// phases (print, query.slow, web_vitals) and each has different fields.
+/// Indexes cover the 3 access patterns: by kind+time, by tenant+time, by time.
+model TelemetryEvent {
+  id        String   @id @default(uuid())
+  tenantId  String?
+  userId    String?
+  kind      String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([kind, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([createdAt])
+}
+
+

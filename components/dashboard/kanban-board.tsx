@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch, ApiClientError } from "@/modules/shared";
@@ -23,24 +23,11 @@ import { ORDER_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from "@/lib/constants";
 import { renderWhatsAppTemplate, type TemplateOverrides } from "@/lib/whatsapp-templates";
 import { useWhatsappTemplates } from "@/hooks/use-whatsapp-templates";
 import { useTranslation } from "@/hooks/use-translation";
+import { useKanbanOrders, type KanbanOrder } from "@/hooks/use-kanban-orders";
 
-interface KanbanItem {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  customerPhone: string;
-  status: string;
-  paymentStatus: string;
-  totalAmount: number;
-  paidAmount: number;
-  isExpress: boolean;
-  items: { serviceName: string; quantity: number; weightKg: number | null }[];
-  createdAt: string;
-  receivedAt: string | null;
-  inProgressAt: string | null;
-  readyAt: string | null;
-  deliveredAt: string | null;
-}
+// ponytail: alias KanbanOrder → KanbanItem locally so the presentational
+// layer keeps its old name without re-touching every reference below.
+type KanbanItem = KanbanOrder;
 
 const STATUS_FLOW: Record<string, string> = {
   RECEIVED: "IN_PROGRESS",
@@ -235,8 +222,7 @@ function KanbanOrderCard({
 }
 
 export function KanbanBoard() {
-  const [orders, setOrders] = useState<KanbanItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { orders: hookOrders, loading, refetch } = useKanbanOrders();
   const [advancing, setAdvancing] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -249,22 +235,7 @@ export function KanbanBoard() {
     return () => clearInterval(timer);
   }, []);
 
-  const fetchOrders = useCallback(async () => {
-    try {
-      const { data } = await apiFetch<KanbanItem[]>("/api/dashboard/kanban");
-      setOrders(data);
-    } catch {
-      // silent
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchOrders();
-    const interval = setInterval(fetchOrders, 30000);
-    return () => clearInterval(interval);
-  }, [fetchOrders]);
+  const orders = hookOrders ?? [];
 
   const handleAdvance = async (orderId: string, nextStatus: string) => {
     setAdvancing(orderId);
@@ -274,7 +245,7 @@ export function KanbanBoard() {
         body: { status: nextStatus },
       });
       toast.success(t("orders.statusUpdated"));
-      await fetchOrders();
+      await refetch();
     } catch (err) {
       toast.error(err instanceof ApiClientError ? err.message : t("orders.failedUpdate"));
     } finally {

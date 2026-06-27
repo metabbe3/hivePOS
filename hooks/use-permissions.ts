@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { hasPermission, type Resource, type Action } from "@/lib/permissions/definitions";
 
@@ -16,10 +17,19 @@ export function usePermissions() {
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
   const isLoading = status === "loading";
 
-  const can = (resource: Resource, action: Action): boolean => {
-    if (isSuperAdmin) return true;
-    return hasPermission(permissions, resource, action);
-  };
+  // ponytail: stable callback — permissions only changes on session refresh,
+  // so `can` keeps identity across renders and downstream memo/memoized
+  // components don't re-render unnecessarily.
+  const can = useCallback(
+    (resource: Resource, action: Action): boolean => {
+      if (isSuperAdmin) return true;
+      return hasPermission(permissions, resource, action);
+    },
+    [isSuperAdmin, permissions]
+  );
 
-  return { can, permissions, isLoading, isSuperAdmin };
+  return useMemo(
+    () => ({ can, permissions, isLoading, isSuperAdmin }),
+    [can, permissions, isLoading, isSuperAdmin]
+  );
 }

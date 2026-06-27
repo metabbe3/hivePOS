@@ -5,11 +5,11 @@ import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 
 const ticketSchema = z.object({
-  subject: z.string().min(5, "Subject must be at least 5 characters").max(200),
-  description: z.string().min(10, "Description must be at least 10 characters").max(5000),
+  subject: z.string().min(5, "Subjek terlalu pendek — minimal 5 huruf.").max(200),
+  description: z.string().min(10, "Deskripsi terlalu pendek — minimal 10 huruf.").max(5000),
   category: z.enum(TICKET_CATEGORIES).optional(),
-  submitterName: z.string().min(1, "Name is required").max(120),
-  submitterEmail: z.string().email("Valid email required"),
+  submitterName: z.string().min(1, "Nama wajib diisi.").max(120),
+  submitterEmail: z.string().email("Format email salah."),
   submitterPhone: z.string().max(40).optional().or(z.literal("")),
   tenantSlug: z.string().max(80).optional().or(z.literal("")),
 });

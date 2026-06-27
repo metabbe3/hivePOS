@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import {
   DollarSign,
   ShoppingCart,
@@ -22,19 +23,31 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { DateRangePicker } from "@/components/shared/date-range-picker";
-import { RevenueReport } from "@/components/reports/revenue-report";
-import { OrdersReport } from "@/components/reports/orders-report";
-import { CustomersReport } from "@/components/reports/customers-report";
-import { ServicesReport } from "@/components/reports/services-report";
-import { CommissionReport } from "@/components/reports/commission-report";
-import { OutstandingReport } from "@/components/reports/outstanding-report";
-import { PaymentCollectionReport } from "@/components/reports/payment-collection-report";
-import { ExpensesReport } from "@/components/reports/expenses-report";
-import { ProfitReport } from "@/components/reports/profit-report";
-import { InventoryReport } from "@/components/reports/inventory-report";
-import { MonthlyPnlReport } from "@/components/reports/monthly-pnl-report";
 import { getDateRangePreset } from "@/lib/constants";
 import { exportAllToXlsx } from "@/lib/export-utils";
+import { toast } from "sonner";
+
+// ponytail: dynamic chunks per tab — visiting /reporting only loads the
+// active tab's report. Switching tabs fetches that report on demand.
+// Each loader adapts the named export to the `default` next/dynamic expects.
+const loadingFallback = (
+  <div className="flex items-center justify-center py-20">
+    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  </div>
+);
+const dyn = (loader: () => Promise<{ default: React.ComponentType<any> }>) =>
+  dynamic(loader, { loading: () => loadingFallback, ssr: false });
+
+const RevenueReport = dyn(() => import("@/components/reports/revenue-report").then(m => ({ default: m.RevenueReport })));
+const OrdersReport = dyn(() => import("@/components/reports/orders-report").then(m => ({ default: m.OrdersReport })));
+const CustomersReport = dyn(() => import("@/components/reports/customers-report").then(m => ({ default: m.CustomersReport })));
+const ServicesReport = dyn(() => import("@/components/reports/services-report").then(m => ({ default: m.ServicesReport })));
+const CommissionReport = dyn(() => import("@/components/reports/commission-report").then(m => ({ default: m.CommissionReport })));
+const OutstandingReport = dyn(() => import("@/components/reports/outstanding-report").then(m => ({ default: m.OutstandingReport })));
+const ExpensesReport = dyn(() => import("@/components/reports/expenses-report").then(m => ({ default: m.ExpensesReport })));
+const ProfitReport = dyn(() => import("@/components/reports/profit-report").then(m => ({ default: m.ProfitReport })));
+const InventoryReport = dyn(() => import("@/components/reports/inventory-report").then(m => ({ default: m.InventoryReport })));
+const MonthlyPnlReport = dyn(() => import("@/components/reports/monthly-pnl-report").then(m => ({ default: m.MonthlyPnlReport })));
 
 interface TabItem {
   value: string;
@@ -71,6 +84,9 @@ export default function ReportingPage() {
     setExporting(true);
     try {
       await exportAllToXlsx(from, to, t);
+      toast.success(t("reporting.exportDone"));
+    } catch {
+      toast.error(t("reporting.exportFailed"));
     } finally {
       setExporting(false);
     }

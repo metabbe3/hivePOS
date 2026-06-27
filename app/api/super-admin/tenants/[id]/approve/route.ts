@@ -7,9 +7,11 @@ import {
 } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { TRIAL_DAYS } from "@/lib/billing";
 
-// ponytail: 90 days = 3 bulan. If trial length changes, grep "90 * 24".
-const TRIAL_MS = 90 * 24 * 60 * 60 * 1000;
+// Trial length is centralized in lib/billing.ts (TRIAL_DAYS = 14) so a manual
+// approve grants the same window as registration.
+const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 
 // POST → approve a pending tenant. Sets isActive + approvedAt + trial dates.
 // Errors if already approved (approvedAt !== null).

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { PaymentMarquee } from "@/components/landing/PaymentMarquee";
@@ -11,30 +12,84 @@ import { BetaPartnerCTA } from "@/components/landing/BetaPartnerCTA";
 import { LandingFAQ } from "@/components/landing/LandingFAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { SAAS_FAQS } from "@/lib/landing-data-saas";
 
 export const metadata: Metadata = {
-  title: "hivePOS — Aplikasi Kasir Online untuk Laundry",
+  title: "hivePOS — Kasir Laundry Online | Alternatif Moka POS untuk UMKM",
   description:
-    "Sistem kasir online untuk bisnis laundry di Indonesia. Kelola pesanan kiloan & satuan, kanban status, deposit wallet, dan laporan keuangan dalam satu aplikasi. Coba gratis 3 bulan.",
+    "Aplikasi kasir laundry termurah untuk UMKM Indonesia. Browser-native, tanpa install. Kiloan, satuan, WhatsApp order, multi-outlet. Gratis 1 outlet. Alternatif Moka POS mulai Rp 49K/outlet.",
   alternates: { canonical: "/" },
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: SAAS_FAQS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+const softwareAppJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "hivePOS",
+  description: "Aplikasi kasir laundry untuk UMKM Indonesia. Browser-native, tanpa install. Kiloan, satuan, WhatsApp order, multi-outlet.",
+  url: "https://hivepos.id",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web Browser",
+  offers: [
+    { "@type": "Offer", price: "0", priceCurrency: "IDR", description: "Free — 1 outlet, 2 staff, 100 order/bulan" },
+    { "@type": "Offer", price: "49000", priceCurrency: "IDR", description: "Growth — Rp 49K/outlet/bulan, unlimited" },
+    { "@type": "Offer", price: "79000", priceCurrency: "IDR", description: "Pro — Rp 79K/outlet/bulan, website + foto bukti" },
+  ],
+  featureList: [
+    "Kasir laundry kiloan, satuan, express",
+    "Cetak struk thermal (Bluetooth/USB/WiFi)",
+    "WhatsApp order + template pesanan",
+    "Multi-outlet dengan dashboard terpisah",
+    "Manajemen pelanggan + dompet deposit",
+    "Pickup/antar-jemput gratis",
+    "PWA: install di HP, order offline",
+    "Website laundry sendiri (Pro)",
+    "Bukti foto order (Pro)",
+  ],
 };
 
 export default function LandingPage() {
   return (
     <div className="pub-scope min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <LandingNav />
-      <main>
+      <div>
         <LandingHero />
         <PaymentMarquee />
         <IndustriesSection />
         <FeatureBento />
         <HowItWorks />
         <PricingSection />
+        {/* Internal SEO link — keyword-rich anchor to the comparison page */}
+        <div className="border-t border-zinc-200 bg-white py-5 text-center">
+          <Link
+            href="/alternatif-moka-pos-laundry"
+            className="text-sm font-semibold text-indigo-600 hover:underline"
+          >
+            Sedang cari alternatif Moka POS untuk laundry? → Lihat perbandingan lengkap hivePOS vs Moka POS
+          </Link>
+        </div>
         <WebsiteSpotlight />
         <BetaPartnerCTA />
         <LandingFAQ />
         <FinalCTA />
-      </main>
+      </div>
       <LandingFooter />
     </div>
   );

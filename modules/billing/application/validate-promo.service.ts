@@ -16,7 +16,7 @@ export class ValidatePromoService {
     ctx: RequestContext,
   ): Promise<ValidatePromoResult> {
     if (!input.code) {
-      throw new ValidationError("Promo code is required");
+      throw new ValidationError("Kode promo wajib diisi.");
     }
 
     const result = await this.repo.validatePromoCode(input.code, ctx.tenantId);

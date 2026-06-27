@@ -47,3 +47,13 @@ export interface TenantPort {
 export interface ModuleResolver {
   resolve(): BusinessModule;
 }
+
+/**
+ * Customer existence check scoped to a branch. Used by CreateOrderService to
+ * confirm the supplied customerId actually belongs to the caller's branch —
+ * closes the cross-tenant customer-spoofing gap (a tampered offline payload
+ * could otherwise point at another tenant's customer).
+ */
+export interface CustomerLookupPort {
+  existsInBranch(customerId: string, branchId: string): Promise<boolean>;
+}

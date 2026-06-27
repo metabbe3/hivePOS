@@ -52,23 +52,32 @@ export class PrismaCustomerRepository implements CustomerRepository {
             }
           : {}),
       },
-      include: {
-        orders: {
-          select: { totalAmount: true, createdAt: true },
-          orderBy: { createdAt: "desc" },
-        },
-      },
     });
+
+    // Aggregate per-customer order stats in ONE groupBy instead of loading
+    // every order row via include (avoids N+1 / over-fetch on large tenants).
+    const customerIds = customers.map((c) => c.id);
+    const stats =
+      customerIds.length > 0
+        ? await prisma.order.groupBy({
+            by: ["customerId"],
+            where: { branchId: query.branchId, customerId: { in: customerIds } },
+            _count: true,
+            _sum: { totalAmount: true },
+            _max: { createdAt: true },
+          })
+        : [];
+    const statsMap = new Map(stats.map((s) => [s.customerId, s]));
 
     const now = Date.now();
 
     const enriched: CustomerWithSummary[] = customers.map((c) => {
-      const totalOrders = c.orders.length;
-      const totalSpent = c.orders.reduce(
-        (sum, o) => sum + decimalToNumberRequired(o.totalAmount),
-        0,
-      );
-      const lastOrderDate = c.orders.length > 0 ? c.orders[0].createdAt : null;
+      const s = statsMap.get(c.id);
+      const totalOrders = s?._count ?? 0;
+      const totalSpent = s?._sum?.totalAmount
+        ? decimalToNumberRequired(s._sum.totalAmount)
+        : 0;
+      const lastOrderDate = s?._max?.createdAt ?? null;
 
       const customerStatus: CustomerStatus = deriveCustomerStatus(
         c.createdAt,
@@ -155,6 +164,7 @@ export class PrismaCustomerRepository implements CustomerRepository {
         email: data.email,
         notes: data.notes,
         branchId: data.branchId,
+        clientId: data.clientId,
       },
     });
     return toCustomerRecord(customer);
@@ -175,6 +185,13 @@ export class PrismaCustomerRepository implements CustomerRepository {
   async findByPhone(phone: string, branchId: string): Promise<CustomerRecord | null> {
     const customer = await prisma.customer.findFirst({
       where: { phone, branchId },
+    });
+    return customer ? toCustomerRecord(customer) : null;
+  }
+
+  async findByClientId(clientId: string): Promise<CustomerRecord | null> {
+    const customer = await prisma.customer.findFirst({
+      where: { clientId },
     });
     return customer ? toCustomerRecord(customer) : null;
   }

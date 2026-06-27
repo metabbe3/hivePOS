@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2, Plus, Minus, UserPlus, User, X, Search, Clock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -148,12 +148,20 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // ponytail: servicesById Map so per-item lookups are O(1) instead of
+  // O(n) Array.find. Rebuilt only when services array changes.
+  const servicesById = useMemo(() => {
+    const m = new Map<string, EditService>();
+    for (const s of services) m.set(s.id, s);
+    return m;
+  }, [services]);
+
   function getService(id: string) {
-    return services.find((s) => s.id === id);
+    return servicesById.get(id);
   }
 
   function calcSubtotal(item: EditLineItem) {
-    const svc = getService(item.serviceId);
+    const svc = servicesById.get(item.serviceId);
     if (!svc) return 0;
     return svc.pricingType === "PER_KG"
       ? svc.basePrice * (parseFloat(item.weightKg) || 0)
@@ -173,7 +181,7 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
   const total = subtotal - discountCalculated;
 
   const totalPcs = items.reduce((sum, item) => {
-    const svc = getService(item.serviceId);
+    const svc = servicesById.get(item.serviceId);
     if (!svc) return sum;
     if (svc.pricingType === "PER_ITEM")
       return sum + (parseInt(item.quantity) || 0);
@@ -190,81 +198,102 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
       )
     : customers;
 
-  function addServiceItem(serviceId: string) {
-    setItems([
-      ...items,
+  const addServiceItem = useCallback((serviceId: string) => {
+    setItems((prev) => [
+      ...prev,
       { serviceId, quantity: "1", weightKg: "", garmentBreakdown: [] },
     ]);
-  }
+  }, []);
 
-  function updateItem(index: number, field: keyof EditLineItem, value: string) {
-    const updated = [...items];
-    updated[index] = { ...updated[index], [field]: value };
-    setItems(updated);
-  }
-
-  function removeItem(index: number) {
-    setItems(items.filter((_, i) => i !== index));
-  }
-
-  async function handleCreateCustomer(e?: React.FormEvent) {
-    if (e) e.preventDefault();
-    try {
-      const { data: customer } = await apiFetch<EditCustomer>("/api/customers", {
-        method: "POST",
-        body: custForm,
+  const updateItem = useCallback(
+    (index: number, field: keyof EditLineItem, value: string) => {
+      setItems((prev) => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], [field]: value };
+        return updated;
       });
-      setCustomers([...customers, customer]);
-      setSelectedCustomer(customer);
-      setCustModalOpen(false);
-      setCustForm({ name: "", phone: "" });
-      toast.success(t("newOrder.customerCreated"));
-    } catch (err) {
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : t("newOrder.failedCreateCustomer"),
-      );
-    }
-  }
+    },
+    [],
+  );
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!selectedCustomer) return;
-    if (items.length === 0) {
-      toast.error(t("orders.addItem"));
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await onSave({
-        customerId: selectedCustomer.id,
-        notes: notes || undefined,
-        receivedAt:
-          useCustomTime && receivedAt
-            ? new Date(receivedAt).toISOString()
-            : undefined,
-        items: items.map((i) => ({
-          serviceId: i.serviceId,
-          quantity: parseFloat(i.quantity),
-          weightKg: i.weightKg ? parseFloat(i.weightKg) : undefined,
-          garmentBreakdown: i.garmentBreakdown?.length
-            ? i.garmentBreakdown
-            : undefined,
-        })),
-        discountType:
-          discountMode === "none"
-            ? undefined
-            : discountMode === "percentage"
-              ? "PERCENTAGE"
-              : "FIXED",
-        discountAmount:
-          discountMode === "none" ? undefined : parseFloat(discountValue) || 0,
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const removeItem = useCallback((index: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleCreateCustomer = useCallback(
+    async (e?: React.FormEvent) => {
+      if (e) e.preventDefault();
+      try {
+        const { data: customer } = await apiFetch<EditCustomer>(
+          "/api/customers",
+          { method: "POST", body: custForm },
+        );
+        setCustomers((prev) => [...prev, customer]);
+        setSelectedCustomer(customer);
+        setCustModalOpen(false);
+        setCustForm({ name: "", phone: "" });
+        toast.success(t("newOrder.customerCreated"));
+      } catch (err) {
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : t("newOrder.failedCreateCustomer"),
+        );
+      }
+    },
+    [custForm, t],
+  );
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!selectedCustomer) return;
+      if (items.length === 0) {
+        toast.error(t("orders.addItem"));
+        return;
+      }
+      setSubmitting(true);
+      try {
+        await onSave({
+          customerId: selectedCustomer.id,
+          notes: notes || undefined,
+          receivedAt:
+            useCustomTime && receivedAt
+              ? new Date(receivedAt).toISOString()
+              : undefined,
+          items: items.map((i) => ({
+            serviceId: i.serviceId,
+            quantity: parseFloat(i.quantity),
+            weightKg: i.weightKg ? parseFloat(i.weightKg) : undefined,
+            garmentBreakdown: i.garmentBreakdown?.length
+              ? i.garmentBreakdown
+              : undefined,
+          })),
+          discountType:
+            discountMode === "none"
+              ? undefined
+              : discountMode === "percentage"
+                ? "PERCENTAGE"
+                : "FIXED",
+          discountAmount:
+            discountMode === "none" ? undefined : parseFloat(discountValue) || 0,
+        });
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [
+      selectedCustomer,
+      items,
+      notes,
+      useCustomTime,
+      receivedAt,
+      discountMode,
+      discountValue,
+      t,
+      onSave,
+    ],
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

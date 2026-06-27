@@ -507,16 +507,18 @@ export default async function TenantSitePage() {
   // Static CSS — no tenant data interpolated here. Safe.
   const styleCss = `
     .pub-scope {
-      --brand: #0284C7;
-      --brand-deep: #075985;
-      --brand-soft: #BAE6FD;
+      --brand: #1E40AF;
+      --brand-deep: #1E3A8A;
+      --brand-soft: #C7D2FE;
+      --accent: #F59E0B;
+      --accent-deep: #D97706;
       --ink: #0F172A;
       --ink-2: #334155;
       --muted: #64748B;
       --border: #E2E8F0;
       --surface: #FFFFFF;
-      --surface-2: #EFF6FF;
-      --bg: #F8FBFF;
+      --surface-2: #EEF2FF;
+      --bg: #F8FAFC;
       --success: #16A34A;
       --violet: #7C3AED;
       --emerald: #059669;
@@ -549,17 +551,17 @@ export default async function TenantSitePage() {
     @media (hover: hover) {
       .pub-scope .service-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 32px -8px rgba(2, 132, 199, 0.18);
+        box-shadow: 0 12px 32px -8px rgba(30, 64, 175, 0.18);
         border-color: var(--brand-soft);
       }
     }
     .pub-scope .cta-primary {
-      background: var(--brand);
+      background: var(--accent);
       color: #fff;
       transition: background 180ms ease-out, transform 120ms ease-out;
     }
     @media (hover: hover) {
-      .pub-scope .cta-primary:hover { background: var(--brand-deep); }
+      .pub-scope .cta-primary:hover { background: var(--accent-deep); }
     }
     .pub-scope .cta-primary:active { transform: scale(0.98); }
     .pub-scope .cta-ghost {
@@ -573,8 +575,8 @@ export default async function TenantSitePage() {
     }
     .pub-scope .reveal {
       opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 400ms ease-out, transform 400ms ease-out;
+      transform: translateY(16px);
+      transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
     }
     .pub-scope .reveal.is-visible { opacity: 1; transform: translateY(0); }
     @media (prefers-reduced-motion: reduce) {
@@ -586,10 +588,10 @@ export default async function TenantSitePage() {
     }
     .pub-scope .hero-gradient {
       background:
-        radial-gradient(at 20% 20%, #E0F2FE 0%, transparent 50%),
-        radial-gradient(at 80% 0%, #BAE6FD 0%, transparent 45%),
+        radial-gradient(at 20% 20%, #C7D2FE 0%, transparent 50%),
+        radial-gradient(at 80% 0%, #FDE68A 0%, transparent 40%),
         radial-gradient(at 60% 100%, #DBEAFE 0%, transparent 55%),
-        linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+        linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
     }
     .pub-scope .floating-wa {
       position: fixed;
@@ -600,6 +602,20 @@ export default async function TenantSitePage() {
     }
     @media (min-width: 768px) {
       .pub-scope .floating-wa { right: 32px; bottom: 32px; }
+    }
+    .pub-scope .mobile-cta-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+      background: #fff;
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 16px -4px rgba(0,0,0,0.08);
+    }
+    @media (min-width: 768px) {
+      .pub-scope .mobile-cta-bar { display: none; }
     }
     .pub-scope details > summary {
       list-style: none;
@@ -1461,9 +1477,9 @@ export default async function TenantSitePage() {
           </p>
           <a
             href={SITE_URL}
-            className="font-mono-label text-[10px] uppercase tracking-[0.2em] text-[#64748B] hover:text-[#0284C7] transition-colors"
+            className="text-xs font-medium text-[#64748B] hover:text-[#1E40AF] transition-colors"
           >
-            Powered by hivePOS
+            Dibuat dengan hivePOS
           </a>
         </div>
       </footer>
@@ -1480,6 +1496,21 @@ export default async function TenantSitePage() {
         >
           <Icon name="whatsapp" size={28} />
         </a>
+      )}
+
+      {/* Sticky mobile CTA bar — always-visible "Pesan via WhatsApp" on phones */}
+      {waOrder && (
+        <div className="mobile-cta-bar">
+          <a
+            href={waOrder}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cta-primary flex items-center justify-center gap-2 rounded-full py-3.5 text-center text-sm font-bold"
+          >
+            <Icon name="whatsapp" size={18} />
+            Pesan via WhatsApp
+          </a>
+        </div>
       )}
     </div>
   );

@@ -22,12 +22,12 @@ export const PATCH = withErrorHandler(
 
     const reason = typeof body?.reason === "string" ? body.reason.trim() : "";
     if (reason.length < 10) {
-      throw new ValidationError("Reason must be at least 10 characters");
+      throw new ValidationError("Alasan terlalu pendek — minimal 10 huruf.");
     }
 
     const op = body?.op as Op | undefined;
     if (!op || !["extend_trial", "cancel", "change_plan", "mark_paid"].includes(op)) {
-      throw new ValidationError("Invalid op");
+      throw new ValidationError("Operasi tidak valid.");
     }
 
     const tenant = await prisma.tenant.findUnique({
@@ -40,7 +40,7 @@ export const PATCH = withErrorHandler(
       case "extend_trial": {
         const days = Math.floor(Number(body?.days));
         if (!Number.isFinite(days) || days <= 0 || days > 365) {
-          throw new ValidationError("days must be between 1 and 365");
+          throw new ValidationError("Jumlah hari harus di antara 1 dan 365.");
         }
         if (!tenant.subscription) {
           throw new ConflictError("Tenant has no subscription record");
@@ -99,7 +99,7 @@ export const PATCH = withErrorHandler(
 
       case "change_plan": {
         const planId = typeof body?.planId === "string" ? body.planId : null;
-        if (!planId) throw new ValidationError("planId is required");
+        if (!planId) throw new ValidationError("Paket wajib dipilih.");
         const plan = await prisma.plan.findUnique({ where: { id: planId } });
         if (!plan || !plan.isActive) {
           throw new NotFoundError("Plan", planId);
@@ -129,15 +129,15 @@ export const PATCH = withErrorHandler(
         // Records a manual SaaSPayment (offline transfer, cash, etc.) without going through Midtrans.
         const amount = Number(body?.amount);
         if (!Number.isFinite(amount) || amount <= 0) {
-          throw new ValidationError("amount must be a positive number");
+          throw new ValidationError("Jumlah harus lebih dari 0.");
         }
         const months = Math.floor(Number(body?.months));
         if (!Number.isFinite(months) || months <= 0) {
-          throw new ValidationError("months must be a positive integer");
+          throw new ValidationError("Jumlah bulan minimal 1.");
         }
         const outletCount = Math.floor(Number(body?.outletCount ?? tenant.subscription?.paidOutletCount ?? 1));
         if (!Number.isFinite(outletCount) || outletCount <= 0) {
-          throw new ValidationError("outletCount must be a positive integer");
+          throw new ValidationError("Jumlah outlet minimal 1.");
         }
 
         const now = new Date();

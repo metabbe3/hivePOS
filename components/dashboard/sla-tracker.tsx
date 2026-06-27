@@ -2,25 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/modules/shared";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Clock, AlertTriangle, Timer, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "@/hooks/use-translation";
+import { useKanbanOrders, type KanbanOrder } from "@/hooks/use-kanban-orders";
 
-interface SlaOrder {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  status: string;
-  items: { serviceName: string }[];
-  createdAt: string;
-  receivedAt: string | null;
-  inProgressAt: string | null;
-}
+// ponytail: SLATracker reads from the same useKanbanOrders cache as KanbanBoard.
+// One fetch per 30s serves both components.
 
 interface SlaItem {
-  order: SlaOrder;
+  order: KanbanOrder;
   deadline: Date;
   remaining: number; // ms
   totalSla: number; // ms
@@ -58,56 +50,43 @@ function formatTime(date: Date): string {
 }
 
 export function SLATracker() {
+  const { orders } = useKanbanOrders();
   const [slaItems, setSlaItems] = useState<SlaItem[]>([]);
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
 
+  // Recompute SLA items whenever the shared kanban cache changes.
+  // ponytail: filtered + sorted in a single pass; O(n) where n = active orders.
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadExpress() {
-      try {
-        if (cancelled) return;
-        const { data } = await apiFetch<(SlaOrder & { isExpress: boolean })[]>("/api/dashboard/kanban");
-        if (cancelled) return;
-        const express = data.filter(
-          (o: SlaOrder & { isExpress: boolean }) =>
-            o.isExpress && (o.status === "RECEIVED" || o.status === "IN_PROGRESS")
-        );
-        const now = Date.now();
-        const items: SlaItem[] = express.map((o: SlaOrder) => {
-          const start = o.inProgressAt
-            ? new Date(o.inProgressAt).getTime()
-            : o.receivedAt
-              ? new Date(o.receivedAt).getTime()
-              : new Date(o.createdAt).getTime();
-          const slaMs = detectSlaMs(o.items);
-          const deadline = new Date(start + slaMs);
-          const remaining = deadline.getTime() - now;
-          return {
-            order: o,
-            deadline,
-            remaining,
-            totalSla: slaMs,
-            isOverdue: remaining <= 0,
-            isUrgent: remaining > 0 && remaining < 60 * 60 * 1000,
-          };
-        });
-        items.sort((a, b) => a.remaining - b.remaining);
-        setSlaItems(items);
-      } catch {
-        // silent
-      }
-    }
-
-    loadExpress();
-    const interval = setInterval(loadExpress, 30000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
+    if (!orders) return;
+    const now = Date.now();
+    const items: SlaItem[] = orders
+      .filter(
+        (o) =>
+          o.isExpress && (o.status === "RECEIVED" || o.status === "IN_PROGRESS"),
+      )
+      .map((o) => {
+        const start = o.inProgressAt
+          ? new Date(o.inProgressAt).getTime()
+          : o.receivedAt
+            ? new Date(o.receivedAt).getTime()
+            : new Date(o.createdAt).getTime();
+        const slaMs = detectSlaMs(o.items);
+        const deadline = new Date(start + slaMs);
+        const remaining = deadline.getTime() - now;
+        return {
+          order: o,
+          deadline,
+          remaining,
+          totalSla: slaMs,
+          isOverdue: remaining <= 0,
+          isUrgent: remaining > 0 && remaining < 60 * 60 * 1000,
+        };
+      });
+    items.sort((a, b) => a.remaining - b.remaining);
+    setSlaItems(items);
+  }, [orders]);
 
   // Tick remaining times every minute
   useEffect(() => {

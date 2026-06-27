@@ -14,7 +14,7 @@ import {
 export const POST = withErrorHandler(async (req: Request) => {
   const bf = await getBranchFilter();
   if (bf.error) throw new UnauthenticatedError();
-  const { branchId } = bf;
+  const { branchId, tenantId } = bf;
 
   // Look up printer config from database (with env var fallback)
   const branch = await prisma.branch.findUnique({
@@ -73,6 +73,10 @@ export const POST = withErrorHandler(async (req: Request) => {
     branch: { name: order.branch?.name ?? null },
   }, businessName, branch?.printerPaperSize ?? undefined);
 
+  // ponytail: server-side print telemetry write — richer than client roundtrip
+  // for network prints and survives ad blockers. Client handles bluetooth/usb/browser.
+  const userId = bf.session.user.id;
+  const printT0 = performance.now();
   try {
     await sendToPrinter(data, PRINTER_HOST, PRINTER_PORT);
 
@@ -82,9 +86,26 @@ export const POST = withErrorHandler(async (req: Request) => {
       data: { printerLastSeen: new Date() },
     });
 
+    await prisma.telemetryEvent.create({
+      data: {
+        tenantId,
+        userId,
+        kind: "print",
+        payload: { ok: true, ms: Math.round(performance.now() - printT0), kind: "network", orderId },
+      },
+    });
+
     return apiSuccess({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Print failed";
+    await prisma.telemetryEvent.create({
+      data: {
+        tenantId,
+        userId,
+        kind: "print",
+        payload: { ok: false, ms: Math.round(performance.now() - printT0), kind: "network", orderId, error: message },
+      },
+    });
     throw new InternalError(message, { cause: err });
   }
 });

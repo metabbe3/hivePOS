@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { logger } from "@/modules/shared";
+import { logger, InsufficientBalanceError } from "@/modules/shared";
 import type {
   PaymentRepository,
   RecordPaymentData,
@@ -16,13 +16,24 @@ export class PrismaPaymentRepository implements PaymentRepository {
       // Lock the order row for the duration of the transaction
       const order = await tx.order.findUniqueOrThrow({
         where: { id: data.orderId, branchId: data.branchId },
-        include: { customer: true },
       });
 
       // ── Handle DEPOSIT: deduct from customer wallet ──
+      // Atomic decrement (not read-then-write) so two concurrent deposit
+      // payments on the same customer can't lose an update / double-spend.
+      // The service pre-checks sufficiency outside this tx; if a concurrent
+      // payment wins the race and drives the balance negative, the guard below
+      // throws and the whole transaction rolls back (no payment recorded).
       if (data.paymentMethod === "DEPOSIT") {
-        const currentBalance = Number(order.customer.balance);
-        const newBalance = currentBalance - data.amount;
+        const updated = await tx.customer.update({
+          where: { id: customerId },
+          data: { balance: { decrement: data.amount } },
+          select: { balance: true },
+        });
+        const newBalance = Number(updated.balance);
+        if (newBalance < 0) {
+          throw new InsufficientBalanceError();
+        }
 
         await tx.depositTransaction.create({
           data: {
@@ -34,11 +45,6 @@ export class PrismaPaymentRepository implements PaymentRepository {
             orderId: data.orderId,
             branchId: data.branchId,
           },
-        });
-
-        await tx.customer.update({
-          where: { id: customerId },
-          data: { balance: newBalance },
         });
       }
 

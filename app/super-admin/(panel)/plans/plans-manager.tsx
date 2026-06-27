@@ -103,7 +103,7 @@ export function PlansManager() {
     e.preventDefault();
     const name = form.name.trim();
     if (!name) {
-      toast.error("Name is required");
+      toast.error("Nama wajib diisi.");
       return;
     }
 

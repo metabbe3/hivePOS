@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/format";
 import { executeDatabaseQuery } from "@/lib/ai-tools-query";
 import { executeReportQuery } from "@/lib/ai-tools-report";
@@ -275,7 +276,7 @@ async function getTopCustomers(branchId: string, limit: number) {
 
 async function getOutstandingPayments(branchId: string) {
   const orders = await prisma.order.findMany({
-    where: { branchId, paymentStatus: { in: ["PENDING", "PARTIAL"] } },
+    where: { branchId, paymentStatus: { in: UNPAID_PAYMENT_STATUSES } },
     select: {
       orderNumber: true,
       customer: { select: { name: true } },
@@ -633,7 +634,7 @@ async function getDailySummary(branchId: string) {
     prisma.order.count({
       where: {
         branchId,
-        paymentStatus: { in: ["PENDING", "PARTIAL"] },
+        paymentStatus: { in: UNPAID_PAYMENT_STATUSES },
       },
     }),
   ]);

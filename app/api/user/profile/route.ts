@@ -39,7 +39,7 @@ export const PATCH = withErrorHandler(async (req) => {
 
     const valid = await bcrypt.compare(data.currentPassword, user.passwordHash);
     if (!valid) {
-      throw new ValidationError("Current password is incorrect");
+      throw new ValidationError("Kata sandi lama salah.");
     }
   }
 
@@ -52,7 +52,7 @@ export const PATCH = withErrorHandler(async (req) => {
   }
 
   if (Object.keys(updateData).length === 0) {
-    throw new ValidationError("No changes provided");
+    throw new ValidationError("Tidak ada perubahan.");
   }
 
   const updated = await prisma.user.update({

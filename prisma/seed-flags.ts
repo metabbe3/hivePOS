@@ -25,6 +25,9 @@ const FLAGS = [
   { key: "billing",        name: "Billing & Subscription",   category: "admin" },
   { key: "website",        name: "Public Website",           category: "growth" },
   { key: "tickets",        name: "Help / Bantuan",           category: "general" },
+  { key: "offlineOrderCreate", name: "Offline Order Create", category: "general" },
+  { key: "printerSettings", name: "Printer Settings", category: "general" },
+  { key: "orderPhotos", name: "Order Proof Photos", category: "operations" },
 ] as const;
 
 async function main() {
@@ -33,7 +36,12 @@ async function main() {
     await prisma.featureFlag.upsert({
       where: { key: f.key },
       update: { name: f.name, category: f.category },
-      create: { ...f, enabled: true },
+      create: {
+        ...f,
+        // ponytail: offlineOrderCreate defaults OFF globally — flip per-tenant
+        // via super-admin override during dogfood phase. Other flags default ON.
+        enabled: f.key !== "offlineOrderCreate",
+      },
     });
     console.log(`  ✓ ${f.key}`);
   }

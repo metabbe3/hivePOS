@@ -1,4 +1,5 @@
-import * as XLSX from "xlsx";
+// ponytail: xlsx (~400KB) loaded only when user actually exports to .xlsx.
+// Static import would bundle it with every page that touches export-utils.
 
 export function exportToCsv(data: Record<string, unknown>[], filename: string, headers?: Record<string, string>) {
   if (data.length === 0) return;
@@ -16,8 +17,9 @@ export function exportToCsv(data: Record<string, unknown>[], filename: string, h
   downloadBlob(blob, filename);
 }
 
-export function exportToXls(data: Record<string, unknown>[], filename: string, sheetName = "Report", headers?: Record<string, string>) {
+export async function exportToXls(data: Record<string, unknown>[], filename: string, sheetName = "Report", headers?: Record<string, string>) {
   if (data.length === 0) return;
+  const XLSX = await import("xlsx");
   const keys = Object.keys(data[0]);
   const headerRow: Record<string, string> = {};
   keys.forEach((k) => { headerRow[k] = headers?.[k] ?? k; });
@@ -44,6 +46,7 @@ export async function exportAllToXlsx(from: string, to: string, t: (key: string)
     )
   );
 
+  const XLSX = await import("xlsx");
   const wb = XLSX.utils.book_new();
 
   function addSheet(name: string, data: Record<string, unknown>[], headers: Record<string, string>) {

@@ -20,6 +20,7 @@ import { OrderItemsTable } from "@/components/orders/order-items-table";
 import { OrderPriceSummary } from "@/components/orders/order-price-summary";
 import { OrderPaymentCard } from "@/components/orders/order-payment-card";
 import { OrderCustomerCard } from "@/components/orders/order-customer-card";
+import { OrderPhotoSection } from "@/components/orders/order-photo-section";
 import { OrderPaymentsLog } from "@/components/orders/order-payments-log";
 import { OrderPaymentDialog } from "@/components/orders/order-payment-dialog";
 import { OrderEditForm } from "@/components/orders/order-edit-form";
@@ -281,6 +282,7 @@ export default function OrderDetailPage({
               </CardContent>
             </Card>
           )}
+          <OrderPhotoSection orderId={order.id} />
         </div>
 
         {/* Sidebar */}

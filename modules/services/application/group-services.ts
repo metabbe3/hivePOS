@@ -86,7 +86,7 @@ export class ReorderServiceGroupsService {
 
   async execute(input: ReorderGroupsInput, ctx: RequestContext): Promise<void> {
     if (input.groups.length === 0) {
-      throw new ValidationError("At least one group is required to reorder");
+      throw new ValidationError("Pilih minimal satu grup.");
     }
 
     const ids = input.groups.map((g) => g.id);

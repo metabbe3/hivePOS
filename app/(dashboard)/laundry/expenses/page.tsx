@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { usePermissionGuard } from "@/hooks/use-permission-guard";
 import { useTranslation } from "@/hooks/use-translation";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { PageLoading } from "@/components/shared/loading";
+import { SimplePagination } from "@/components/shared/simple-pagination";
 import { EmptyState } from "@/components/shared/empty-state";
 import {
   Table,
@@ -40,8 +42,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DynamicForm } from "@/lib/forms/dynamic-form";
 import { expenseSchema } from "@/lib/forms/schemas";
+import type { FormSchema } from "@/lib/forms/types";
+
+// The create/edit form only mounts when its dialog opens (base-ui Dialog
+// lazily mounts its content). Dynamic-importing it keeps DynamicForm + its
+// field renderers out of the expenses route's initial bundle → lower FCP.
+const DynamicForm = dynamic(
+  () => import("@/lib/forms/dynamic-form").then((m) => ({ default: m.DynamicForm })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="py-10 text-center text-sm text-muted-foreground">…</div>
+    ),
+  },
+);
 import {
   Dialog,
   DialogContent,
@@ -51,6 +66,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { apiFetch, ApiClientError } from "@/modules/shared";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 
 interface ExpenseCategory {
   id: string;
@@ -66,8 +82,115 @@ interface Expense {
   category: ExpenseCategory;
 }
 
+// ponytail: inline-create category field. The page already owns `categories`
+// state + loadCategories(); this component renders the Select and a "+ New"
+// popover that POSTs a category, refreshes the list, and auto-selects it.
+function CategoryField({
+  value,
+  onChange,
+  disabled,
+  categories,
+  onCreated,
+}: {
+  value: unknown;
+  onChange: (v: unknown) => void;
+  disabled: boolean;
+  categories: ExpenseCategory[];
+  onCreated: () => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      const { data } = await apiFetch<ExpenseCategory>(
+        "/api/expense-categories",
+        { method: "POST", body: { name } },
+      );
+      await onCreated(); // refresh page-level categories state
+      onChange(data.id); // auto-select the new category in the form
+      setName("");
+      setOpen(false);
+      toast.success(t("expenses.categoryAdded"));
+    } catch (err) {
+      toast.error(
+        err instanceof ApiClientError
+          ? err.message
+          : t("expenses.failedCreateCategory"),
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="flex gap-2">
+      <Select
+        value={String(value ?? "")}
+        onValueChange={onChange}
+        disabled={disabled}
+        items={categories.map((c) => ({ label: c.name, value: c.id }))}
+      >
+        <SelectTrigger className="flex-1">
+          <SelectValue placeholder="Pilih kategori" />
+        </SelectTrigger>
+        <SelectContent>
+          {categories.map((c) => (
+            <SelectItem key={c.id} value={c.id}>
+              {c.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={disabled}
+              aria-label={t("expenses.newCategoryName")}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          }
+        />
+        <PopoverContent align="end" className="w-56">
+          <form onSubmit={handleCreate} className="space-y-2">
+            <Label className="text-xs text-muted-foreground">
+              {t("expenses.newCategoryName")}
+            </Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t("expenses.newCategoryName")}
+              autoFocus
+              disabled={saving}
+            />
+            <Button
+              type="submit"
+              size="sm"
+              className="w-full"
+              disabled={saving || !name.trim()}
+            >
+              {saving ? t("common.saving") : t("common.create")}
+            </Button>
+          </form>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
 export default function ExpensesPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,6 +202,7 @@ export default function ExpensesPage() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterFrom, setFilterFrom] = useState("");
   const [filterTo, setFilterTo] = useState("");
+  const [expensePage, setExpensePage] = useState(1);
 
   const { allowed, isLoading: roleLoading } = usePermissionGuard("expenses", "read", "/laundry/orders");
 
@@ -113,8 +237,35 @@ export default function ExpensesPage() {
   }, []);
 
   useEffect(() => {
+    setExpensePage(1); // filters changed → back to first page
     loadExpenses();
   }, [filterCategory, filterFrom, filterTo]);
+
+  // ponytail: override the category field with a render that uses the page's
+  // categories state + a "+ New" popover. Schema endpoint stays as a fallback.
+  const expenseSchemaWithCreate = useMemo<FormSchema>(
+    () => ({
+      ...expenseSchema,
+      fields: expenseSchema.fields.map((f) =>
+        f.name === "categoryId"
+          ? {
+              ...f,
+              optionsEndpoint: undefined, // page supplies options via render
+              render: ({ value, onChange, disabled }) => (
+                <CategoryField
+                  value={value}
+                  onChange={onChange}
+                  disabled={disabled}
+                  categories={categories}
+                  onCreated={loadCategories}
+                />
+              ),
+            }
+          : f,
+      ),
+    }),
+    [categories],
+  );
 
   if (roleLoading || !allowed) return null;
 
@@ -129,6 +280,14 @@ export default function ExpensesPage() {
   }
 
   async function handleDelete(id: string) {
+    const ok = await confirm({
+      title: t("expenses.deleteConfirmTitle"),
+      description: t("expenses.deleteConfirmDesc"),
+      confirmLabel: t("common.delete"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await apiFetch(`/api/expenses/${id}`, { method: "DELETE" });
       toast.success(t("expenses.deleted"));
@@ -155,6 +314,14 @@ export default function ExpensesPage() {
   }
 
   async function handleDeleteCategory(id: string) {
+    const ok = await confirm({
+      title: t("expenses.deleteCategoryConfirmTitle"),
+      description: t("expenses.deleteCategoryConfirmDesc"),
+      confirmLabel: t("common.delete"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await apiFetch(`/api/expense-categories/${id}`, { method: "DELETE" });
       toast.success(t("expenses.categoryDeleted"));
@@ -181,6 +348,15 @@ export default function ExpensesPage() {
   if (loading) return <PageLoading />;
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+  // Paginate the table rows (the summary total still reflects ALL expenses).
+  const EXPENSE_PAGE_SIZE = 25;
+  const expenseTotalPages = Math.max(1, Math.ceil(expenses.length / EXPENSE_PAGE_SIZE));
+  const safeExpensePage = Math.min(expensePage, expenseTotalPages);
+  const pageExpenses = expenses.slice(
+    (safeExpensePage - 1) * EXPENSE_PAGE_SIZE,
+    safeExpensePage * EXPENSE_PAGE_SIZE,
+  );
 
   return (
     <div className="space-y-6">
@@ -314,7 +490,7 @@ export default function ExpensesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {expenses.map((expense) => (
+                {pageExpenses.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell className="text-sm">
                       {formatDate(expense.date)}
@@ -355,12 +531,18 @@ export default function ExpensesPage() {
               </TableBody>
             </Table>
           </div>
+          <SimplePagination
+            page={safeExpensePage}
+            totalPages={expenseTotalPages}
+            onPageChange={setExpensePage}
+            total={expenses.length}
+          />
         </>
       )}
 
       {/* Create/Edit Expense Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-primary" />
@@ -368,14 +550,14 @@ export default function ExpensesPage() {
             </DialogTitle>
           </DialogHeader>
           <DynamicForm
-            schema={expenseSchema}
+            schema={expenseSchemaWithCreate}
             initialData={
               editing
                 ? {
                     amount: Number(editing.amount),
-                    category: editing.category?.id,
+                    categoryId: editing.category?.id,
                     date: editing.date?.split("T")[0],
-                    notes: editing.description,
+                    description: editing.description,
                   }
                 : undefined
             }

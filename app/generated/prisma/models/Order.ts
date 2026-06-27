@@ -51,6 +51,7 @@ export type OrderMinAggregateOutputType = {
   notes: string | null
   module: $Enums.BusinessModule | null
   branchId: string | null
+  clientId: string | null
   createdAt: Date | null
   updatedAt: Date | null
   receivedAt: Date | null
@@ -72,6 +73,7 @@ export type OrderMaxAggregateOutputType = {
   notes: string | null
   module: $Enums.BusinessModule | null
   branchId: string | null
+  clientId: string | null
   createdAt: Date | null
   updatedAt: Date | null
   receivedAt: Date | null
@@ -93,6 +95,7 @@ export type OrderCountAggregateOutputType = {
   notes: number
   module: number
   branchId: number
+  clientId: number
   createdAt: number
   updatedAt: number
   receivedAt: number
@@ -128,6 +131,7 @@ export type OrderMinAggregateInputType = {
   notes?: true
   module?: true
   branchId?: true
+  clientId?: true
   createdAt?: true
   updatedAt?: true
   receivedAt?: true
@@ -149,6 +153,7 @@ export type OrderMaxAggregateInputType = {
   notes?: true
   module?: true
   branchId?: true
+  clientId?: true
   createdAt?: true
   updatedAt?: true
   receivedAt?: true
@@ -170,6 +175,7 @@ export type OrderCountAggregateInputType = {
   notes?: true
   module?: true
   branchId?: true
+  clientId?: true
   createdAt?: true
   updatedAt?: true
   receivedAt?: true
@@ -278,6 +284,7 @@ export type OrderGroupByOutputType = {
   notes: string | null
   module: $Enums.BusinessModule
   branchId: string
+  clientId: string | null
   createdAt: Date
   updatedAt: Date
   receivedAt: Date | null
@@ -322,6 +329,7 @@ export type OrderWhereInput = {
   notes?: Prisma.StringNullableFilter<"Order"> | string | null
   module?: Prisma.EnumBusinessModuleFilter<"Order"> | $Enums.BusinessModule
   branchId?: Prisma.StringFilter<"Order"> | string
+  clientId?: Prisma.StringNullableFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   receivedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
@@ -334,6 +342,7 @@ export type OrderWhereInput = {
   payments?: Prisma.PaymentListRelationFilter
   depositTransactions?: Prisma.DepositTransactionListRelationFilter
   convertedFromPickup?: Prisma.XOR<Prisma.PickupRequestNullableScalarRelationFilter, Prisma.PickupRequestWhereInput> | null
+  photos?: Prisma.OrderPhotoListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -349,6 +358,7 @@ export type OrderOrderByWithRelationInput = {
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
+  clientId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -361,11 +371,13 @@ export type OrderOrderByWithRelationInput = {
   payments?: Prisma.PaymentOrderByRelationAggregateInput
   depositTransactions?: Prisma.DepositTransactionOrderByRelationAggregateInput
   convertedFromPickup?: Prisma.PickupRequestOrderByWithRelationInput
+  photos?: Prisma.OrderPhotoOrderByRelationAggregateInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   orderNumber?: string
+  clientId?: string
   AND?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   OR?: Prisma.OrderWhereInput[]
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
@@ -391,7 +403,8 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   payments?: Prisma.PaymentListRelationFilter
   depositTransactions?: Prisma.DepositTransactionListRelationFilter
   convertedFromPickup?: Prisma.XOR<Prisma.PickupRequestNullableScalarRelationFilter, Prisma.PickupRequestWhereInput> | null
-}, "id" | "orderNumber">
+  photos?: Prisma.OrderPhotoListRelationFilter
+}, "id" | "orderNumber" | "clientId">
 
 export type OrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -406,6 +419,7 @@ export type OrderOrderByWithAggregationInput = {
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   module?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
+  clientId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -435,6 +449,7 @@ export type OrderScalarWhereWithAggregatesInput = {
   notes?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   module?: Prisma.EnumBusinessModuleWithAggregatesFilter<"Order"> | $Enums.BusinessModule
   branchId?: Prisma.StringWithAggregatesFilter<"Order"> | string
+  clientId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   receivedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
@@ -454,6 +469,7 @@ export type OrderCreateInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -466,6 +482,7 @@ export type OrderCreateInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -481,6 +498,7 @@ export type OrderUncheckedCreateInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -491,6 +509,7 @@ export type OrderUncheckedCreateInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -504,6 +523,7 @@ export type OrderUpdateInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -516,6 +536,7 @@ export type OrderUpdateInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -531,6 +552,7 @@ export type OrderUncheckedUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -541,6 +563,7 @@ export type OrderUncheckedUpdateInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -556,6 +579,7 @@ export type OrderCreateManyInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -575,6 +599,7 @@ export type OrderUpdateManyMutationInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -596,6 +621,7 @@ export type OrderUncheckedUpdateManyInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -627,6 +653,7 @@ export type OrderCountOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   module?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
@@ -654,6 +681,7 @@ export type OrderMaxOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   module?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
@@ -675,6 +703,7 @@ export type OrderMinOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   module?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
+  clientId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   receivedAt?: Prisma.SortOrder
@@ -791,6 +820,20 @@ export type EnumPaymentStatusFieldUpdateOperationsInput = {
   set?: $Enums.PaymentStatus
 }
 
+export type OrderCreateNestedOneWithoutPhotosInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutPhotosInput, Prisma.OrderUncheckedCreateWithoutPhotosInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutPhotosInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutPhotosNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutPhotosInput, Prisma.OrderUncheckedCreateWithoutPhotosInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutPhotosInput
+  upsert?: Prisma.OrderUpsertWithoutPhotosInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutPhotosInput, Prisma.OrderUpdateWithoutPhotosInput>, Prisma.OrderUncheckedUpdateWithoutPhotosInput>
+}
+
 export type OrderCreateNestedOneWithoutOrderItemsInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutOrderItemsInput, Prisma.OrderUncheckedCreateWithoutOrderItemsInput>
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutOrderItemsInput
@@ -862,6 +905,7 @@ export type OrderCreateWithoutBranchInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -873,6 +917,7 @@ export type OrderCreateWithoutBranchInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutBranchInput = {
@@ -887,6 +932,7 @@ export type OrderUncheckedCreateWithoutBranchInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -897,6 +943,7 @@ export type OrderUncheckedCreateWithoutBranchInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutBranchInput = {
@@ -941,6 +988,7 @@ export type OrderScalarWhereInput = {
   notes?: Prisma.StringNullableFilter<"Order"> | string | null
   module?: Prisma.EnumBusinessModuleFilter<"Order"> | $Enums.BusinessModule
   branchId?: Prisma.StringFilter<"Order"> | string
+  clientId?: Prisma.StringNullableFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   receivedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
@@ -960,6 +1008,7 @@ export type OrderCreateWithoutCustomerInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -971,6 +1020,7 @@ export type OrderCreateWithoutCustomerInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutCustomerInput = {
@@ -985,6 +1035,7 @@ export type OrderUncheckedCreateWithoutCustomerInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -995,6 +1046,7 @@ export type OrderUncheckedCreateWithoutCustomerInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutCustomerInput = {
@@ -1023,6 +1075,126 @@ export type OrderUpdateManyWithWhereWithoutCustomerInput = {
   data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutCustomerInput>
 }
 
+export type OrderCreateWithoutPhotosInput = {
+  id?: string
+  orderNumber: string
+  status?: $Enums.OrderStatus
+  totalAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountType?: string | null
+  paidAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: $Enums.PaymentStatus
+  notes?: string | null
+  module?: $Enums.BusinessModule
+  clientId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  receivedAt?: Date | string | null
+  inProgressAt?: Date | string | null
+  readyAt?: Date | string | null
+  deliveredAt?: Date | string | null
+  branch: Prisma.BranchCreateNestedOneWithoutOrdersInput
+  customer: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrderInput
+  convertedFromPickup?: Prisma.PickupRequestCreateNestedOneWithoutConvertedOrderInput
+}
+
+export type OrderUncheckedCreateWithoutPhotosInput = {
+  id?: string
+  orderNumber: string
+  customerId: string
+  status?: $Enums.OrderStatus
+  totalAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountType?: string | null
+  paidAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: $Enums.PaymentStatus
+  notes?: string | null
+  module?: $Enums.BusinessModule
+  branchId: string
+  clientId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  receivedAt?: Date | string | null
+  inProgressAt?: Date | string | null
+  readyAt?: Date | string | null
+  deliveredAt?: Date | string | null
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrderInput
+  convertedFromPickup?: Prisma.PickupRequestUncheckedCreateNestedOneWithoutConvertedOrderInput
+}
+
+export type OrderCreateOrConnectWithoutPhotosInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutPhotosInput, Prisma.OrderUncheckedCreateWithoutPhotosInput>
+}
+
+export type OrderUpsertWithoutPhotosInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutPhotosInput, Prisma.OrderUncheckedUpdateWithoutPhotosInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutPhotosInput, Prisma.OrderUncheckedCreateWithoutPhotosInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutPhotosInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutPhotosInput, Prisma.OrderUncheckedUpdateWithoutPhotosInput>
+}
+
+export type OrderUpdateWithoutPhotosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  totalAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inProgressAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  readyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  branch?: Prisma.BranchUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneRequiredWithoutOrdersNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrderNestedInput
+  convertedFromPickup?: Prisma.PickupRequestUpdateOneWithoutConvertedOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutPhotosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  customerId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  totalAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paidAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inProgressAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  readyAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrderNestedInput
+  convertedFromPickup?: Prisma.PickupRequestUncheckedUpdateOneWithoutConvertedOrderNestedInput
+}
+
 export type OrderCreateWithoutOrderItemsInput = {
   id?: string
   orderNumber: string
@@ -1034,6 +1206,7 @@ export type OrderCreateWithoutOrderItemsInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1045,6 +1218,7 @@ export type OrderCreateWithoutOrderItemsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutOrderItemsInput = {
@@ -1060,6 +1234,7 @@ export type OrderUncheckedCreateWithoutOrderItemsInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1069,6 +1244,7 @@ export type OrderUncheckedCreateWithoutOrderItemsInput = {
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutOrderItemsInput = {
@@ -1098,6 +1274,7 @@ export type OrderUpdateWithoutOrderItemsInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1109,6 +1286,7 @@ export type OrderUpdateWithoutOrderItemsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutOrderItemsInput = {
@@ -1124,6 +1302,7 @@ export type OrderUncheckedUpdateWithoutOrderItemsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1133,6 +1312,7 @@ export type OrderUncheckedUpdateWithoutOrderItemsInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutPaymentsInput = {
@@ -1146,6 +1326,7 @@ export type OrderCreateWithoutPaymentsInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1157,6 +1338,7 @@ export type OrderCreateWithoutPaymentsInput = {
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutPaymentsInput = {
@@ -1172,6 +1354,7 @@ export type OrderUncheckedCreateWithoutPaymentsInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1181,6 +1364,7 @@ export type OrderUncheckedCreateWithoutPaymentsInput = {
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutPaymentsInput = {
@@ -1210,6 +1394,7 @@ export type OrderUpdateWithoutPaymentsInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1221,6 +1406,7 @@ export type OrderUpdateWithoutPaymentsInput = {
   orderItems?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutPaymentsInput = {
@@ -1236,6 +1422,7 @@ export type OrderUncheckedUpdateWithoutPaymentsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1245,6 +1432,7 @@ export type OrderUncheckedUpdateWithoutPaymentsInput = {
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutConvertedFromPickupInput = {
@@ -1258,6 +1446,7 @@ export type OrderCreateWithoutConvertedFromPickupInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1269,6 +1458,7 @@ export type OrderCreateWithoutConvertedFromPickupInput = {
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutOrderInput
+  photos?: Prisma.OrderPhotoCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutConvertedFromPickupInput = {
@@ -1284,6 +1474,7 @@ export type OrderUncheckedCreateWithoutConvertedFromPickupInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1293,6 +1484,7 @@ export type OrderUncheckedCreateWithoutConvertedFromPickupInput = {
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutOrderInput
+  photos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutConvertedFromPickupInput = {
@@ -1322,6 +1514,7 @@ export type OrderUpdateWithoutConvertedFromPickupInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1333,6 +1526,7 @@ export type OrderUpdateWithoutConvertedFromPickupInput = {
   orderItems?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrderNestedInput
+  photos?: Prisma.OrderPhotoUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutConvertedFromPickupInput = {
@@ -1348,6 +1542,7 @@ export type OrderUncheckedUpdateWithoutConvertedFromPickupInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1357,6 +1552,7 @@ export type OrderUncheckedUpdateWithoutConvertedFromPickupInput = {
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrderNestedInput
+  photos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutDepositTransactionsInput = {
@@ -1370,6 +1566,7 @@ export type OrderCreateWithoutDepositTransactionsInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1381,6 +1578,7 @@ export type OrderCreateWithoutDepositTransactionsInput = {
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutDepositTransactionsInput = {
@@ -1396,6 +1594,7 @@ export type OrderUncheckedCreateWithoutDepositTransactionsInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1405,6 +1604,7 @@ export type OrderUncheckedCreateWithoutDepositTransactionsInput = {
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedCreateNestedOneWithoutConvertedOrderInput
+  photos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutDepositTransactionsInput = {
@@ -1434,6 +1634,7 @@ export type OrderUpdateWithoutDepositTransactionsInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1445,6 +1646,7 @@ export type OrderUpdateWithoutDepositTransactionsInput = {
   orderItems?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutDepositTransactionsInput = {
@@ -1460,6 +1662,7 @@ export type OrderUncheckedUpdateWithoutDepositTransactionsInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1469,6 +1672,7 @@ export type OrderUncheckedUpdateWithoutDepositTransactionsInput = {
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyBranchInput = {
@@ -1483,6 +1687,7 @@ export type OrderCreateManyBranchInput = {
   paymentStatus?: $Enums.PaymentStatus
   notes?: string | null
   module?: $Enums.BusinessModule
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1502,6 +1707,7 @@ export type OrderUpdateWithoutBranchInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1513,6 +1719,7 @@ export type OrderUpdateWithoutBranchInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutBranchInput = {
@@ -1527,6 +1734,7 @@ export type OrderUncheckedUpdateWithoutBranchInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1537,6 +1745,7 @@ export type OrderUncheckedUpdateWithoutBranchInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutBranchInput = {
@@ -1551,6 +1760,7 @@ export type OrderUncheckedUpdateManyWithoutBranchInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1571,6 +1781,7 @@ export type OrderCreateManyCustomerInput = {
   notes?: string | null
   module?: $Enums.BusinessModule
   branchId: string
+  clientId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   receivedAt?: Date | string | null
@@ -1590,6 +1801,7 @@ export type OrderUpdateWithoutCustomerInput = {
   paymentStatus?: Prisma.EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1601,6 +1813,7 @@ export type OrderUpdateWithoutCustomerInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutCustomerInput = {
@@ -1615,6 +1828,7 @@ export type OrderUncheckedUpdateWithoutCustomerInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1625,6 +1839,7 @@ export type OrderUncheckedUpdateWithoutCustomerInput = {
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutOrderNestedInput
   convertedFromPickup?: Prisma.PickupRequestUncheckedUpdateOneWithoutConvertedOrderNestedInput
+  photos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutCustomerInput = {
@@ -1639,6 +1854,7 @@ export type OrderUncheckedUpdateManyWithoutCustomerInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1656,12 +1872,14 @@ export type OrderCountOutputType = {
   orderItems: number
   payments: number
   depositTransactions: number
+  photos: number
 }
 
 export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orderItems?: boolean | OrderCountOutputTypeCountOrderItemsArgs
   payments?: boolean | OrderCountOutputTypeCountPaymentsArgs
   depositTransactions?: boolean | OrderCountOutputTypeCountDepositTransactionsArgs
+  photos?: boolean | OrderCountOutputTypeCountPhotosArgs
 }
 
 /**
@@ -1695,6 +1913,13 @@ export type OrderCountOutputTypeCountDepositTransactionsArgs<ExtArgs extends run
   where?: Prisma.DepositTransactionWhereInput
 }
 
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountPhotosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderPhotoWhereInput
+}
+
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1709,6 +1934,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notes?: boolean
   module?: boolean
   branchId?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   receivedAt?: boolean
@@ -1721,6 +1947,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   payments?: boolean | Prisma.Order$paymentsArgs<ExtArgs>
   depositTransactions?: boolean | Prisma.Order$depositTransactionsArgs<ExtArgs>
   convertedFromPickup?: boolean | Prisma.Order$convertedFromPickupArgs<ExtArgs>
+  photos?: boolean | Prisma.Order$photosArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -1737,6 +1964,7 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   notes?: boolean
   module?: boolean
   branchId?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   receivedAt?: boolean
@@ -1760,6 +1988,7 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   notes?: boolean
   module?: boolean
   branchId?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   receivedAt?: boolean
@@ -1783,6 +2012,7 @@ export type OrderSelectScalar = {
   notes?: boolean
   module?: boolean
   branchId?: boolean
+  clientId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   receivedAt?: boolean
@@ -1791,7 +2021,7 @@ export type OrderSelectScalar = {
   deliveredAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "customerId" | "status" | "totalAmount" | "discountAmount" | "discountType" | "paidAmount" | "paymentStatus" | "notes" | "module" | "branchId" | "createdAt" | "updatedAt" | "receivedAt" | "inProgressAt" | "readyAt" | "deliveredAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "customerId" | "status" | "totalAmount" | "discountAmount" | "discountType" | "paidAmount" | "paymentStatus" | "notes" | "module" | "branchId" | "clientId" | "createdAt" | "updatedAt" | "receivedAt" | "inProgressAt" | "readyAt" | "deliveredAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   branch?: boolean | Prisma.BranchDefaultArgs<ExtArgs>
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1799,6 +2029,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   payments?: boolean | Prisma.Order$paymentsArgs<ExtArgs>
   depositTransactions?: boolean | Prisma.Order$depositTransactionsArgs<ExtArgs>
   convertedFromPickup?: boolean | Prisma.Order$convertedFromPickupArgs<ExtArgs>
+  photos?: boolean | Prisma.Order$photosArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1819,6 +2050,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     payments: Prisma.$PaymentPayload<ExtArgs>[]
     depositTransactions: Prisma.$DepositTransactionPayload<ExtArgs>[]
     convertedFromPickup: Prisma.$PickupRequestPayload<ExtArgs> | null
+    photos: Prisma.$OrderPhotoPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1833,6 +2065,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     notes: string | null
     module: $Enums.BusinessModule
     branchId: string
+    clientId: string | null
     createdAt: Date
     updatedAt: Date
     receivedAt: Date | null
@@ -2239,6 +2472,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   payments<T extends Prisma.Order$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   depositTransactions<T extends Prisma.Order$depositTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$depositTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   convertedFromPickup<T extends Prisma.Order$convertedFromPickupArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$convertedFromPickupArgs<ExtArgs>>): Prisma.Prisma__PickupRequestClient<runtime.Types.Result.GetResult<Prisma.$PickupRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  photos<T extends Prisma.Order$photosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$photosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPhotoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2280,6 +2514,7 @@ export interface OrderFieldRefs {
   readonly notes: Prisma.FieldRef<"Order", 'String'>
   readonly module: Prisma.FieldRef<"Order", 'BusinessModule'>
   readonly branchId: Prisma.FieldRef<"Order", 'String'>
+  readonly clientId: Prisma.FieldRef<"Order", 'String'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly receivedAt: Prisma.FieldRef<"Order", 'DateTime'>
@@ -2775,6 +3010,30 @@ export type Order$convertedFromPickupArgs<ExtArgs extends runtime.Types.Extensio
    */
   include?: Prisma.PickupRequestInclude<ExtArgs> | null
   where?: Prisma.PickupRequestWhereInput
+}
+
+/**
+ * Order.photos
+ */
+export type Order$photosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderPhoto
+   */
+  select?: Prisma.OrderPhotoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderPhoto
+   */
+  omit?: Prisma.OrderPhotoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderPhotoInclude<ExtArgs> | null
+  where?: Prisma.OrderPhotoWhereInput
+  orderBy?: Prisma.OrderPhotoOrderByWithRelationInput | Prisma.OrderPhotoOrderByWithRelationInput[]
+  cursor?: Prisma.OrderPhotoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderPhotoScalarFieldEnum | Prisma.OrderPhotoScalarFieldEnum[]
 }
 
 /**

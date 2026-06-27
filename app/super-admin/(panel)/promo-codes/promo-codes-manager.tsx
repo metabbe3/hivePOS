@@ -77,13 +77,13 @@ export function PromoCodesManager() {
 
     const code = form.code.trim().toUpperCase();
     if (!code) {
-      toast.error("Code is required");
+      toast.error("Kode wajib diisi.");
       return;
     }
 
     const value = Number(form.value);
     if (!Number.isFinite(value) || value <= 0) {
-      toast.error("Value must be a positive number");
+      toast.error("Nilai harus lebih dari 0.");
       return;
     }
 

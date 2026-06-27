@@ -1,4 +1,5 @@
 import { withErrorHandler, apiSuccess } from "@/modules/shared";
+import { UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
 import { endOfDay } from "@/lib/dates";
@@ -162,11 +163,11 @@ export const GET = withErrorHandler(async (req) => {
     }),
     // Unpaid delivered count
     prisma.order.count({
-      where: { branchId: { in: branchIds },module: moduleFilter, status: "DELIVERED", paymentStatus: { in: ["PENDING", "PARTIAL"] } },
+      where: { branchId: { in: branchIds },module: moduleFilter, status: "DELIVERED", paymentStatus: { in: UNPAID_PAYMENT_STATUSES } },
     }),
     // Unpaid orders list (piutang)
     prisma.order.findMany({
-      where: { branchId: { in: branchIds },module: moduleFilter, paymentStatus: { in: ["PENDING", "PARTIAL"] } },
+      where: { branchId: { in: branchIds },module: moduleFilter, paymentStatus: { in: UNPAID_PAYMENT_STATUSES } },
       orderBy: { createdAt: "asc" },
       take: 20,
       include: {
@@ -188,15 +189,25 @@ export const GET = withErrorHandler(async (req) => {
     }),
   ]);
 
-  // Fetch customer names for top customers
+  // Resolve top-customer + service names in parallel (was two sequential awaits).
   const customerIds = topCustomersGrouped.map((tc) => tc.customerId);
-  const customers = customerIds.length > 0
-    ? await prisma.customer.findMany({
-        where: { branchId: { in: branchIds },id: { in: customerIds } },
-        select: { id: true, name: true },
-      })
-    : [];
+  const serviceIds = serviceBreakdownGrouped.map((sb) => sb.serviceId);
+  const [customers, services] = await Promise.all([
+    customerIds.length > 0
+      ? prisma.customer.findMany({
+          where: { branchId: { in: branchIds }, id: { in: customerIds } },
+          select: { id: true, name: true },
+        })
+      : Promise.resolve([] as { id: string; name: string }[]),
+    serviceIds.length > 0
+      ? prisma.service.findMany({
+          where: { branchId: { in: branchIds }, id: { in: serviceIds } },
+          select: { id: true, name: true },
+        })
+      : Promise.resolve([] as { id: string; name: string }[]),
+  ]);
   const customerMap = new Map(customers.map((c) => [c.id, c.name]));
+  const serviceMap = new Map(services.map((s) => [s.id, s.name]));
 
   const topCustomers = topCustomersGrouped.map((tc) => ({
     customerId: tc.customerId,
@@ -204,16 +215,6 @@ export const GET = withErrorHandler(async (req) => {
     orders: tc._count,
     totalSpent: Number(tc._sum.totalAmount ?? 0),
   }));
-
-  // Fetch service names for breakdown
-  const serviceIds = serviceBreakdownGrouped.map((sb) => sb.serviceId);
-  const services = serviceIds.length > 0
-    ? await prisma.service.findMany({
-        where: { branchId: { in: branchIds },id: { in: serviceIds } },
-        select: { id: true, name: true },
-      })
-    : [];
-  const serviceMap = new Map(services.map((s) => [s.id, s.name]));
 
   const serviceBreakdown = serviceBreakdownGrouped.map((sb) => ({
     serviceId: sb.serviceId,
@@ -357,18 +358,29 @@ export const GET = withErrorHandler(async (req) => {
       };
     })(),
     sparkline: await (async () => {
-      const days: number[] = [];
+      // Compute the 7 day-ranges, then fire all counts in parallel (was a
+      // sequential for-loop with await — 7 serial DB round-trips).
+      const ranges: { from: Date; to: Date }[] = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         d.setHours(0, 0, 0, 0);
-        const dEnd = endOfDay(new Date(d));
-        const count = await prisma.order.count({
-          where: { branchId: { in: branchIds },module: moduleFilter, OR: [{ receivedAt: { gte: d, lte: dEnd } }, { receivedAt: null, createdAt: { gte: d, lte: dEnd } }] },
-        });
-        days.push(count);
+        ranges.push({ from: d, to: endOfDay(new Date(d)) });
       }
-      return days;
+      return Promise.all(
+        ranges.map(({ from, to }) =>
+          prisma.order.count({
+            where: {
+              branchId: { in: branchIds },
+              module: moduleFilter,
+              OR: [
+                { receivedAt: { gte: from, lte: to } },
+                { receivedAt: null, createdAt: { gte: from, lte: to } },
+              ],
+            },
+          }),
+        ),
+      );
     })(),
   });
 });

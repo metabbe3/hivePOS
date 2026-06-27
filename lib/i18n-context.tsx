@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { type Lang, getTranslation } from "@/lib/i18n";
 
 interface I18nContextValue {
@@ -40,8 +40,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     [lang]
   );
 
+  // ponytail: memoize context value — lang is the only dep that changes (locale switch).
+  // Without this, every consumer of useTranslation re-renders on every parent render.
+  const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
   return (
-    <I18nContext.Provider value={{ lang, setLang, t }}>
+    <I18nContext.Provider value={value}>
       {children}
     </I18nContext.Provider>
   );

@@ -123,7 +123,7 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
       return;
     }
     if (!branchId) {
-      toast.error("Outlet belum dipilih");
+      toast.error("Outlet wajib dipilih.");
       return;
     }
     if (addressText.trim().length < 4) {

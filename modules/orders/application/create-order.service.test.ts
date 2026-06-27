@@ -6,6 +6,7 @@ import {
   mockBranchPort,
   mockLimitPort,
   mockTenantPort,
+  mockCustomerLookup,
   testContext,
   testKgService,
   testItemService,
@@ -18,7 +19,10 @@ import {
   NotFoundError,
 } from "@/modules/shared";
 
-function makeService(overrides: { services?: typeof testKgService[] } = {}) {
+function makeService(overrides: {
+  services?: typeof testKgService[];
+  customerExists?: boolean;
+} = {}) {
   const orderRepo = mockOrderRepo();
   const serviceCatalog = mockServiceCatalog(
     overrides.services ?? [testKgService, testItemService],
@@ -26,14 +30,16 @@ function makeService(overrides: { services?: typeof testKgService[] } = {}) {
   const branchPort = mockBranchPort();
   const limitPort = mockLimitPort();
   const tenantPort = mockTenantPort();
+  const customerLookup = mockCustomerLookup(overrides.customerExists ?? true);
   const service = new CreateOrderService(
     orderRepo,
     serviceCatalog,
     branchPort,
     limitPort,
     tenantPort,
+    customerLookup,
   );
-  return { service, orderRepo, serviceCatalog, branchPort, limitPort };
+  return { service, orderRepo, serviceCatalog, branchPort, limitPort, customerLookup };
 }
 
 const validInput: CreateOrderInput = {
@@ -94,6 +100,7 @@ describe("CreateOrderService", () => {
       }),
       mockLimitPort(),
       mockTenantPort(),
+      mockCustomerLookup(),
     );
 
     await expect(service.execute(validInput, testContext())).rejects.toThrow(
@@ -112,6 +119,7 @@ describe("CreateOrderService", () => {
       }),
       mockLimitPort(),
       mockTenantPort(),
+      mockCustomerLookup(),
     );
 
     await expect(
@@ -134,6 +142,7 @@ describe("CreateOrderService", () => {
         reason: "Limit reached",
       }),
       mockTenantPort(),
+      mockCustomerLookup(),
     );
 
     await expect(service.execute(validInput, testContext())).rejects.toThrow(
@@ -175,6 +184,7 @@ describe("CreateOrderService", () => {
       mockBranchPort(),
       mockLimitPort(),
       mockTenantPort(),
+      mockCustomerLookup(),
     );
 
     await service.execute(validInput, testContext());
@@ -193,6 +203,7 @@ describe("CreateOrderService", () => {
       mockBranchPort(),
       mockLimitPort(),
       mockTenantPort(),
+      mockCustomerLookup(),
     );
 
     await service.execute(
@@ -202,5 +213,53 @@ describe("CreateOrderService", () => {
 
     const call = (orderRepo.create as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(call.orderNumber).toContain("20250615");
+  });
+
+  // ── Anti-tamper guards (offline payload hardening) ──────────────────
+
+  it("throws NotFoundError when customerId does not belong to the branch", async () => {
+    // ponytail: simulates a tampered offline payload pointing at another
+    // tenant's customer. Server must reject — Prisma FK alone isn't enough.
+    const { service, customerLookup } = makeService({ customerExists: false });
+
+    await expect(service.execute(validInput, testContext())).rejects.toThrow(
+      NotFoundError,
+    );
+    expect(customerLookup.existsInBranch).toHaveBeenCalledWith(
+      "cust-1",
+      "branch-1",
+    );
+  });
+
+  it("throws ForbiddenError when PERCENTAGE discount exceeds 100", async () => {
+    const { service } = makeService();
+    const input: CreateOrderInput = {
+      ...validInput,
+      discountType: "PERCENTAGE",
+      discountAmount: 150, // tampered
+    };
+
+    await expect(service.execute(input, testContext())).rejects.toThrow(
+      ForbiddenError,
+    );
+  });
+
+  it("allows PERCENTAGE discount of exactly 100 (comp / free order)", async () => {
+    const { service, orderRepo } = makeService();
+    const input: CreateOrderInput = {
+      ...validInput,
+      discountType: "PERCENTAGE",
+      discountAmount: 100,
+    };
+
+    await service.execute(input, testContext());
+
+    // 51000 - 100% = 51000 discount, total 0
+    expect(orderRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        discountAmount: 51000,
+        totalAmount: 0,
+      }),
+    );
   });
 });

@@ -48,7 +48,7 @@ export function SubscriptionManager({
   async function submit(op: string) {
     const trimmed = reason.trim();
     if (trimmed.length < 10) {
-      toast.error("Reason must be at least 10 characters");
+      toast.error("Alasan terlalu pendek — minimal 10 huruf.");
       return;
     }
     setSubmitting(true);

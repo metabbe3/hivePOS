@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/shared/confirm-dialog";
-import { Loader2, Lock, LogOut, ShieldAlert } from "lucide-react";
+import { Loader2, Lock, LogOut, ShieldAlert, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,11 +17,12 @@ export function SettingsManager({ admin }: { admin: { id: string; email: string;
   const [confirmPw, setConfirmPw] = useState("");
   const [savingPw, setSavingPw] = useState(false);
   const [revoking, setRevoking] = useState(false);
+  const [forcing, setForcing] = useState(false);
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     if (newPw.length < 8) {
-      toast.error("New password must be at least 8 characters");
+      toast.error("Kata sandi baru minimal 8 karakter.");
       return;
     }
     if (newPw !== confirmPw) {
@@ -59,6 +60,25 @@ export function SettingsManager({ admin }: { admin: { id: string; email: string;
       toast.error(err instanceof ApiClientError ? err.message : "Gagal revoke sessions.");
     } finally {
       setRevoking(false);
+    }
+  }
+
+  async function handleForceUpdatePwa() {
+    if (!(await confirm({
+      title: "Force-update semua PWA?",
+      description:
+        "Semua device yang memakai PWA (kasir, owner) akan di-nuke: cache dihapus, service worker di-unregister, dan halaman di-reload. Pakai untuk hotfix atau perubahan breaking di service worker.",
+      confirmLabel: "Force Update",
+      destructive: true,
+    }))) return;
+    setForcing(true);
+    try {
+      await apiFetch("/api/super-admin/pwa/force-update", { method: "POST" });
+      toast.success("Nonce PWA dirotasi. Device lain akan reload pada poll berikutnya (max 10 menit).");
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : "Gagal memicu force-update.");
+    } finally {
+      setForcing(false);
     }
   }
 
@@ -121,6 +141,28 @@ export function SettingsManager({ admin }: { admin: { id: string; email: string;
         <Button variant="destructive" onClick={handleRevokeSessions} disabled={revoking}>
           {revoking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
           Revoke Other Sessions
+        </Button>
+      </section>
+
+      <section className="rounded-xl bg-amber-50/60 dark:bg-amber-900/10 ring-1 ring-amber-300/50 dark:ring-amber-700/40 p-6 space-y-3">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-amber-800 dark:text-amber-300">
+          <RefreshCw className="h-4 w-4" />
+          PWA Force Update
+        </h2>
+        <p className="text-sm text-amber-800/80 dark:text-amber-300/70">
+          Rotasi nonce PWA untuk semua device terinstall. Setiap kasir / owner yang memakai
+          PWA akan detect perubahan pada poll berikutnya (max 10 menit), hapus cache lokal,
+          unregister service worker, dan reload halaman. Pakai untuk hotfix atau breaking
+          change di service worker.
+        </p>
+        <Button
+          variant="outline"
+          onClick={handleForceUpdatePwa}
+          disabled={forcing}
+          className="border-amber-400 text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/30"
+        >
+          {forcing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+          Force Update All PWAs
         </Button>
       </section>
     </div>

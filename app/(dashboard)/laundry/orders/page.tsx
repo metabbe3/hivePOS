@@ -208,6 +208,12 @@ export default function OrdersPage() {
           prev.map((o) => (o.id === order.id ? { ...o, status: result.data.status } : o))
         );
       }
+      // Keep the status-tab badges honest without a full reload.
+      setStatusCounts((prev) => ({
+        ...prev,
+        [order.status]: Math.max(0, (prev[order.status] ?? 0) - 1),
+        [result.data.status]: (prev[result.data.status] ?? 0) + 1,
+      }));
       toast.success(`${order.orderNumber} → ${t(ORDER_STATUS_CONFIG[action.status as keyof typeof ORDER_STATUS_CONFIG].labelKey)}`);
     } catch (err) {
       toast.error(err instanceof ApiClientError ? err.message : t("orders.failedUpdate"));
@@ -264,6 +270,80 @@ export default function OrdersPage() {
     setPayOrder(order);
     setPayForm({ amount: String(remaining), paymentMethod: "CASH", notes: "", paidAt: new Date().toISOString().slice(0, 10) });
     setPayDialogOpen(true);
+  }
+
+  // ponytail: single source of truth for row action buttons — previously
+  // duplicated desktop (hidden sm:flex) + mobile (flex sm:hidden) blocks.
+  // variant controls the advance button's ml-auto (mobile only).
+  function renderOrderActions(
+    order: Order,
+    action: { label: string; status: string } | undefined,
+    variant: "inline" | "stacked",
+  ) {
+    return (
+      <>
+        {!isEmployee && order.paymentStatus !== "PAID" && (
+          <button
+            type="button"
+            aria-label={t("orderDetails.recordPayment")}
+            onClick={(e) => openPayDialog(order, e)}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50/80 transition-colors"
+          >
+            <Banknote className="h-4 w-4" />
+          </button>
+        )}
+        {!isEmployee && order.status !== "DELIVERED" && (
+          <button
+            type="button"
+            aria-label={t("orders.editOrder")}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/laundry/orders/${order.id}?edit=true`); }}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        )}
+        {!isEmployee && (
+          <button
+            type="button"
+            aria-label="WhatsApp"
+            onClick={(e) => openWhatsApp(order, e)}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50/80 transition-colors"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </button>
+        )}
+        <button
+          type="button"
+          aria-label="Receipt"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(`/laundry/orders/${order.id}/receipt`, '_blank'); }}
+          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
+        >
+          <FileText className="h-4 w-4" />
+        </button>
+        {!isEmployee && (
+          <button
+            type="button"
+            aria-label="Delete"
+            onClick={(e) => deleteOrder(order, e)}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+        {action && !isEmployee && (
+          <Button
+            size="sm"
+            variant={order.status === "READY" ? "default" : "outline"}
+            onClick={(e) => advanceStatus(order, e)}
+            disabled={advancing === order.id}
+            className={`${variant === "stacked" ? "ml-auto " : ""}shrink-0 rounded-lg`}
+          >
+            {advancing === order.id && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
+            {action.label}
+          </Button>
+        )}
+      </>
+    );
   }
 
   async function handlePayment(e: React.FormEvent) {
@@ -478,66 +558,7 @@ export default function OrdersPage() {
                               </span>
                             )}
                           </div>
-                          {!isEmployee && order.paymentStatus !== "PAID" && (
-                          <button
-                            type="button"
-                            title={t("orderDetails.recordPayment")}
-                            onClick={(e) => openPayDialog(order, e)}
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50/80 transition-colors"
-                          >
-                            <Banknote className="h-4 w-4" />
-                          </button>
-                          )}
-                          {!isEmployee && order.status !== "DELIVERED" && (
-                          <button
-                            type="button"
-                            title={t("orders.editOrder")}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/laundry/orders/${order.id}?edit=true`); }}
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                          )}
-                          {!isEmployee && (
-                          <button
-                            type="button"
-                            title="WhatsApp"
-                            onClick={(e) => openWhatsApp(order, e)}
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50/80 transition-colors"
-                          >
-                            <MessageCircle className="h-4 w-4" />
-                          </button>
-                          )}
-                          <button
-                            type="button"
-                            title="Receipt"
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(`/laundry/orders/${order.id}/receipt`, '_blank'); }}
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
-                          >
-                            <FileText className="h-4 w-4" />
-                          </button>
-                          {!isEmployee && (
-                            <button
-                              type="button"
-                              title="Delete"
-                              onClick={(e) => deleteOrder(order, e)}
-                              className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          )}
-                          {action && !isEmployee && (
-                            <Button
-                              size="sm"
-                              variant={order.status === "READY" ? "default" : "outline"}
-                              onClick={(e) => advanceStatus(order, e)}
-                              disabled={advancing === order.id}
-                              className="shrink-0 rounded-lg"
-                            >
-                              {advancing === order.id && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
-                              {action.label}
-                            </Button>
-                          )}
+                          {renderOrderActions(order, action, "inline")}
                         </div>
                         {/* Mobile: price only */}
                         <div className="sm:hidden text-right shrink-0">
@@ -557,66 +578,7 @@ export default function OrdersPage() {
                       </div>
                       {/* Mobile: actions row below */}
                       <div className="flex sm:hidden items-center gap-1.5 mt-3 pt-3 border-t border-border/40">
-                        {!isEmployee && order.paymentStatus !== "PAID" && (
-                        <button
-                          type="button"
-                          title={t("orderDetails.recordPayment")}
-                          onClick={(e) => openPayDialog(order, e)}
-                          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50/80 transition-colors"
-                        >
-                          <Banknote className="h-4 w-4" />
-                        </button>
-                        )}
-                        {!isEmployee && order.status !== "DELIVERED" && (
-                        <button
-                          type="button"
-                          title={t("orders.editOrder")}
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/laundry/orders/${order.id}?edit=true`); }}
-                          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        )}
-                        {!isEmployee && (
-                        <button
-                          type="button"
-                          title="WhatsApp"
-                          onClick={(e) => openWhatsApp(order, e)}
-                          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50/80 transition-colors"
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                        </button>
-                        )}
-                        <button
-                          type="button"
-                          title="Receipt"
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(`/laundry/orders/${order.id}/receipt`, '_blank'); }}
-                          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
-                        >
-                          <FileText className="h-4 w-4" />
-                        </button>
-                        {!isEmployee && (
-                          <button
-                            type="button"
-                            title="Delete"
-                            onClick={(e) => deleteOrder(order, e)}
-                            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        )}
-                        {action && !isEmployee && (
-                          <Button
-                            size="sm"
-                            variant={order.status === "READY" ? "default" : "outline"}
-                            onClick={(e) => advanceStatus(order, e)}
-                            disabled={advancing === order.id}
-                            className="ml-auto shrink-0 rounded-lg"
-                          >
-                            {advancing === order.id && <Loader2 className="h-3 w-3 animate-spin mr-1" />}
-                            {action.label}
-                          </Button>
-                        )}
+                        {renderOrderActions(order, action, "stacked")}
                       </div>
                     </CardContent>
                   </Card>

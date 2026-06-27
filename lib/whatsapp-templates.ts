@@ -58,12 +58,8 @@ Layanan:
 {{serviceLines}}
 {{extrasLine}}
 Biaya: {{totalAmount}}
-{{remainingBlock}}{{readyGreeting}}
-Lacak pesanan: {{trackingUrl}}
-
-📋 Syarat & Ketentuan:
-Komplain max 3 hari setelah pengambilan barang
-Ganti rugi komplain max Rp 200.000`;
+{{remainingLine}}{{qrisLine}}{{readyGreeting}}
+Lacak pesanan: {{trackingUrl}}{{terms}}`;
 
 const ORDER_TRACKING_SHARE_DEFAULT = `Halo {{customerName}}, pesanan laundry kamu bisa dilacak di sini:
 
@@ -120,9 +116,11 @@ export const WHATSAPP_TEMPLATES: TemplateManifestEntry[] = [
       { name: "serviceLines", description: "Daftar layanan multi-baris", required: true },
       { name: "extrasLine", description: "Total piece count line, kosong kalau semua per-kg", required: false },
       { name: "totalAmount", description: "Total biaya terformat (mis. Rp 25.000)", required: true },
-      { name: "remainingBlock", description: "Blok sisa pembayaran + link QRIS, kosong kalau lunas", required: false },
+      { name: "remainingLine", description: "Sisa pembayaran, kosong kalau lunas", required: false },
+      { name: "qrisLine", description: "Link QRIS dari website settings, kosong kalau belum di-set / lunas", required: false },
       { name: "readyGreeting", description: "Pesan 'siap diambil', kosong kalau bukan READY", required: false },
       { name: "trackingUrl", description: "URL lacak pesanan", required: true },
+      { name: "terms", description: "Syarat & Ketentuan dari invoiceFooter branch, kosong kalau belum di-set", required: false },
     ],
   },
   {

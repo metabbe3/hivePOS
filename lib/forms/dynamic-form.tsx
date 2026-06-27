@@ -352,14 +352,28 @@ export function DynamicForm({
   children,
 }: DynamicFormProps) {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const touchTargets = schema.touchTargets ?? false;
 
   // Resolve i18n-aware strings: try key, fall back to literal, fall back to default.
+  // CRITICAL: if t(key) returns the key itself (unresolved — stale PWA bundle,
+  // broken context, missing key), DON'T show the raw key — fall through to the
+  // literal/fallback so the form is ALWAYS human-readable.
   const resolveText = (literal: string | undefined, key: string | undefined, fallback?: string): string | undefined => {
-    if (key) return t(key);
+    if (key) {
+      const resolved = t(key);
+      if (resolved !== key) return resolved; // resolved → use it
+      // unresolved → fall through to literal/fallback (NOT the raw key)
+    }
     if (literal) return literal;
     return fallback;
+  };
+
+  // Translate a form-UI string with a hardcoded bilingual fallback. Same
+  // self-healing logic: if t() can't resolve, use the hardcoded message.
+  const tr = (key: string, id: string, en: string): string => {
+    const resolved = t(key);
+    return resolved === key ? (lang === "id" ? id : en) : resolved;
   };
 
   // Initialize values from defaults + initial data
@@ -420,7 +434,7 @@ export function DynamicForm({
       // Required check
       if (f.required && (val === "" || val === undefined || val === null)) {
         const label = resolveText(f.label, f.labelKey, f.name) ?? f.name;
-        e[f.name] = t("validation.required").replace("{field}", label);
+        e[f.name] = lang === "id" ? `${label} wajib diisi.` : `${label} is required.`;
         continue;
       }
 
@@ -438,7 +452,7 @@ export function DynamicForm({
     e.preventDefault();
     if (submitting) return;
     if (!validateAll()) {
-      toast.error(t("form.checkForm"));
+      toast.error(tr("form.checkForm", "Ada isian yang belum lengkap — cek lagi ya.", "Some fields still need filling."));
       return;
     }
 
@@ -509,9 +523,9 @@ export function DynamicForm({
   const submitLabel = resolveText(
     submitLabelOverride ?? schema.submitLabel,
     schema.submitLabelKey,
-    t("form.submit"),
+    tr("form.submit", "Simpan", "Submit"),
   );
-  const cancelLabel = resolveText(schema.cancelLabel, schema.cancelLabelKey, t("form.cancel"));
+  const cancelLabel = resolveText(schema.cancelLabel, schema.cancelLabelKey, tr("form.cancel", "Batal", "Cancel"));
 
   return (
     <form onSubmit={handleSubmit} className={cn("space-y-4", className)}>
@@ -555,24 +569,32 @@ export function DynamicForm({
       </div>
 
       {!hideActions && (
-        <div className="flex items-center gap-3 pt-2">
-          <Button type="submit" loading={submitting} disabled={disabled} size={touchTargets ? "touch" : "default"}>
-            {submitting
-              ? t("form.saving")
-              : (
-                <>
-                  {recordId || initialData?.id ? <Save className="size-4" /> : <Plus className="size-4" />}
-                  {submitLabel}
-                </>
-              )}
-          </Button>
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel} disabled={submitting} size={touchTargets ? "touch" : "default"}>
-              <X className="size-4" />
-              {cancelLabel}
+        schema.submitFullWidth ? (
+          <div className="pt-2">
+            <Button type="submit" loading={submitting} disabled={disabled} size={touchTargets ? "touch" : "default"} className="w-full">
+              {submitting ? tr("form.saving", "Menyimpan…", "Saving…") : submitLabel}
             </Button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 pt-2">
+            <Button type="submit" loading={submitting} disabled={disabled} size={touchTargets ? "touch" : "default"}>
+              {submitting
+                ? tr("form.saving", "Menyimpan…", "Saving…")
+                : (
+                  <>
+                    {recordId || initialData?.id ? <Save className="size-4" /> : <Plus className="size-4" />}
+                    {submitLabel}
+                  </>
+                )}
+            </Button>
+            {onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel} disabled={submitting} size={touchTargets ? "touch" : "default"}>
+                <X className="size-4" />
+                {cancelLabel}
+              </Button>
+            )}
+          </div>
+        )
       )}
 
       {children}

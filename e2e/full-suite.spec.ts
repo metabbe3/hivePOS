@@ -22,7 +22,8 @@ test.describe('Auth Flow', () => {
   });
 
   test('super admin login → super-admin page', async ({ page }) => {
-    await page.goto('/login');
+    // ponytail: super-admin scope is set by /super-admin/login, not /login.
+    await page.goto('/super-admin/login');
     await page.fill('input[type="email"]', 'admin@possaas.id');
     await page.fill('input[type="password"]', 'admin123');
     await page.click('button[type="submit"]');
@@ -63,8 +64,9 @@ test.describe('Dashboard', () => {
   test.beforeEach(async ({ page }) => { await loginOwner(page); });
 
   test('shows module switcher sidebar', async ({ page }) => {
-    await expect(page.locator('text=MODUL BISNIS')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('a:has-text("Laundry")').first()).toBeVisible();
+    // ponytail: redesigned — Laundry appears as module-switcher button, not link text.
+    await expect(page.locator('a[href*="/laundry/orders"]').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: /Laundry/ }).first()).toBeVisible();
   });
 
   test('shows stats cards', async ({ page }) => {
@@ -212,7 +214,8 @@ test.describe('Customer Management', () => {
     if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await searchInput.fill('Budi');
       await page.waitForTimeout(1000);
-      await expect(page.locator('text=Budi')).toBeVisible({ timeout: 3000 });
+      // ponytail: multiple Budis may exist; .first() avoids strict-mode violation.
+      await expect(page.locator('text=Budi').first()).toBeVisible({ timeout: 3000 });
     }
   });
 });
@@ -261,7 +264,9 @@ test.describe('All Pages Smoke Test', () => {
 // ─── 8. PUBLIC PAGES ───────────────────────────────────────
 test.describe('Public Pages', () => {
   test('track page loads', async ({ page }) => {
-    const res = await page.goto('/track');
+    // ponytail: /track/[orderNumber] requires a number; bare /track 404s.
+    // Use an obviously-invalid number to hit the error-state branch (still 200).
+    const res = await page.goto('/track/QA-PROBE-0000');
     expect(res?.status()).toBeLessThan(400);
   });
 });
@@ -269,7 +274,8 @@ test.describe('Public Pages', () => {
 // ─── 9. SUPER ADMIN ────────────────────────────────────────
 test.describe('Super Admin', () => {
   test('dashboard loads with tenant list', async ({ page }) => {
-    await page.goto('/login');
+    // ponytail: super-admin scope is set by /super-admin/login, not /login.
+    await page.goto('/super-admin/login');
     await page.fill('input[type="email"]', 'admin@possaas.id');
     await page.fill('input[type="password"]', 'admin123');
     await page.click('button[type="submit"]');

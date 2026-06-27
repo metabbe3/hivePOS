@@ -15,7 +15,7 @@ export function IndustriesSection() {
             </div>
             <h2 className="mb-4 font-display text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl md:text-5xl">
               Dibuat Spesifik untuk{" "}
-              <span className="bg-gradient-to-r from-indigo-600 to-secondary bg-clip-text text-transparent">
+              <span className="text-indigo-600">
                 Setiap Industri
               </span>
             </h2>

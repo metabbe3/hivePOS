@@ -1,11 +1,12 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "@/hooks/use-translation";
 import { useRole } from "@/hooks/use-role";
+import { useWakeLock } from "@/hooks/use-wake-lock";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProfileHero } from "@/components/profile/profile-hero";
@@ -14,6 +15,8 @@ import { PersonalInfoCard } from "@/components/profile/personal-info-card";
 import { PasswordChangeCard } from "@/components/profile/password-change-card";
 import { LinkedAccountsCard } from "@/components/profile/linked-accounts-card";
 import { MyTicketsCard } from "@/components/profile/my-tickets-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import type { ProfileData } from "@/components/profile/types";
 
 export default function ProfilePage() {
@@ -109,6 +112,7 @@ function ProfileContent() {
             onChanged={({ googleId }) => setProfile({ ...profile, googleId })}
           />
           <PasswordChangeCard />
+          <PwaPreferencesCard />
           <MyTicketsCard />
         </div>
 
@@ -126,5 +130,53 @@ function ProfileContent() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ponytail: localStorage-backed (not DB) because wake lock is a per-device
+// concern — a kasir's phone needs it, the owner's laptop doesn't. No schema
+// change, no API. Same pattern as `theme` / `pos.lastPrinter`.
+function PwaPreferencesCard() {
+  const { t } = useTranslation();
+  const { enabled, supported, toggle } = useWakeLock();
+
+  return (
+    <Card className="overflow-hidden rounded-xl border-border/60 shadow-sm">
+      <CardContent className="space-y-4 p-5">
+        <div className="flex items-center gap-2 border-b border-border/40 pb-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Smartphone className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold uppercase tracking-wide">
+              {t("profile.pwaPrefs")}
+            </h2>
+            <p className="text-[11px] text-muted-foreground">
+              {t("profile.pwaPrefsDesc")}
+            </p>
+          </div>
+        </div>
+
+        <label
+          htmlFor="wake-lock"
+          className="flex items-start justify-between gap-4"
+        >
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">{t("profile.wakeLock")}</p>
+            <p className="text-[11px] text-muted-foreground">
+              {supported
+                ? t("profile.wakeLockHint")
+                : t("profile.wakeLockUnsupported")}
+            </p>
+          </div>
+          <Switch
+            id="wake-lock"
+            checked={enabled}
+            onCheckedChange={(v) => toggle(v)}
+            disabled={!supported}
+          />
+        </label>
+      </CardContent>
+    </Card>
   );
 }

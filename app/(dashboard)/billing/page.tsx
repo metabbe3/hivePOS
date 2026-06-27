@@ -480,7 +480,8 @@ export default function BillingPage() {
                     <li>✓ Subdomain + template profesional</li>
                     <li>✓ SEO lokal (Google Maps, schema.org)</li>
                     <li>✓ Tracking pesanan online</li>
-                    <li>✓ QRIS, WhatsApp order, testimoni</li>
+                    <li>✓ Bukti foto order (sebelum &amp; sesudah)</li>
+                    <li>✓ QRIS + testimoni pelanggan</li>
                   </ul>
                   <Link
                     href="/website"

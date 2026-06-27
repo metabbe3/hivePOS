@@ -81,27 +81,61 @@ describe("buildOrderWhatsAppUrl", () => {
     expect(url).toContain("25.000");
   });
 
-  it("includes QRIS link only when there is an unpaid remainder", () => {
+  it("includes the QRIS line (using the configured qrisUrl) when unpaid", () => {
     const partial = buildOrderWhatsAppUrl(
       "0812",
-      { ...baseOrder, totalAmount: 25000, paidAmount: 10000 },
+      {
+        ...baseOrder,
+        totalAmount: 25000,
+        paidAmount: 10000,
+        qrisUrl: "https://laundry.example/qris.png",
+      },
       stubT,
     );
-    expect(partial).toContain("QRIS");
-    expect(partial).toContain("Sisa");
+    const decoded = decodeURIComponent(partial.split("text=")[1]);
+    expect(decoded).toContain("Sisa pembayaran");
+    expect(decoded).toContain("Pembayaran via QRIS");
+    expect(decoded).toContain("https://laundry.example/qris.png");
   });
 
-  it("omits QRIS link when fully paid", () => {
+  it("omits the QRIS line when no qrisUrl is configured (no dead link)", () => {
+    // baseOrder is unpaid but has no qrisUrl — the old code emitted a broken
+    // /QRIS.JPG link here. Now the QRIS line is simply absent.
+    const url = buildOrderWhatsAppUrl("0812", baseOrder, stubT);
+    const decoded = decodeURIComponent(url.split("text=")[1]);
+    expect(decoded).toContain("Sisa pembayaran"); // remainder still shown
+    expect(decoded).not.toContain("QRIS");
+    expect(decoded).not.toContain("QRIS.JPG");
+  });
+
+  it("never emits the dead /QRIS.JPG link (regression guard)", () => {
+    const cases = [
+      baseOrder,
+      { ...baseOrder, qrisUrl: "https://x/q.png" },
+      { ...baseOrder, totalAmount: 25000, paidAmount: 25000, qrisUrl: "https://x/q.png" },
+    ];
+    for (const order of cases) {
+      const url = buildOrderWhatsAppUrl("0812", order, stubT);
+      expect(url).not.toContain("QRIS.JPG");
+    }
+  });
+
+  it("omits QRIS line when fully paid (even with qrisUrl configured)", () => {
     const paid = buildOrderWhatsAppUrl(
       "0812",
-      { ...baseOrder, totalAmount: 25000, paidAmount: 25000 },
+      {
+        ...baseOrder,
+        totalAmount: 25000,
+        paidAmount: 25000,
+        qrisUrl: "https://x/q.png",
+      },
       stubT,
     );
     expect(paid).not.toContain("QRIS");
     expect(paid).not.toContain("Sisa");
   });
 
-  it("omits QRIS link when overpaid (no negative remainder)", () => {
+  it("omits QRIS line when overpaid (no negative remainder)", () => {
     const overpaid = buildOrderWhatsAppUrl(
       "0812",
       { ...baseOrder, totalAmount: 25000, paidAmount: 30000 },
@@ -130,10 +164,26 @@ describe("buildOrderWhatsAppUrl", () => {
     expect(url).toContain("LD-001");
   });
 
-  it("includes the standard terms and conditions footer", () => {
+  it("includes the terms block from the branch invoiceFooter when set", () => {
+    const url = buildOrderWhatsAppUrl(
+      "0812",
+      {
+        ...baseOrder,
+        invoiceFooter: "Komplain max 3 hari setelah diambil\nGanti rugi max Rp 200.000",
+      },
+      stubT,
+    );
+    const decoded = decodeURIComponent(url.split("text=")[1]);
+    expect(decoded).toContain("Syarat & Ketentuan");
+    expect(decoded).toContain("Komplain max 3 hari");
+    expect(decoded).toContain("200.000");
+  });
+
+  it("omits the terms block when invoiceFooter is empty (no fake terms)", () => {
     const url = buildOrderWhatsAppUrl("0812", baseOrder, stubT);
-    expect(url).toContain("Syarat"); // "Syarat & Ketentuan"
-    expect(url).toContain("200.000");
+    const decoded = decodeURIComponent(url.split("text=")[1]);
+    expect(decoded).not.toContain("Syarat");
+    expect(decoded).not.toContain("200.000");
   });
 
   it("counts pieces for per-item orders (not per-kg)", () => {

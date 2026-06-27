@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-hivePOS — multi-tenant POS SaaS for Indonesian laundry / F&B / salon businesses.
+hivePOS — Kasir Laundry Ringan di Browser untuk UMKM.
 Next.js 16 App Router, React 19, Prisma 7 (PostgreSQL), NextAuth v5, Tailwind 4,
 Vitest, Playwright. Bilingual (`en` + `id`). Dev port **3007**.
 
@@ -51,6 +51,39 @@ These rules exist because breaking them has caused real bugs. Verify each before
 6. **Mark deliberate shortcuts** with `// ponytail: <ceiling> — <upgrade path>`. These regenerate `PONYTAIL-DEBT.md`.
 7. **Sidebar filter rule**: both `hasFlag(item.flag) AND can(item.resource, item.action)` must remain. Removing either breaks DRY gating.
 8. **If touching `lib/auth.ts` jwt callback**: feature flags must resolve in all paths — credentials login, Google OAuth, session refresh, impersonation swap.
+
+## Brand voice & positioning
+
+**One-liner**: Kasir laundry ringan di browser, untuk UMKM Indonesia.
+
+**Primary slogan**: "Kasir laundry, tinggal buka browser."
+
+### Positioning
+- **Target**: UMKM laundry (1-5 outlets, owner-operated). NOT big laundry chains.
+- **Differentiator**: browser-native, no install, transparent per-outlet pricing.
+- **Reference brand**: Shopify (lightweight, practical-but-aspirational, "anyone can start").
+- **Anti-patterns we don't follow**: heavy iPad POS apps (Moka-style), all-in-one suites (Majoo-style), Android-hardware bundles (Qasir-style).
+
+### Voice rules
+1. **Bahasa Indonesia, casual-professional.** "Anda" for CTAs, casual for marketing lines.
+2. **No buzzwords.** "Dashboard real-time" ok. "AI-powered synergy" not ok.
+3. **Concrete > abstract.** "2 menit" not "cepat". "Rp 49K/outlet" not "terjangkau".
+4. **UMKM-friendly.** Avoid English-only phrases. Avoid jargon unless explained inline.
+5. **Dogfooding is proof, not lead.** "Dibuat dan dipakai sendiri di laundry kami" is a supporting badge under the hero — not the hero itself.
+6. **Anti-bloat is implicit.** Frame as "tanpa ribet", "tanpa install", "tanpa kontrak mahal". Never name competitors.
+7. **Indonesian context is native.** Pickup, kiloan, QRIS, e-wallet, WhatsApp — these are not exotic, they're the default.
+
+### Do
+- Lead with browser-native + UMKM-laundry
+- Use concrete numbers (2 menit, Rp 49K, 1 outlet gratis)
+- Show honest proof (dogfooding, transparent pricing, real stats)
+
+### Don't
+- Pretend to be enterprise ("platform", "solution", "ecosystem")
+- Use hype words ("revolusioner", "game-changer", "next-gen")
+- Promise features we don't have (offline mode, hardware bundles)
+- Bash competitors by name
+- Lead with the dogfooding backstory — it's supporting proof, not the hook
 
 ## Doc map
 

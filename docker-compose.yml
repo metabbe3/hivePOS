@@ -47,6 +47,10 @@ services:
       - "3007:3000"
     environment:
       DATABASE_URL: "postgresql://posadmin:poslocal@db:5432/pos_saas?schema=public"
+      # Indonesia-only app: WIB. Set on the app (not the db) so JS date
+      # boundaries (dashboard "today", reporting) align with Jakarta midnight.
+      # DB timestamps are UTC instants, formatted WIB at display time.
+      TZ: Asia/Jakarta
       AUTH_SECRET: ${AUTH_SECRET:-change-this-in-production}
       AUTH_URL: ${AUTH_URL:-http://localhost:3007}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3007}
@@ -59,12 +63,23 @@ services:
       MIDTRANS_ENV: ${MIDTRANS_ENV:-sandbox}
       NEXT_PUBLIC_MIDTRANS_CLIENT_KEY: ${NEXT_PUBLIC_MIDTRANS_CLIENT_KEY:-}
       NEXT_PUBLIC_MIDTRANS_ENV: ${NEXT_PUBLIC_MIDTRANS_ENV:-sandbox}
+      # Auth rate-limit is ON by default (prod). Override RATE_LIMIT_DISABLED=true
+      # only in dev/test containers running login sweeps (avoids false-429).
+      RATE_LIMIT_DISABLED: ${RATE_LIMIT_DISABLED:-false}
       # ponytail: best-effort ticket email — no-op if unset, errors swallowed in sendEmail
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-}
+      # Order proof photos — local disk on a host bind-mount (./data/uploads),
+      # NOT an opaque named volume, so files are plain/inspectable on the host
+      # and survive container rebuilds.
+      PHOTO_UPLOAD_DIR: /app/data/uploads
+      # Shared secret that authorizes the daily /api/internal/photo-cleanup cron.
+      CRON_SECRET: ${CRON_SECRET:-}
+    volumes:
+      - ./data/uploads:/app/data/uploads
     depends_on:
       db:
         condition: service_healthy

@@ -32,7 +32,7 @@ export function OrderPaymentsLog({ payments }: Props) {
               <span className="font-semibold">
                 {formatCurrency(p.amount)}
               </span>
-              <Badge variant="outline" className="text-[11px]">
+              <Badge variant="outline" className="text-xs">
                 {t(
                   PAYMENT_METHOD_LABELS[
                     p.paymentMethod as keyof typeof PAYMENT_METHOD_LABELS

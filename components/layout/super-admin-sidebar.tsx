@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Settings,
   Flag,
+  Cable,
 } from "lucide-react";
 import { BrandMark } from "@/components/public/brand-logo";
 import {
@@ -51,6 +52,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { title: "Performance", href: "/super-admin/performance", icon: TrendingUp },
       { title: "Health", href: "/super-admin/health", icon: Activity },
       { title: "Pickup Insights", href: "/super-admin/pickup-insights", icon: Truck },
+      { title: "Peripherals", href: "/super-admin/peripherals", icon: Cable },
     ],
   },
   {

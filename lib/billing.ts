@@ -8,6 +8,11 @@ export const ORIGINAL_PRICE_PER_OUTLET = 79000;
 // different unit price. add PLAN_FEATURES.website to gate the website feature.
 export const PRO_PRICE_PER_OUTLET = 79000;
 
+/// Free-trial length (days) for new signups — single source of truth. Honors the
+/// landing page "Coba Growth/Pro 14 Hari Gratis" claim. Adopted in register +
+/// approve + seed so the trial length can't drift between them.
+export const TRIAL_DAYS = 14;
+
 const UNLIMITED = 999999;
 
 export const PLAN_FEATURES = {
@@ -19,10 +24,27 @@ export const PLAN_FEATURES = {
 export type TenantPlan = "FREE" | "GROWTH" | "PRO";
 
 /**
+ * Decide a tenant's plan during their free trial. Pure + unit-tested (no prisma).
+ * Returns the trial tier while `trialEndsAt` is in the future, FREE once it
+ * passes — the lazy auto-revert. getTenantPlan recomputes this every call, so a
+ * trial expires itself with no cron. Unknown trialTier defaults to GROWTH (the
+ * primary landing-page CTA).
+ */
+export function resolveTrialPlan(input: {
+  trialEndsAt: Date | null;
+  trialTier: string | null;
+  now: Date;
+}): TenantPlan {
+  const { trialEndsAt, trialTier, now } = input;
+  if (!trialEndsAt || trialEndsAt.getTime() <= now.getTime()) return "FREE";
+  return trialTier === "PRO" ? "PRO" : "GROWTH";
+}
+
+/**
  * ponytail: plan discrimination from payment history. A tenant is Pro if any
  * PAID SaaSPayment has unitPrice >= PRO_PRICE_PER_OUTLET. Growth = any other
- * paid history. Free = no paid outlets. Simpler than a Plan table join and
- * survives the existing per-outlet coverage model unchanged.
+ * paid history. Unpaid tenants fall back to their free-trial tier (or FREE once
+ * the trial window closes). Survives the existing per-outlet coverage model.
  */
 export async function getTenantPlan(tenantId: string): Promise<TenantPlan> {
   const proPayment = await prisma.saaSPayment.findFirst({
@@ -36,7 +58,19 @@ export async function getTenantPlan(tenantId: string): Promise<TenantPlan> {
   if (proPayment) return "PRO";
 
   const paid = await isTenantPaid(tenantId);
-  return paid ? "GROWTH" : "FREE";
+  if (paid) return "GROWTH";
+
+  // Unpaid: honor the free-trial window. Lazy revert — once trialEndsAt passes,
+  // resolveTrialPlan returns FREE on the next call, no expiry job needed.
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { trialEndsAt: true, trialTier: true },
+  });
+  return resolveTrialPlan({
+    trialEndsAt: tenant?.trialEndsAt ?? null,
+    trialTier: tenant?.trialTier ?? null,
+    now: new Date(),
+  });
 }
 
 // Free tier limits (when tenant has no paid outlets)
@@ -187,6 +221,21 @@ export async function getTenantLimits(
 }> {
   const plan = await getTenantPlan(tenantId);
   if (plan === "FREE") {
+    // ponytail: read configurable limits from DB Plan row (editable via super-admin).
+    // Falls back to hardcoded FREE_TIER if the row is missing (unseeded DB / pre-migration).
+    const dbPlan = await prisma.plan.findUnique({
+      where: { name: FREE_PLAN_NAME },
+      select: { maxOutlets: true, maxUsers: true, maxOrders: true },
+    });
+    if (dbPlan) {
+      return {
+        maxOutlets: dbPlan.maxOutlets,
+        maxUsers: dbPlan.maxUsers,
+        maxOrders: dbPlan.maxOrders,
+        isPaid: false,
+        planName: FREE_PLAN_NAME,
+      };
+    }
     return { ...FREE_TIER, isPaid: false, planName: FREE_PLAN_NAME };
   }
   return {

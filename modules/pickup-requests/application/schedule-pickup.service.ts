@@ -16,18 +16,18 @@ export class SchedulePickupService {
   ): Promise<PickupRequestDTO> {
     // ── Validate input ──
     if (!input.requestedDate) {
-      throw new ValidationError("requestedDate is required");
+      throw new ValidationError("Tanggal pengambilan wajib diisi.");
     }
     const d = new Date(input.requestedDate);
     if (isNaN(d.getTime())) {
-      throw new ValidationError("requestedDate is invalid");
+      throw new ValidationError("Tanggal pengambilan tidak valid.");
     }
     const requestedDate = new Date(
       Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
     );
     const requestedSlot = input.requestedSlot?.trim();
     if (!requestedSlot) {
-      throw new ValidationError("requestedSlot is required");
+      throw new ValidationError("Jam pengambilan wajib dipilih.");
     }
 
     // ── Load + check transition ──

@@ -98,7 +98,7 @@ describe("renderWhatsAppTemplate", () => {
         serviceLines: "- Cuci Kering (3kg)",
         totalAmount: "Rp 25.000",
         trackingUrl: "https://hivepos.id/track/LD-001",
-        // extrasLine, remainingBlock, readyGreeting intentionally missing
+        // extrasLine, remainingLine, qrisLine, readyGreeting, terms intentionally missing
       },
     );
     expect(out).toContain("LD-001");
@@ -118,8 +118,10 @@ describe("renderWhatsAppTemplate", () => {
         totalAmount: "Rp 25.000",
         trackingUrl: "https://hivepos.id/track/LD-001",
         extrasLine: "",
-        remainingBlock: "",
+        remainingLine: "",
+        qrisLine: "",
         readyGreeting: "",
+        terms: "",
       },
     );
     expect(out).not.to.match(/\n{3,}/);

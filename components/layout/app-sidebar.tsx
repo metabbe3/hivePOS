@@ -20,6 +20,7 @@ import {
   Globe,
   MessageCircle,
   LifeBuoy,
+  Printer,
 } from "lucide-react";
 import { BrandMark } from "@/components/public/brand-logo";
 import {
@@ -82,6 +83,9 @@ const SHARED_NAV: NavItem[] = [
   { titleKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, color: "text-amber-600", resource: "dashboard", action: "read", flag: "dashboard" },
   { titleKey: "nav.customers", href: "/customers", icon: Users, color: "text-amber-600", resource: "customers", action: "read", flag: "customers" },
   { titleKey: "nav.reporting", href: "/reporting", icon: BarChart3, color: "text-violet-600", resource: "reports", action: "read", flag: "reports" },
+  // ponytail: printer settings is device-level (localStorage) so it stays visible
+  // even in "Semua Outlet" mode. Gated by orders:read → kasir, manager, owner.
+  { titleKey: "nav.printerSettings", href: "/printer-settings", icon: Printer, color: "text-slate-600", resource: "orders", action: "read", flag: "printerSettings" },
 ];
 
 const ADMIN_NAV: NavItem[] = [
@@ -105,6 +109,48 @@ export const MODULE_META: Record<string, { labelKey: string; icon: any; emoji: s
   fnb: { labelKey: "nav.moduleFnb", icon: Soup, emoji: "🍽️" },
   salon: { labelKey: "nav.moduleSalon", icon: Scissors, emoji: "💇" },
 };
+
+// ponytail: NavList — the four SidebarGroup blocks below previously
+// copy-pasted ~30 lines of SidebarMenu/SidebarMenuItem/SidebarMenuButton
+// each. Now they delegate here. Per-group differences (accent color,
+// active-route resolver, badge) come via props.
+function NavList({
+  items,
+  accentColor = "bg-indigo-500",
+  isActive,
+}: {
+  items: NavItem[];
+  accentColor?: string;
+  isActive?: (item: NavItem) => boolean;
+}) {
+  const pathname = usePathname();
+  const { t } = useTranslation();
+  return (
+    <SidebarMenu>
+      {items.map((item) => {
+        const active = isActive ? isActive(item) : pathname.startsWith(item.href);
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton
+              isActive={active}
+              render={<a href={item.href} />}
+              className={`group relative rounded-lg transition-all duration-200 hover:bg-sidebar-accent/60 ${
+                active ? "bg-sidebar-accent/80 font-semibold" : ""
+              }`}
+            >
+              {active && (
+                <div className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full ${accentColor}`} />
+              )}
+              <item.icon className={`h-[18px] w-[18px] transition-colors ${active ? item.color : "text-muted-foreground group-hover:text-foreground"}`} />
+              <span className="text-[13px]">{t(item.titleKey)}</span>
+              {item.badge}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+}
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -130,9 +176,9 @@ export function AppSidebar() {
 
   const visibleShared = SHARED_NAV.filter((item) => {
     if (isAllOutlets) {
-      // In ALL mode, only Dashboard + Laporan are meaningful
+      // In ALL mode, only Dashboard + Laporan + Printer settings are meaningful
       return (
-        (item.href === "/dashboard" || item.href === "/reporting") &&
+        (item.href === "/dashboard" || item.href === "/reporting" || item.href === "/printer-settings") &&
         hasFlag(item.flag) &&
         can(item.resource, item.action)
       );
@@ -174,31 +220,14 @@ export function AppSidebar() {
             {t("nav.general")}
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleShared.map((item) => {
-                const isActive =
-                  item.href === "/dashboard"
-                    ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      render={<a href={item.href} />}
-                      className={`group relative rounded-lg transition-all duration-200 hover:bg-sidebar-accent/60 ${
-                        isActive ? "bg-sidebar-accent/80 font-semibold" : ""
-                      }`}
-                    >
-                      {isActive && (
-                        <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-indigo-500" />
-                      )}
-                      <item.icon className={`h-[18px] w-[18px] transition-colors ${isActive ? item.color : "text-muted-foreground group-hover:text-foreground"}`} />
-                      <span className="text-[13px]">{t(item.titleKey)}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            <NavList
+              items={visibleShared}
+              isActive={(item) =>
+                item.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname.startsWith(item.href)
+              }
+            />
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -209,29 +238,7 @@ export function AppSidebar() {
               {MODULE_META[activeModule]?.emoji} {MODULE_META[activeModule] ? t(MODULE_META[activeModule].labelKey) : ""}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {visibleModule.map((item) => {
-                  const isActive = pathname.startsWith(item.href);
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        isActive={isActive}
-                        render={<a href={item.href} />}
-                        className={`group relative rounded-lg transition-all duration-200 hover:bg-sidebar-accent/60 ${
-                          isActive ? "bg-sidebar-accent/80 font-semibold" : ""
-                        }`}
-                      >
-                        {isActive && (
-                          <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-indigo-500" />
-                        )}
-                        <item.icon className={`h-[18px] w-[18px] transition-colors ${isActive ? item.color : "text-muted-foreground group-hover:text-foreground"}`} />
-                        <span className="text-[13px]">{t(item.titleKey)}</span>
-                        {item.badge}
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
+              <NavList items={visibleModule} />
             </SidebarGroupContent>
           </SidebarGroup>
         )}
@@ -243,60 +250,18 @@ export function AppSidebar() {
               {t("nav.admin")}
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {visibleAdmin.map((item) => {
-                  const isActive = pathname.startsWith(item.href);
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        isActive={isActive}
-                        render={<a href={item.href} />}
-                        className={`group relative rounded-lg transition-all duration-200 hover:bg-sidebar-accent/60 ${
-                          isActive ? "bg-sidebar-accent/80 font-semibold" : ""
-                        }`}
-                      >
-                        {isActive && (
-                          <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-indigo-500" />
-                        )}
-                        <item.icon className={`h-[18px] w-[18px] transition-colors ${isActive ? item.color : "text-muted-foreground group-hover:text-foreground"}`} />
-                        <span className="text-[13px]">{t(item.titleKey)}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
+              <NavList items={visibleAdmin} />
             </SidebarGroupContent>
           </SidebarGroup>
         )}
 
         {/* Help — always visible (no RBAC gate, but still flag-gated) */}
         {visibleHelp.length > 0 && (
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleHelp.map((item) => {
-                const isActive = pathname.startsWith(item.href);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      render={<a href={item.href} />}
-                      className={`group relative rounded-lg transition-all duration-200 hover:bg-sidebar-accent/60 ${
-                        isActive ? "bg-sidebar-accent/80 font-semibold" : ""
-                      }`}
-                    >
-                      {isActive && (
-                        <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-rose-500" />
-                      )}
-                      <item.icon className={`h-[18px] w-[18px] transition-colors ${isActive ? item.color : "text-muted-foreground group-hover:text-foreground"}`} />
-                      <span className="text-[13px]">{t(item.titleKey)}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <NavList items={visibleHelp} accentColor="bg-rose-500" />
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
       </SidebarContent>
 

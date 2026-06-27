@@ -18,17 +18,17 @@ export const POST = withErrorHandler(async (req: Request) => {
   const current = typeof body?.currentPassword === "string" ? body.currentPassword : "";
   const next = typeof body?.newPassword === "string" ? body.newPassword : "";
 
-  if (current.length === 0) throw new ValidationError("Current password is required");
-  if (next.length < 8) throw new ValidationError("New password must be at least 8 characters");
+  if (current.length === 0) throw new ValidationError("Kata sandi lama wajib diisi.");
+  if (next.length < 8) throw new ValidationError("Kata sandi baru minimal 8 karakter.");
 
   const admin = await prisma.superAdmin.findUnique({
     where: { id: actor.id },
     select: { passwordHash: true, sessionVersion: true },
   });
-  if (!admin) throw new ValidationError("Account not found");
+  if (!admin) throw new ValidationError("Akun tidak ditemukan.");
 
   const ok = await verifyPassword(current, admin.passwordHash);
-  if (!ok) throw new ValidationError("Current password is incorrect");
+  if (!ok) throw new ValidationError("Kata sandi lama salah.");
 
   const newHash = await hashPassword(next);
 

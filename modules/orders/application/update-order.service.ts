@@ -7,12 +7,9 @@ import type {
   ReplaceOrderData,
 } from "../domain/repository.port";
 import { priceOrder } from "../domain/pricing";
-import {
-  generateOrderNumber,
-  orderNumberPrefix,
-  parseSequence,
-} from "../domain/order-number.vo";
+import { orderNumberPrefix } from "../domain/order-number.vo";
 import { deriveTenantCode } from "@/lib/tenant-code";
+import { allocateOrderNumber } from "./allocate-order-number";
 import type { ServiceCatalogPort, TenantPort } from "./ports";
 import type { RequestContext } from "./context";
 import type { UpdateOrderInput } from "./dto";
@@ -72,7 +69,9 @@ export class UpdateOrderService {
 
     // ── 6. Regenerate order number if receivedAt changed ──
     const newReceivedAt = input.receivedAt ? new Date(input.receivedAt) : null;
-    let newOrderNumber: string | undefined;
+    let newPrefix: string | null = null;
+    let renumberReceivedAt: Date | null = null;
+    let renumberTenantCode: string | null = null;
 
     if (newReceivedAt) {
       // ponytail: load tenant slug once for both old/new prefix compare.
@@ -81,25 +80,42 @@ export class UpdateOrderService {
       const oldDateStr = existing.receivedAt
         ? orderNumberPrefix(existing.receivedAt, tenantCode)
         : "";
-      const newPrefix = orderNumberPrefix(newReceivedAt, tenantCode);
+      const candidatePrefix = orderNumberPrefix(newReceivedAt, tenantCode);
 
-      if (newPrefix !== oldDateStr) {
-        const lastSeq = await this.orderRepo.getLastSequenceForPrefix(newPrefix);
-        newOrderNumber = generateOrderNumber(newReceivedAt, lastSeq, tenantCode);
+      if (candidatePrefix !== oldDateStr) {
+        // ponytail: delegate the renumber through allocateOrderNumber so a
+        // concurrent create can't trip P2002 on the new number. The actual
+        // replaceItems call happens inside the helper's tryInsert callback.
+        newPrefix = candidatePrefix;
+        renumberReceivedAt = newReceivedAt;
+        renumberTenantCode = tenantCode;
       }
     }
 
     // ── 7. Persist (repository handles item replacement + payment recalc) ──
-    const data: ReplaceOrderData = {
+    const data: Omit<ReplaceOrderData, "orderNumber"> = {
       customerId: input.customerId,
       totalAmount: pricing.totalAmount.amount,
       discountAmount: pricing.discount.amount,
       discountType: input.discountType ?? null,
       notes: input.notes ?? null,
       receivedAt: newReceivedAt,
-      ...(newOrderNumber ? { orderNumber: newOrderNumber } : {}),
       items: pricing.items,
     };
+
+    if (newPrefix && renumberReceivedAt && renumberTenantCode) {
+      return allocateOrderNumber(
+        newPrefix,
+        renumberReceivedAt,
+        renumberTenantCode,
+        (p) => this.orderRepo.getLastSequenceForPrefix(p),
+        (orderNumber) =>
+          this.orderRepo.replaceItems(orderId, ctx.branchId, {
+            ...data,
+            orderNumber,
+          }),
+      );
+    }
 
     return this.orderRepo.replaceItems(orderId, ctx.branchId, data);
   }

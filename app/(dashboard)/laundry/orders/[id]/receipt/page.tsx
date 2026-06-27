@@ -22,7 +22,17 @@ import {
   rememberPrinter,
   getRememberedPrinter,
   reconnectBluetooth,
+  reconnectSerial,
 } from "@/lib/client-printer";
+import { queueTelemetry } from "@/lib/client-telemetry";
+
+// ponytail: one helper for all 4 print paths — keep timing + queueing in one place
+// rather than duplicating across handleThermal/Bluetooth/Usb/Browser. Each path
+// calls this with its kind and the t0 captured at method entry.
+type PrintKind = "network" | "bluetooth" | "usb" | "browser";
+function reportPrint(kind: PrintKind, t0: number, ok: boolean, orderId?: string, error?: string) {
+  queueTelemetry("print", { kind, ok, ms: Math.round(performance.now() - t0), orderId, error });
+}
 
 interface OrderItem {
   id: string;
@@ -54,6 +64,8 @@ interface OrderReceipt {
   orderItems: OrderItem[];
   payments: Payment[];
   branch: { name: string | null; phone: string | null; address: string | null };
+  /** Branch thermal-paper size — drives the receipt width. Falls back to 58mm. */
+  printerPaperSize?: string | null;
 }
 
 export default function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
@@ -87,19 +99,21 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
             paidAmount: Number(data.paidAmount ?? 0),
             payments: (data.payments ?? []).map((p: Payment) => ({ ...p, amount: Number(p.amount ?? 0) })),
           });
+          // Paper size comes from the order's branch (single source of truth) —
+          // reliable in "Semua Outlet" mode, unlike the prior /api/user fetch.
+          if (data.printerPaperSize) setPaperSize(data.printerPaperSize);
         })
         .catch(() => {})
         .finally(() => setLoading(false));
     });
   }, [params]);
 
-  // Fetch paper size + network printer config from branch
+  // Fetch network printer config from branch (paper size comes from the order).
   useEffect(() => {
     apiFetch<{ branchId: string }>("/api/user")
       .then((r) => {
         if (r.data?.branchId) {
           return apiFetch<{
-            printerPaperSize: string | null;
             printerHost: string | null;
             printerPort: number | null;
             printerEnabled: boolean;
@@ -109,7 +123,6 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
       })
       .then((res) => {
         if (!res?.data) return;
-        if (res.data.printerPaperSize) setPaperSize(res.data.printerPaperSize);
         setBranchPrinter({
           host: res.data.printerHost,
           port: res.data.printerPort,
@@ -135,18 +148,26 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
   const networkReady = !!(branchPrinter?.enabled && branchPrinter.host);
 
   const handleBrowserPrint = useCallback(() => {
+    const t0 = performance.now();
     // Inject dynamic @page size before printing
     const style = document.createElement("style");
     style.id = "dynamic-print-page";
     style.textContent = `@page { size: ${paperSize} auto; margin: 0; }`;
     document.head.appendChild(style);
-    window.print();
-    // Clean up after a short delay
-    setTimeout(() => {
-      const el = document.getElementById("dynamic-print-page");
-      if (el) el.remove();
-    }, 1000);
-  }, [paperSize]);
+    try {
+      window.print();
+      reportPrint("browser", t0, true, order?.id);
+    } catch (e) {
+      reportPrint("browser", t0, false, order?.id, e instanceof Error ? e.message : String(e));
+      throw e;
+    } finally {
+      // Clean up after a short delay
+      setTimeout(() => {
+        const el = document.getElementById("dynamic-print-page");
+        if (el) el.remove();
+      }, 1000);
+    }
+  }, [paperSize, order?.id]);
 
   // ponytail: shared builder — the three direct methods used to duplicate this 12-line mapping.
   function buildReceiptData(): Uint8Array {
@@ -192,6 +213,7 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
 
   async function handleBluetoothPrint() {
     if (!order) return;
+    const t0 = performance.now();
     setDirectPrinting(true);
     try {
       const printers = await scanBluetoothPrinters();
@@ -199,10 +221,12 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
       const data = buildReceiptData();
       const printer = printers[0];
       await printViaBluetooth(printer.device, data);
+      reportPrint("bluetooth", t0, true, order.id);
       toast.success(t("receipt.printed"));
       rememberPrinter({ kind: "bluetooth", id: printer.device.id, label: printer.device.name || "Bluetooth" });
       setReadyPrinter(printer.device.name || "Bluetooth");
     } catch (err) {
+      reportPrint("bluetooth", t0, false, order.id, err instanceof Error ? err.message : String(err));
       toast.error(err instanceof Error ? err.message : t("receipt.failedPrint"));
     } finally {
       setDirectPrinting(false);
@@ -211,6 +235,7 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
 
   async function handleUsbPrint() {
     if (!order) return;
+    const t0 = performance.now();
     setDirectPrinting(true);
     try {
       const printers = await scanSerialPrinters();
@@ -218,10 +243,12 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
       const data = buildReceiptData();
       const printer = printers[0];
       await printViaSerial(printer.port, data);
+      reportPrint("usb", t0, true, order.id);
       toast.success(t("receipt.printed"));
-      rememberPrinter({ kind: "serial", id: printer.name, label: printer.name });
+      rememberPrinter({ kind: "serial", id: printer.id, label: printer.name });
       setReadyPrinter(printer.name);
     } catch (err) {
+      reportPrint("usb", t0, false, order.id, err instanceof Error ? err.message : String(err));
       toast.error(err instanceof Error ? err.message : t("receipt.failedPrint"));
     } finally {
       setDirectPrinting(false);
@@ -237,16 +264,40 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
     }
     // 2. remembered bluetooth → silent reconnect, then print
     if (remembered?.kind === "bluetooth" && btAvailable) {
+      const t0 = performance.now();
       const dev = await reconnectBluetooth();
       if (dev && order) {
         setDirectPrinting(true);
         try {
           await printViaBluetooth(dev, buildReceiptData());
+          reportPrint("bluetooth", t0, true, order.id);
           toast.success(t("receipt.printed"));
           rememberPrinter({ kind: "bluetooth", id: dev.id, label: dev.name || "Bluetooth" });
           setReadyPrinter(dev.name || "Bluetooth");
           return;
         } catch (err) {
+          reportPrint("bluetooth", t0, false, order.id, err instanceof Error ? err.message : String(err));
+          toast.error(err instanceof Error ? err.message : t("receipt.failedPrint"));
+        } finally {
+          setDirectPrinting(false);
+        }
+      }
+    }
+    // 2b. remembered serial (USB) → silent reconnect via getPorts(), then print
+    if (remembered?.kind === "serial" && serialAvailable) {
+      const t0 = performance.now();
+      const port = await reconnectSerial();
+      if (port && order) {
+        setDirectPrinting(true);
+        try {
+          await printViaSerial(port, buildReceiptData());
+          reportPrint("usb", t0, true, order.id);
+          toast.success(t("receipt.printed"));
+          rememberPrinter({ kind: "serial", id: remembered.id, label: remembered.label });
+          setReadyPrinter(remembered.label);
+          return;
+        } catch (err) {
+          reportPrint("usb", t0, false, order.id, err instanceof Error ? err.message : String(err));
           toast.error(err instanceof Error ? err.message : t("receipt.failedPrint"));
         } finally {
           setDirectPrinting(false);
@@ -347,6 +398,27 @@ export default function ReceiptPage({ params }: { params: Promise<{ id: string }
               USB
             </Button>
           )}
+        </div>
+
+        {/* Paper size — live preview + print width (no reload needed) */}
+        <div className="flex flex-wrap items-center gap-2 pl-12 sm:pl-0 sm:justify-end">
+          <span className="text-xs text-muted-foreground">
+            {t("printerSettings.paperSize")}
+          </span>
+          {(["56mm", "58mm", "80mm"] as const).map((size) => (
+            <button
+              key={size}
+              type="button"
+              onClick={() => setPaperSize(size)}
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
+                paperSize === size
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "border border-border/40 text-muted-foreground hover:bg-muted/60"
+              }`}
+            >
+              {size}
+            </button>
+          ))}
         </div>
 
         {/* Cross-browser honesty — Safari/iOS path */}

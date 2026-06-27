@@ -14,6 +14,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // on their own subdomains. Root + tenant subdomains only.
   const platformUrls: MetadataRoute.Sitemap = [
     { url: base, lastModified, changeFrequency: "weekly", priority: 1.0 },
+    { url: `${base}/alternatif-moka-pos-laundry`, lastModified, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/register`, lastModified, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/terms`, lastModified, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const tenants = await prisma.tenant.findMany({

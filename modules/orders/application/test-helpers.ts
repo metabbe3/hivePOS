@@ -15,6 +15,7 @@ import type {
   BranchPort,
   OrderLimitPort,
   TenantPort,
+  CustomerLookupPort,
   BranchCoverageInfo,
   OrderLimitResult,
 } from "./ports";
@@ -96,6 +97,13 @@ export function mockTenantPort(slug: string | null = "test-tenant"): TenantPort 
   };
 }
 
+/** Mock CustomerLookupPort — default returns true (customer is in branch). */
+export function mockCustomerLookup(exists = true): CustomerLookupPort {
+  return {
+    existsInBranch: vi.fn().mockResolvedValue(exists),
+  };
+}
+
 /** A standard request context for tests. */
 export function testContext(
   overrides: Partial<RequestContext> = {},
@@ -161,6 +169,9 @@ export function testOrderDetail(
     readyAt: null,
     deliveredAt: null,
     customerBalance: 100000,
+    qrisUrl: null,
+    invoiceFooter: null,
+    printerPaperSize: null,
     orderItems: [],
     payments: [],
     ...overrides,

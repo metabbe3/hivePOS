@@ -10,8 +10,8 @@ import { schedulePickupService } from "@/modules/pickup-requests/pickup-requests
 import type { SchedulePickupInput } from "@/modules/pickup-requests/application/dto";
 
 const scheduleSchema = z.object({
-  requestedDate: z.string().min(1, "Date is required"),
-  requestedSlot: z.string().min(1, "Slot is required"),
+  requestedDate: z.string().min(1, "Tanggal wajib diisi."),
+  requestedSlot: z.string().min(1, "Jam pengambilan wajib dipilih."),
   assignedDriverId: z.string().optional().or(z.literal("")).nullable(),
 });
 
