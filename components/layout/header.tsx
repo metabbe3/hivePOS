@@ -12,54 +12,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Moon, Sun, User, UserCircle, LifeBuoy } from "lucide-react";
-import { useEffect, useState } from "react";
+import { LogOut, User, UserCircle, LifeBuoy } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
+import { useTranslation } from "@/hooks/use-translation";
 import { BranchSelector } from "@/components/shared/branch-selector";
 import { TicketBell } from "@/components/tickets/ticket-bell";
+import { InstallAppButton } from "@/components/shared/install-app-button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
-function DarkModeToggle() {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const isDark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    if (isDark) {
-      setDark(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  function toggle() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  }
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggle}
-      className="h-8 w-8 rounded-lg text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-    >
-      {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </Button>
-  );
-}
-
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/laundry/orders": "Orders",
-  "/laundry/services": "Layanan & Harga",
-  "/laundry/inventory": "Inventory",
-  "/laundry/expenses": "Expenses",
-  "/customers": "Pelanggan",
-  "/reporting": "Laporan",
-  "/branches": "Outlet",
-  "/users": "Staff",
-  "/profile": "Profil",
+// ponytail: route → i18n key. Values resolved via t() so titles follow the
+// active locale. New routes: add an entry here + the i18n key in lib/i18n.ts.
+const ROUTE_TITLE_KEYS: Record<string, string> = {
+  "/dashboard": "nav.dashboard",
+  "/laundry/orders": "nav.orders",
+  "/laundry/pickup-requests": "nav.pickup",
+  "/laundry/services": "nav.services",
+  "/laundry/inventory": "nav.inventory",
+  "/laundry/expenses": "nav.expenses",
+  "/customers": "nav.customers",
+  "/reporting": "nav.reporting",
+  "/branches": "nav.branches",
+  "/users": "nav.users",
+  "/roles": "nav.roles",
+  "/billing": "nav.billing",
+  "/website": "nav.website",
+  "/whatsapp-templates": "nav.whatsappTemplates",
+  "/printer-settings": "nav.printerSettings",
+  "/tickets": "nav.help",
+  "/profile": "profile.title",
 };
 
 export function Header() {
@@ -67,12 +47,14 @@ export function Header() {
   const { isOwner } = useRole();
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
 
-  // Find best matching title
-  const currentTitle =
-    Object.entries(PAGE_TITLES)
+  // Longest-prefix match so /laundry/orders/123 still resolves to "Orders".
+  const titleKey =
+    Object.entries(ROUTE_TITLE_KEYS)
       .filter(([href]) => pathname.startsWith(href))
-      .sort((a, b) => b[0].length - a[0].length)[0]?.[1] || "";
+      .sort((a, b) => b[0].length - a[0].length)[0]?.[1];
+  const currentTitle = titleKey ? t(titleKey) : "";
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
@@ -91,7 +73,8 @@ export function Header() {
       <div className="flex-1" />
       <div className="hidden sm:block"><BranchSelector /></div>
       <TicketBell />
-      <DarkModeToggle />
+      <InstallAppButton />
+      <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger render={
           <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground" />

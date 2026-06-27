@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { z } from "zod";
 import { seedDefaultRoles, backfillUserRoles } from "@/lib/permissions/seed";
 import { rateLimit } from "@/lib/rate-limit";
+import { TRIAL_DAYS } from "@/lib/billing";
 
 const registerSchema = z.object({
   businessName: z.string().min(2),
@@ -14,6 +15,8 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).optional().or(z.literal("")),
   googleId: z.string().optional(),
+  /// Which tier to trial: "PRO" (default — full features for 14 days) or "GROWTH".
+  trialTier: z.enum(["GROWTH", "PRO"]).optional(),
 });
 
 export const POST = withErrorHandler(async (req) => {
@@ -52,8 +55,10 @@ export const POST = withErrorHandler(async (req) => {
 
   // Create tenant + branch + owner + subscription in a transaction
   const result = await prisma.$transaction(async (tx) => {
-    // ponytail: new tenant starts pending — isActive:false + approvedAt:null.
-    // Trial dates are set by the approve endpoint, not here.
+    const now = new Date();
+    const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 86_400_000);
+    // Auto-activated at signup — no admin approval. Honors the landing "Live dalam
+    // 2 menit / langsung jalan" claim and grants the 14-day Growth/Pro trial now.
     const tenant = await tx.tenant.create({
       data: {
         name: data.businessName,
@@ -62,16 +67,23 @@ export const POST = withErrorHandler(async (req) => {
         ownerName: data.ownerName,
         ownerPhone: data.ownerPhone,
         activeModules: ["laundry"],
-        isActive: false,
-        approvedAt: null,
+        isActive: true,
+        approvedAt: now,
+        trialEndsAt,
+        trialTier: data.trialTier ?? "PRO",
       },
     });
 
     // Create default branch
+    // ponytail: isFreeTier=true so the order guard doesn't block newly-approved
+    // free-tier tenants (branch with isFreeTier=false + coverageEnd=null is treated
+    // as LOCKED by create-order.service.ts). Flipped to false + coverageEnd set on
+    // first payment via extendOutletCoverage().
     const branch = await tx.branch.create({
       data: {
         name: data.branchName,
         tenantId: tenant.id,
+        isFreeTier: true,
       },
     });
 
@@ -96,14 +108,15 @@ export const POST = withErrorHandler(async (req) => {
     const roleMap = await seedDefaultRoles(tx, tenant.id);
     await backfillUserRoles(tx, tenant.id, roleMap);
 
-    // Create subscription
+    // Create subscription (status TRIAL for the 14-day window; the effective tier
+    // derives from tenant.trialTier + trialEndsAt in lib/billing.ts getTenantPlan).
     if (freePlan) {
       await tx.subscription.create({
         data: {
           tenantId: tenant.id,
           planId: freePlan.id,
           status: "TRIAL",
-          // ponytail: currentPeriodEnd set by approve endpoint (90 days from approval).
+          currentPeriodEnd: trialEndsAt,
         },
       });
     }

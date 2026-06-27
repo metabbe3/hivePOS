@@ -1,4 +1,5 @@
 import { withErrorHandler, apiSuccess } from "@/modules/shared";
+import { UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
 
@@ -54,7 +55,7 @@ export const GET = withErrorHandler(async (req) => {
       where: {
         ...receivedAtFilter,
         branchId: { in: branchIds },
-        paymentStatus: { in: ["PENDING", "PARTIAL"] },
+        paymentStatus: { in: UNPAID_PAYMENT_STATUSES },
       },
       select: { totalAmount: true, paidAmount: true },
     }),

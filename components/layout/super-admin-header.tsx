@@ -12,39 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Moon, Sun, Shield, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
-
-function DarkModeToggle() {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const isDark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    if (isDark) {
-      setDark(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  function toggle() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  }
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={toggle}
-      className="h-9 w-9 rounded-xl text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-    >
-      {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </Button>
-  );
-}
+import { LogOut, Shield, ChevronRight } from "lucide-react";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 // ponytail: section + page-title lookup. Returns a "Section / Page" breadcrumb.
 const SECTIONS: { match: string; section: string; title: string }[] = [
@@ -108,7 +77,7 @@ export function SuperAdminHeader() {
 
       <div className="flex-1" />
 
-      <DarkModeToggle />
+      <ThemeToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger

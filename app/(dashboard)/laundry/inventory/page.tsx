@@ -6,7 +6,8 @@ import { useTranslation } from "@/hooks/use-translation";
 import { toast } from "sonner";
 import {
   Pencil,
-  Trash2,
+  Power,
+  PowerOff,
   Package,
   ArrowUpDown,
   History,
@@ -44,6 +45,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { apiFetch, ApiClientError } from "@/modules/shared";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 
 interface StockItem {
   id: string;
@@ -66,6 +68,7 @@ interface StockMovement {
 
 export default function InventoryPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [items, setItems] = useState<StockItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -158,6 +161,20 @@ export default function InventoryPage() {
   }
 
   async function toggleActive(item: StockItem) {
+    const ok = await confirm({
+      title: item.isActive
+        ? t("inventory.deactivateConfirmTitle")
+        : t("inventory.activateConfirmTitle"),
+      description: item.isActive
+        ? t("inventory.deactivateConfirmDesc").replace("{name}", item.name)
+        : t("inventory.activateConfirmDesc").replace("{name}", item.name),
+      confirmLabel: item.isActive
+        ? t("inventory.deactivate")
+        : t("inventory.activate"),
+      cancelLabel: t("common.cancel"),
+      destructive: item.isActive,
+    });
+    if (!ok) return;
     try {
       await apiFetch(`/api/stock-items/${item.id}`, {
         method: "PATCH",
@@ -269,8 +286,13 @@ export default function InventoryPage() {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() => toggleActive(item)}
+                        title={item.isActive
+                          ? t("inventory.deactivate")
+                          : t("inventory.activate")}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        {item.isActive
+                          ? <PowerOff className="h-3.5 w-3.5" />
+                          : <Power className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
                   </CardHeader>
@@ -314,13 +336,15 @@ export default function InventoryPage() {
           </DialogHeader>
           <DynamicForm 
             schema={stockItemSchema} 
-            initialData={editing ? { 
-              name: editing.name, 
-              unit: editing.unit, 
-              currentQuantity: Number(editing.currentQuantity), 
-              minStock: editing.lowStockThreshold || 0, 
-              pricePerUnit: Number(editing.purchasePricePerUnit) || 0 
-            } : undefined} 
+
+            initialData={editing ? {
+              name: editing.name,
+              unit: editing.unit,
+              currentQuantity: Number(editing.currentQuantity),
+              lowStockThreshold: editing.lowStockThreshold || 0,
+              purchasePricePerUnit: Number(editing.purchasePricePerUnit) || 0,
+            } : undefined}
+
             recordId={editing?.id} 
             onSuccess={() => {
               setDialogOpen(false);

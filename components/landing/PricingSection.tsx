@@ -18,13 +18,13 @@ export function PricingSection() {
               <span className="text-sm font-bold">Harga Transparan</span>
             </div>
             <h2 className="mb-4 font-display text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl md:text-5xl">
-              Pilih Paket yang{" "}
-              <span className="bg-gradient-to-r from-indigo-600 to-secondary bg-clip-text text-transparent">
-                Sesuai Bisnis Anda
+              Harga Jujur,{" "}
+              <span className="text-indigo-600">
+                Tanpa Kontrak
               </span>
             </h2>
             <p className="text-lg text-zinc-600">
-              Mulai gratis. Upgrade kapan saja. Tanpa kontrak.
+              Per outlet, bukan per user. Semua staff di outlet itu ikut tercover. Upgrade kapan saja.
             </p>
           </div>
         </ScrollReveal>

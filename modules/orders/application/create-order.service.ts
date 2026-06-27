@@ -7,9 +7,10 @@ import {
 } from "@/modules/shared";
 import type { OrderRepository, CreateOrderData } from "../domain/repository.port";
 import { priceOrder } from "../domain/pricing";
-import { generateOrderNumber, orderNumberPrefix } from "../domain/order-number.vo";
+import { orderNumberPrefix } from "../domain/order-number.vo";
+import { allocateOrderNumber } from "./allocate-order-number";
 import { deriveTenantCode } from "@/lib/tenant-code";
-import type { ServiceCatalogPort, BranchPort, OrderLimitPort, TenantPort } from "./ports";
+import type { ServiceCatalogPort, BranchPort, OrderLimitPort, TenantPort, CustomerLookupPort } from "./ports";
 import type { RequestContext } from "./context";
 import { hasPermission } from "./context";
 import type { CreateOrderInput } from "./dto";
@@ -22,6 +23,7 @@ export class CreateOrderService {
     private branchPort: BranchPort,
     private limitPort: OrderLimitPort,
     private tenantPort: TenantPort,
+    private customerLookup: CustomerLookupPort,
   ) {}
 
   async execute(
@@ -60,6 +62,32 @@ export class CreateOrderService {
       throw new ForbiddenError("You do not have permission to apply discounts");
     }
 
+    // ── 3b. Guard: PERCENTAGE discount must be 0-100 ──
+    // ponytail: FIXED discount is already capped at subtotal by pricing.ts
+    // (Money.min(subtotal)). PERCENTAGE has no natural cap there, so we
+    // enforce the business range here. Allows 100% (comp / free orders).
+    if (
+      input.discountType === "PERCENTAGE" &&
+      input.discountAmount !== undefined &&
+      (input.discountAmount < 0 || input.discountAmount > 100)
+    ) {
+      throw new ForbiddenError(
+        "Diskon persen harus di antara 0 dan 100.",
+      );
+    }
+
+    // ── 3c. Guard: customerId must belong to the caller's branch ──
+    // ponytail: closes the cross-tenant spoofing gap — without this, a
+    // tampered offline payload could point at another tenant's customer and
+    // Prisma's FK check only validates existence, not tenant scope.
+    const customerBelongsToBranch = await this.customerLookup.existsInBranch(
+      input.customerId,
+      ctx.branchId,
+    );
+    if (!customerBelongsToBranch) {
+      throw new NotFoundError("Customer not found");
+    }
+
     // ── 4. Fetch service pricing and validate all exist ──
     const serviceIds = input.items.map((i) => i.serviceId);
     const services = await this.serviceCatalog.findPricingForServices(
@@ -85,18 +113,17 @@ export class CreateOrderService {
       input.discountAmount,
     );
 
-    // ── 7. Generate order number ──
+    // ── 7+8. Generate order number + persist ──
     // ponytail: tenant code from slug → order numbers self-identify their
     // tenant (HBL-20260621-0001). Fallback "ORD" if slug lookup misses.
+    // allocateOrderNumber retries on P2002 so two concurrent calls (manual
+    // create + pickup-confirm) don't collide on the same sequence number.
     const receivedAt = input.receivedAt ? new Date(input.receivedAt) : new Date();
     const tenantSlug = await this.tenantPort.getSlug(ctx.tenantId);
     const tenantCode = deriveTenantCode(tenantSlug ?? "ord");
     const prefix = orderNumberPrefix(receivedAt, tenantCode);
-    const lastSeq = await this.orderRepo.getLastSequenceForPrefix(prefix);
-    const orderNumber = generateOrderNumber(receivedAt, lastSeq, tenantCode);
 
-    // ── 8. Persist ──
-    const createData: CreateOrderData = {
+    const buildCreateData = (orderNumber: string): CreateOrderData => ({
       branchId: ctx.branchId,
       tenantId: ctx.tenantId,
       module: orderModule,
@@ -108,8 +135,15 @@ export class CreateOrderService {
       receivedAt,
       notes: input.notes ?? null,
       items: pricing.items,
-    };
+      clientId: input.clientId,
+    });
 
-    return this.orderRepo.create(createData);
+    return allocateOrderNumber(
+      prefix,
+      receivedAt,
+      tenantCode,
+      (p) => this.orderRepo.getLastSequenceForPrefix(p),
+      (orderNumber) => this.orderRepo.create(buildCreateData(orderNumber)),
+    );
   }
 }

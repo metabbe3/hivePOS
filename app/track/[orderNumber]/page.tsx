@@ -15,6 +15,7 @@ import { appendWhatsappMessage } from "@/lib/whatsapp";
 import { renderWhatsAppTemplate, type TemplateOverrides } from "@/lib/whatsapp-templates";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import type { OrderStatus } from "@/app/generated/prisma/enums";
+import { TrackPhotosSection } from "@/components/photos/track-photos-section";
 
 interface TrackingItem {
   service: string;
@@ -418,6 +419,9 @@ export default function TrackOrderPage() {
               })}
             </div>
           </div>
+
+          {/* Proof photos (Pro feature) — before/after gallery, read-only */}
+          <TrackPhotosSection orderNumber={data.orderNumber} />
 
           {/* Order Summary Card — quick stats */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-5">

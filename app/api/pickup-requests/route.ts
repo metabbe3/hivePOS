@@ -35,9 +35,9 @@ export const GET = withErrorHandler(async (req) => {
  * without a precise address can type "akan konfirmasi via WhatsApp".
  */
 const staffCreateSchema = z.object({
-  customerId: z.string().min(1, "Customer is required"),
-  branchId: z.string().min(1, "Branch is required"),
-  addressText: z.string().min(4, "Address is required"),
+  customerId: z.string().min(1, "Pelanggan wajib dipilih."),
+  branchId: z.string().min(1, "Outlet wajib dipilih."),
+  addressText: z.string().min(4, "Alamat wajib diisi."),
   requestedDate: z.string().optional().or(z.literal("")),
   requestedSlot: z.string().optional().or(z.literal("")),
   notes: z.string().optional().or(z.literal("")),
@@ -50,14 +50,14 @@ export const POST = withErrorHandler(async (req) => {
 
   // Branch must belong to caller's tenant AND be in caller's branch scope.
   if (!ctx.branchIds.includes(raw.branchId)) {
-    throw new ValidationError("Branch is out of your scope");
+    throw new ValidationError("Outlet ini bukan milik akun Anda.");
   }
   const branch = await prisma.branch.findFirst({
     where: { id: raw.branchId, tenantId: ctx.tenantId, isActive: true },
     select: { id: true, slug: true },
   });
   if (!branch || !branch.slug) {
-    throw new ValidationError("Branch not found or pickup not enabled");
+    throw new ValidationError("Outlet tidak ditemukan atau pickup belum diaktifkan.");
   }
 
   // Customer must belong to the same tenant (via branch.tenantId).
@@ -66,10 +66,10 @@ export const POST = withErrorHandler(async (req) => {
     select: { id: true, name: true, phone: true, email: true },
   });
   if (!customer) {
-    throw new ValidationError("Customer not found");
+    throw new ValidationError("Pelanggan tidak ditemukan.");
   }
   if (!customer.phone) {
-    throw new ValidationError("Customer has no phone number on file");
+    throw new ValidationError("Nomor telepon pelanggan belum terdaftar.");
   }
 
   const pickup = await createPickupService.execute({

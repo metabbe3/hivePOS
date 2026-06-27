@@ -76,6 +76,8 @@ export interface CreateCustomerData {
   email?: string | null;
   notes?: string | null;
   branchId: string;
+  // ponytail: optional idempotency key for offline-created walk-in customers.
+  clientId?: string;
 }
 
 export interface UpdateCustomerData {
@@ -102,6 +104,7 @@ export interface CustomerRepository {
   update(id: string, branchId: string, data: UpdateCustomerData): Promise<CustomerRecord>;
   delete(id: string, branchId: string): Promise<void>;
   findByPhone(phone: string, branchId: string): Promise<CustomerRecord | null>;
+  findByClientId(clientId: string): Promise<CustomerRecord | null>;
   countOrders(customerId: string, branchId: string): Promise<number>;
 }
 

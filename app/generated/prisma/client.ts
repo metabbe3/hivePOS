@@ -122,6 +122,14 @@ export type ServiceGroup = Prisma.ServiceGroupModel
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model OrderPhoto
+ * Before/after/damage proof photo attached to an order ("foto bukti cucian").
+ * Stored compressed on local disk (PHOTO_UPLOAD_DIR); auto-deleted after
+ * PHOTO_TTL_DAYS via lib/photo-cleanup.ts. tenantId is denormalized so every
+ * query scopes without a branch join.
+ */
+export type OrderPhoto = Prisma.OrderPhotoModel
+/**
  * Model OrderItem
  * 
  */
@@ -186,3 +194,18 @@ export type FeatureFlag = Prisma.FeatureFlagModel
  * 
  */
 export type TenantFeatureFlag = Prisma.TenantFeatureFlagModel
+/**
+ * Model SystemSetting
+ * Global key/value store for platform-level settings (force-update nonce,
+ * maintenance flags, etc). Key is the PK — one row per setting.
+ */
+export type SystemSetting = Prisma.SystemSettingModel
+/**
+ * Model TelemetryEvent
+ * Telemetry events for the super-admin Peripherals dashboard.
+ * Payload shape varies by `kind` — see lib/telemetry.ts for typed contracts.
+ * ponytail: flexible Json payload over rigid columns — kinds are added in
+ * phases (print, query.slow, web_vitals) and each has different fields.
+ * Indexes cover the 3 access patterns: by kind+time, by tenant+time, by time.
+ */
+export type TelemetryEvent = Prisma.TelemetryEventModel

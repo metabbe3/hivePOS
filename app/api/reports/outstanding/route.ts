@@ -1,4 +1,5 @@
 import { withErrorHandler, apiSuccess } from "@/modules/shared";
+import { UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
 import { buildDateFilter } from "@/lib/format";
@@ -15,7 +16,7 @@ export const GET = withErrorHandler(async (req) => {
 
   const outstandingOrders = await prisma.order.findMany({
     where: {
-      paymentStatus: { in: ["PENDING", "PARTIAL"] },
+      paymentStatus: { in: UNPAID_PAYMENT_STATUSES },
       branchId: { in: branchIds },
       ...where,
     },

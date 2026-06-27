@@ -28,3 +28,7 @@ export const deleteCustomerService = new DeleteCustomerService(customerRepo);
 export const topUpDepositService = new TopUpDepositService(depositRepo, customerRepo);
 export const listDepositTransactionsService = new ListDepositTransactionsService(depositRepo);
 export const customerStatsService = new CustomerStatsService(statsRepo, customerRepo);
+
+// ponytail: exported for the /api/customers route to do idempotency + phone
+// dedup lookups inline before delegating to CreateCustomerService.
+export { customerRepo };

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 import { withErrorHandler } from "@/modules/shared";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
@@ -44,7 +45,7 @@ export const GET = withErrorHandler(async (req) => {
       _sum: { subtotal: true },
     }),
     prisma.order.findMany({
-      where: { ...receivedAtFilter, branchId: { in: branchIds }, paymentStatus: { in: ["PENDING", "PARTIAL"] } },
+      where: { ...receivedAtFilter, branchId: { in: branchIds }, paymentStatus: { in: UNPAID_PAYMENT_STATUSES } },
       select: { totalAmount: true, paidAmount: true },
     }),
     prisma.expense.groupBy({

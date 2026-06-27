@@ -244,7 +244,7 @@ export default function WebsiteSettingsPage() {
               <Sparkles className="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400" />
               <div className="flex-1">
                 <h3 className="font-semibold text-amber-900 dark:text-amber-100">
-                  Website tersedia di paket Pro
+                  Website sendiri tersedia di paket Pro
                 </h3>
                 <p className="mt-1 text-sm text-amber-800 dark:text-amber-200">
                   Upgrade ke Pro (Rp 79K/outlet/bulan) untuk mengaktifkan website

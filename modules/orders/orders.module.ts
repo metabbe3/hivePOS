@@ -15,6 +15,7 @@ import { PrismaServiceCatalog } from "./infrastructure/prisma-service-catalog";
 import { PrismaBranchPort } from "./infrastructure/prisma-branch.port";
 import { PrismaTenantPort } from "./infrastructure/prisma-tenant.port";
 import { BillingOrderLimitPort } from "./infrastructure/billing-order-limit.port";
+import { PrismaCustomerLookupPort } from "./infrastructure/prisma-customer-lookup.port";
 import { CreateOrderService } from "./application/create-order.service";
 import { UpdateOrderService } from "./application/update-order.service";
 import { RecordPaymentService } from "./application/record-payment.service";
@@ -33,6 +34,7 @@ const serviceCatalog = new PrismaServiceCatalog();
 const branchPort = new PrismaBranchPort();
 const tenantPort = new PrismaTenantPort();
 const limitPort = new BillingOrderLimitPort();
+const customerLookup = new PrismaCustomerLookupPort();
 
 // ── Application services (wired with their dependencies) ──
 export const createOrderService = new CreateOrderService(
@@ -41,6 +43,7 @@ export const createOrderService = new CreateOrderService(
   branchPort,
   limitPort,
   tenantPort,
+  customerLookup,
 );
 
 export const updateOrderService = new UpdateOrderService(

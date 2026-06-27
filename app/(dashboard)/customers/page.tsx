@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, ArrowUpDown, Inbox, UserPlus, Pencil } from "lucide-react";
+import { Search, ArrowUpDown, Inbox, UserPlus, Pencil, X } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageLoading } from "@/components/shared/loading";
@@ -19,6 +19,7 @@ import { useRole } from "@/hooks/use-role";
 import { useGuardedPage } from "@/hooks/use-guarded-page";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useTranslation } from "@/hooks/use-translation";
+import { useDebounce } from "@/hooks/use-debounce";
 import { DynamicForm } from "@/lib/forms";
 import { customerSchema } from "@/lib/forms/schemas";
 import { CustomerList } from "@/components/customers/customer-list";
@@ -53,9 +54,13 @@ export default function CustomersPage() {
   const [deleteTarget, setDeleteTarget] = useState<CustomerListItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
+  // ponytail: 300ms debounce — parity with laundry/orders page. Without this,
+  // typing "john" fires 4 requests (j, jo, joh, john) instead of 1.
+  const debouncedSearch = useDebounce(search, 300);
+
   const buildParams = () => {
     const params = new URLSearchParams();
-    if (search) params.set("search", search);
+    if (debouncedSearch) params.set("search", debouncedSearch);
     if (sortBy) params.set("sort", sortBy);
     if (sortOrder) params.set("order", sortOrder);
     if (statusFilter) params.set("status", statusFilter);
@@ -74,7 +79,7 @@ export default function CustomersPage() {
       .then((res) => setCustomers(res.data ?? []))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, sortBy, sortOrder, statusFilter]);
+  }, [debouncedSearch, sortBy, sortOrder, statusFilter]);
 
   function openCreate() {
     setEditing(null);
@@ -111,8 +116,18 @@ export default function CustomersPage() {
             placeholder={t("customers.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 pr-9"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded text-muted-foreground transition-colors hover:text-foreground"
+              aria-label={t("common.clear")}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <Select

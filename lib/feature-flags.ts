@@ -21,6 +21,28 @@ export async function resolveAllFlags(
   return out;
 }
 
+/**
+ * Same as `resolveAllFlags` but never throws — used in the auth jwt callback
+ * (Non-negotiable #8: flags must resolve in every auth path). On DB error we
+ * return `{}` rather than aborting login/session-refresh.
+ *
+ * ponytail: empty-map on failure hides features in the UI until the next
+ * session refresh, but the real gate is `requireFeatureFlag`/`hasFeatureFlag`
+ * which re-resolve from the DB per request — so this never grants access. The
+ * alternative (letting it throw) makes a transient flag-query hiccup lock users
+ * out entirely. Upgrade path: if flags ever become the sole gate, resolve
+ * synchronously from a cached snapshot instead of swallowing the error.
+ */
+export async function resolveAllFlagsSafe(
+  tenantId: string,
+): Promise<Record<string, boolean>> {
+  try {
+    return await resolveAllFlags(tenantId);
+  } catch {
+    return {};
+  }
+}
+
 /** Resolve a single flag for a tenant. Unknown flag → true (permissive). */
 export async function resolveFlag(
   key: string,
@@ -52,6 +74,11 @@ export const FLAG_KEYS = [
   "billing",
   "website",
   "tickets",
+  // ponytail: off by default — dogfood on a single tenant first, flip via
+  // super-admin override. If this is generally useful we flip the global default.
+  "offlineOrderCreate",
+  "printerSettings",
+  "orderPhotos",
 ] as const;
 
 export type FlagKey = (typeof FLAG_KEYS)[number];

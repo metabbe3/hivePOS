@@ -19,6 +19,9 @@ export interface CreateOrderInput {
   discountType?: DiscountType;
   discountAmount?: number;
   receivedAt?: string;
+  // ponytail: optional idempotency key — when set, the API route dedupes
+  // against the clientId column before delegating to CreateOrderService.
+  clientId?: string;
 }
 
 export type UpdateOrderInput = CreateOrderInput;

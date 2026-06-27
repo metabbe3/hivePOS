@@ -44,7 +44,7 @@ export const POST = withErrorHandler(async (req: Request) => {
   const body = await req.json().catch(() => ({}));
 
   const name = typeof body?.name === "string" ? body.name.trim() : "";
-  if (!name) throw new ValidationError("Name is required");
+  if (!name) throw new ValidationError("Nama wajib diisi.");
 
   const priceMonthly = parseDecimal(body?.priceMonthly, "priceMonthly");
   const priceYearly = parseDecimal(body?.priceYearly, "priceYearly");

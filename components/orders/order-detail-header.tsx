@@ -113,7 +113,7 @@ export function OrderDetailHeader({
               <>
                 {canAdvance && (
                   <Button
-                    size="sm"
+                    size="default"
                     onClick={onAdvanceStatus}
                     className="gap-1.5 bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15 hover:shadow-lg hover:brightness-105"
                   >
@@ -129,12 +129,24 @@ export function OrderDetailHeader({
                     </span>
                   </Button>
                 )}
+                {canPay && (
+                  <Button
+                    size="default"
+                    variant="outline"
+                    onClick={onPay}
+                    className="shrink-0 gap-1.5"
+                    aria-label={t("orderDetails.recordPayment")}
+                  >
+                    <Banknote className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{t("orderDetails.recordPayment")}</span>
+                  </Button>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
                       <Button
                         variant="outline"
-                        size="icon-sm"
+                        size="icon"
                         aria-label={t("customers.moreActions")}
                       />
                     }
@@ -154,12 +166,6 @@ export function OrderDetailHeader({
                       <Share2 className="h-4 w-4" />
                       Share
                     </DropdownMenuItem>
-                    {canPay && (
-                      <DropdownMenuItem onClick={onPay}>
-                        <Banknote className="h-4 w-4" />
-                        {t("orderDetails.recordPayment")}
-                      </DropdownMenuItem>
-                    )}
                     {canEdit && (
                       <DropdownMenuItem onClick={onEdit}>
                         <Pencil className="h-4 w-4" />

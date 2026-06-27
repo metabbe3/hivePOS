@@ -39,6 +39,12 @@ export interface OrderDetail {
   customerName: string;
   customerPhone: string | null;
   customerBalance: number;
+  /** Tenant QRIS image URL (settings.website.qrisImageUrl) — null if unset. */
+  qrisUrl: string | null;
+  /** Branch receipt/footer terms — drives the WhatsApp receipt {{terms}}. */
+  invoiceFooter: string | null;
+  /** Branch thermal-paper size ("58mm"/"80mm"/"56mm"); null → default 58mm. */
+  printerPaperSize: string | null;
   orderItems: OrderItem[];
   payments: OrderPayment[];
 }

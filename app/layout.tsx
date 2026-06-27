@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Toaster } from "sonner";
 import { fontSans, fontDisplay, fontSerif } from "@/lib/fonts";
 import { ConfirmProvider } from "@/components/shared/confirm-dialog";
+import { PwaRegister } from "@/components/shared/pwa-register";
+import { PwaForceUpdateWatcher } from "@/components/shared/pwa-force-update-watcher";
 import "./globals.css";
 
 const SITE_URL = "https://hivepos.id";
@@ -16,12 +18,16 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "hivePOS — Aplikasi Kasir Online untuk Laundry",
+    default: "hivePOS — Kasir Laundry Ringan di Browser untuk UMKM",
     template: "%s | hivePOS",
   },
   description:
-    "Sistem kasir online untuk bisnis laundry di Indonesia. Kelola pesanan kiloan & satuan, kanban status, deposit wallet, dan laporan keuangan dalam satu aplikasi. Coba gratis 3 bulan.",
+    "Aplikasi kasir laundry untuk UMKM Indonesia. Tanpa install, langsung di browser. Kiloan, satuan, express, multi-outlet. Gratis 1 outlet selamanya.",
   keywords: [
+    "kasir laundry browser",
+    "aplikasi kasir UMKM laundry",
+    "kasir laundry ringan",
+    "pos laundry tanpa install",
     "aplikasi kasir laundry murah",
     "software kasir 49 ribu",
     "aplikasi kasir laundry kiloan",
@@ -34,10 +40,20 @@ export const metadata: Metadata = {
     "cuci bedcover laundry software",
     "kasir online terintegrasi",
     "point of sale Indonesia",
+    "alternatif Moka POS laundry",
+    "alternatif Moka POS murah",
+    "aplikasi kasir laundry gratis",
+    "software laundry murah Indonesia",
+    "aplikasi laundry WhatsApp",
+    "alternatif Qasir laundry",
+    "kasir laundry online murah",
   ],
   authors: [{ name: "hivePOS" }],
   creator: "hivePOS",
   publisher: "hivePOS",
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
   alternates: {
     canonical: "/",
     languages: {
@@ -49,16 +65,16 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: SITE_URL,
     siteName: "hivePOS",
-    title: "hivePOS — Aplikasi Kasir Online untuk Laundry",
+    title: "hivePOS — Kasir Laundry Ringan di Browser untuk UMKM",
     description:
-      "Sistem kasir online untuk laundry. Kelola pesanan, pembayaran, dan laporan dalam satu platform. Coba gratis 3 bulan.",
+      "Aplikasi kasir laundry untuk UMKM Indonesia. Tanpa install, langsung di browser. Kiloan, satuan, express, multi-outlet. Gratis 1 outlet selamanya.",
     // Image resolved by app/opengraph-image.tsx (file convention).
   },
   twitter: {
     card: "summary_large_image",
-    title: "hivePOS — Aplikasi Kasir Online untuk Laundry",
+    title: "hivePOS — Kasir Laundry Ringan di Browser untuk UMKM",
     description:
-      "Sistem kasir online untuk laundry. Kelola operasional bisnis dalam satu platform.",
+      "Kasir laundry, tinggal buka browser. Tanpa install, tanpa ribet — khusus UMKM laundry Indonesia.",
     // Image resolved by app/twitter-image.tsx (file convention).
   },
   robots: {
@@ -73,6 +89,12 @@ export const metadata: Metadata = {
   },
   // icons + apple icon resolved by app/icon.tsx and app/apple-icon.tsx.
   category: "technology",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "hivePOS",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({
@@ -105,7 +127,7 @@ export default function RootLayout({
                   name: "hivePOS",
                   url: SITE_URL,
                   description:
-                    "Aplikasi kasir laundry dari Indonesia. Aktif dipakai di laundry partner sejak Juni 2026.",
+                    "hivePOS — aplikasi kasir laundry ringan yang jalan di browser. Untuk UMKM laundry Indonesia.",
                   foundingDate: "2025",
                   knowsLanguage: "id",
                   address: {
@@ -122,7 +144,7 @@ export default function RootLayout({
                   browserRequirements: "Requires a modern web browser",
                   url: SITE_URL,
                   description:
-                    "Sistem kasir online untuk bisnis laundry di Indonesia.",
+                    "hivePOS — aplikasi kasir laundry ringan yang jalan di browser. Untuk UMKM laundry Indonesia.",
                   offers: [
                     {
                       "@type": "Offer",
@@ -202,6 +224,8 @@ export default function RootLayout({
         <main id="main">
           <ConfirmProvider>{children}</ConfirmProvider>
         </main>
+        <PwaRegister />
+        <PwaForceUpdateWatcher />
         <Toaster position="top-right" />
       </body>
     </html>

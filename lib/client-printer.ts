@@ -5,15 +5,7 @@
  * Supports 80mm (48 chars/line) and 58mm (32 chars/line) paper sizes.
  */
 
-const PAPER_WIDTHS: Record<string, number> = {
-  "56mm": 30,
-  "58mm": 32,
-  "80mm": 48,
-};
-
-function getLineWidth(paperSize?: string): number {
-  return PAPER_WIDTHS[paperSize ?? "80mm"] ?? 48;
-}
+import { getLineWidth, ESCPOS_CODE_PAGE } from "./printer-shared";
 
 const ESC = 0x1b;
 const GS = 0x1d;
@@ -32,6 +24,8 @@ class ClientEscPosBuilder {
 
   init(): this {
     this.parts.push(cmd(ESC, 0x40));
+    // Select WPC1252 so latin1-encoded text renders correctly (Indonesian/Latin).
+    this.parts.push(cmd(ESC, 0x74, ESCPOS_CODE_PAGE)); // ESC t n
     return this;
   }
 
@@ -51,7 +45,12 @@ class ClientEscPosBuilder {
   }
 
   text(str: string): this {
-    this.parts.push(new TextEncoder().encode(str + "\n"));
+    // latin1-encoded to match the WPC1252 code table selected in init().
+    // TextEncoder only does UTF-8, so truncate each code unit to a byte.
+    const bytes = new Uint8Array(str.length + 1);
+    for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i) & 0xff;
+    bytes[str.length] = 0x0a; // "\n"
+    this.parts.push(bytes);
     return this;
   }
 
@@ -199,7 +198,16 @@ export async function printViaBluetooth(
 export interface SerialPrinter {
   type: "serial";
   name: string;
+  id: string; // vendorId:productId — stable across sessions, used for silent reconnect
   port: SerialPort;
+}
+
+/** Stable per-port id from USB descriptors: "0451:16a8". "unknown" if missing. */
+function serialPortId(port: SerialPort): string {
+  const info = port.getInfo();
+  const v = info.usbVendorId?.toString(16).padStart(4, "0") ?? "unknown";
+  const p = info.usbProductId?.toString(16).padStart(4, "0") ?? "unknown";
+  return `${v}:${p}`;
 }
 
 export async function isSerialAvailable(): Promise<boolean> {
@@ -213,10 +221,11 @@ export async function scanSerialPrinters(): Promise<SerialPrinter[]> {
 
   try {
     const port = await nav.serial.requestPort();
-    const info = port.getInfo();
+    const id = serialPortId(port);
     return [{
       type: "serial",
-      name: `USB Printer (${info.usbVendorId?.toString(16) || "unknown"})`,
+      name: `USB Printer (${id})`,
+      id,
       port,
     }];
   } catch {
@@ -425,6 +434,34 @@ export async function reconnectBluetooth(): Promise<BluetoothDevice | null> {
       }
     }
     return match;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Silent reconnect to a previously-paired USB/Serial printer (no picker dialog).
+ * Uses navigator.serial.getPorts() — returns ports the user already granted
+ * access to. Matches by the remembered vendorId:productId id.
+ *
+ * ponytail: this closes the "remembered USB printer still pops the picker every
+ * print" gap — getPorts() needs no user gesture for already-granted ports.
+ */
+export async function reconnectSerial(): Promise<SerialPort | null> {
+  const nav = navigator as any;
+  if (!nav.serial?.getPorts) return null;
+  const remembered = getRememberedPrinter();
+  if (!remembered || remembered.kind !== "serial") return null;
+
+  try {
+    const ports: SerialPort[] = await nav.serial.getPorts();
+    // Match by id (vendorId:productId). Legacy entries stored the label as id —
+    // fall back to first granted port if id is non-descriptive but kind matches.
+    const byId = ports.find((port) => serialPortId(port) === remembered.id);
+    if (byId) return byId;
+    // ponytail: legacy fallback — old remembered rows stored "USB Printer (xxx)"
+    // as id. If only one port is granted, trust it; otherwise force re-pick.
+    return ports.length === 1 ? ports[0] : null;
   } catch {
     return null;
   }

@@ -29,6 +29,20 @@ export const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, { labelKey: string; co
   REFUNDED: { labelKey: "status.refunded", color: "bg-slate-100/80 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400" },
 };
 
+/**
+ * Payment statuses that still have an outstanding balance. Single source of
+ * truth for the `{ in: [...] }` Prisma filter used across dashboard/reports.
+ */
+export const UNPAID_PAYMENT_STATUSES: PaymentStatus[] = ["PENDING", "PARTIAL"];
+
+/**
+ * How long order proof photos live before auto-delete. 7 days aligns with the
+ * short end of the laundry damage-claim window (industry: 7–14d) and keeps
+ * total disk bounded (≤ 7 days × daily volume). Single source — adopted by
+ * lib/photo-cleanup.ts + the upload route.
+ */
+export const PHOTO_TTL_DAYS = 7;
+
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CASH: "paymentMethod.cash",
   DEPOSIT: "paymentMethod.deposit",

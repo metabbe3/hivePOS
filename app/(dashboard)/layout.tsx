@@ -7,6 +7,9 @@ import { Header } from "@/components/layout/header";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionGuard } from "@/components/shared/session-guard";
 import { ImpersonationBanner } from "@/components/shared/impersonation-banner";
+import { OfflineBanner } from "@/components/shared/offline-banner";
+import { OfflineSyncManager } from "@/components/shared/offline-sync-manager";
+import { TelemetryFlusher } from "@/components/shared/telemetry-flusher";
 import { I18nProvider } from "@/lib/i18n-context";
 import { useSessionSync } from "@/hooks/use-session-sync";
 
@@ -22,9 +25,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <SessionGuard>
           <I18nProvider>
             <TooltipProvider>
+              <OfflineSyncManager />
+              <TelemetryFlusher />
               <SidebarProvider>
                 <AppSidebar />
                 <SidebarInset>
+                  <OfflineBanner />
                   <ImpersonationBanner />
                   <Header />
                   <main className="flex-1 overflow-x-hidden bg-background p-4 md:p-6">{children}</main>

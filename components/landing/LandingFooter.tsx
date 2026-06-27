@@ -46,8 +46,8 @@ export function LandingFooter() {
               hive<span className="text-indigo-600">POS</span>
             </Link>
             <p className="max-w-xs text-sm text-zinc-500">
-              Aplikasi kasir laundry. Dibuat oleh owner laundry, untuk owner
-              laundry.
+              Kasir laundry ringan, langsung di browser. Untuk UMKM yang
+              ingin mulai hari ini, bukan bulan depan.
             </p>
           </div>
 

@@ -63,6 +63,13 @@ export function DataTableCard<T>({
   const isEmpty = rows.length === 0;
   const emptyText = (isFiltered ? emptyFilteredMessage : emptyMessage) ?? emptyMessage ?? emptyFilteredMessage;
 
+  // ponytail: static lookup — `text-${align}` template strings get purged by Tailwind JIT.
+  const ALIGN: Record<NonNullable<Column<T>["align"]>, string> = {
+    left: "text-left",
+    right: "text-right",
+    center: "text-center",
+  };
+
   return (
     <Card className="overflow-hidden rounded-xl border-border/60 shadow-sm">
       {(title || headerExtra) && (
@@ -88,7 +95,7 @@ export function DataTableCard<T>({
                   {columns.map((col, i) => (
                     <th
                       key={i}
-                      className={`py-2 font-medium text-${col.align ?? "left"}`}
+                      className={`py-2 font-medium ${ALIGN[col.align ?? "left"]}`}
                     >
                       {col.header}
                     </th>
@@ -104,7 +111,7 @@ export function DataTableCard<T>({
                     {columns.map((col, i) => (
                       <td
                         key={i}
-                        className={`py-2.5 text-${col.align ?? "left"}${col.className ? ` ${col.className}` : ""}`}
+                        className={`py-2.5 ${ALIGN[col.align ?? "left"]}${col.className ? ` ${col.className}` : ""}`}
                       >
                         {col.render(row, rowIndex)}
                       </td>

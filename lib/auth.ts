@@ -8,7 +8,7 @@ import { prisma } from "./prisma";
 import { z } from "zod";
 import { legacyRoleToDefaultName } from "./permissions/defaults";
 import { getRequestIp, rateLimitByIp } from "./rate-limit";
-import { resolveAllFlags } from "./feature-flags";
+import { resolveAllFlagsSafe } from "./feature-flags";
 
 export const authSecret =
   process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "dev-secret-change-in-production";
@@ -51,7 +51,7 @@ const loginSchema = z.object({
  * Resolve RBAC permissions/roleName for a user.
  * Falls back to the matching default role by legacy enum when no roleId is set.
  */
-async function loadRoleContext(userId: string, legacyRole: string) {
+export async function loadRoleContext(userId: string, legacyRole: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -117,11 +117,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         // ponytail: rate-limit by client IP — 10 credential attempts per minute.
         // Throws RateLimitError; NextAuth wraps any authorize throw into auth-failure.
-        const ip = await getRequestIp();
-        rateLimitByIp(ip, "/api/auth/callback/credentials", {
-          limit: 10,
-          windowSeconds: 60,
-        });
+        // Bypass with RATE_LIMIT_DISABLED=true (dev/test containers running sweeps).
+        if (process.env.RATE_LIMIT_DISABLED !== "true") {
+          const ip = await getRequestIp();
+          rateLimitByIp(ip, "/api/auth/callback/credentials", {
+            limit: 10,
+            windowSeconds: 60,
+          });
+        }
 
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
@@ -321,7 +324,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // ponytail: resolve feature flags once at login. Refresh path below
         // re-resolves when super-admin toggles + tenant sessionVersion bumps.
         if (token.tenantId) {
-          token.featureFlags = await resolveAllFlags(token.tenantId as string);
+          token.featureFlags = await resolveAllFlagsSafe(token.tenantId as string);
         }
       }
 
@@ -348,7 +351,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.roleId = roleCtx.roleId;
           token.roleName = roleCtx.roleName;
           if (token.tenantId) {
-            token.featureFlags = await resolveAllFlags(token.tenantId as string);
+            token.featureFlags = await resolveAllFlagsSafe(token.tenantId as string);
           }
         }
       }
@@ -390,7 +393,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (fresh) token.sessionVersion = fresh.sessionVersion;
           // Refresh feature flags too so super-admin toggles propagate.
           if (token.tenantId) {
-            token.featureFlags = await resolveAllFlags(token.tenantId as string);
+            token.featureFlags = await resolveAllFlagsSafe(token.tenantId as string);
           }
         }
 
@@ -466,7 +469,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.permissions = roleCtx.permissions;
             token.roleId = roleCtx.roleId;
             token.roleName = roleCtx.roleName;
-            token.featureFlags = await resolveAllFlags(target.tenantId as string);
+            token.featureFlags = await resolveAllFlagsSafe(target.tenantId as string);
           }
         }
       }

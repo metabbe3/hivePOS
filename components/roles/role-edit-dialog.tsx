@@ -47,7 +47,7 @@ export function RoleEditDialog({
 
   async function handleSave() {
     if (!name.trim()) {
-      toast.error("Role name is required");
+      toast.error("Nama peran wajib diisi.");
       return;
     }
 

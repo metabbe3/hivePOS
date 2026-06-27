@@ -33,6 +33,12 @@ export interface OrderMessageInput {
   totalAmount: number;
   paidAmount: number;
   orderItems: OrderMessageItem[];
+  /** Tenant's configured QRIS image (settings.website.qrisImageUrl). When set
+   * AND there's an unpaid remainder, a "Bayar via QRIS" line is included. */
+  qrisUrl?: string | null;
+  /** Branch receipt/footer terms ("Ketentuan") — rendered into {{terms}}.
+   * Single source of truth, shared with the printed receipt + tracking page. */
+  invoiceFooter?: string | null;
 }
 
 /**
@@ -128,13 +134,26 @@ export function buildOrderWhatsAppUrl(
   }, 0);
   const extrasLine = totalPcs > 0 ? `Total: ${totalPcs} pcs` : "";
 
-  let remainingBlock = "";
+  // Honest, data-driven blocks — nothing hardcoded. The QRIS line only appears
+  // when the tenant has configured a QRIS image (no more dead /QRIS.JPG link),
+  // and the terms come from the branch's invoiceFooter (same "Ketentuan" shown
+  // on the printed receipt + tracking page). Empty optionals collapse away.
+  let remainingLine = "";
+  let qrisLine = "";
   if (remaining > 0) {
-    remainingBlock = `Sisa pembayaran: ${formatCurrency(remaining)}\n💰 Pembayaran via QRIS: ${origin}/QRIS.JPG\n`;
+    remainingLine = `Sisa pembayaran: ${formatCurrency(remaining)}`;
+    if (order.qrisUrl) {
+      qrisLine = `\n💰 Pembayaran via QRIS: ${order.qrisUrl}`;
+    }
   }
 
   const readyGreeting =
     order.status === "READY" ? "\nPesanan Anda sudah siap diambil! 🎉" : "";
+
+  const invoiceFooter = order.invoiceFooter?.trim();
+  const terms = invoiceFooter
+    ? `\n\n📋 Syarat & Ketentuan:\n${invoiceFooter}`
+    : "";
 
   const body = renderWhatsAppTemplate(
     "order.receipt",
@@ -144,9 +163,11 @@ export function buildOrderWhatsAppUrl(
       serviceLines,
       extrasLine,
       totalAmount: formatCurrency(order.totalAmount),
-      remainingBlock,
+      remainingLine,
+      qrisLine,
       readyGreeting,
       trackingUrl: `${origin}/track/${order.orderNumber}`,
+      terms,
     },
     tenantOverrides,
   );

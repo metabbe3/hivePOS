@@ -5,6 +5,10 @@ export interface CreateCustomerInput {
   phone?: string | null;
   email?: string | null;
   notes?: string | null;
+  // ponytail: optional idempotency key — when set, the API route dedupes
+  // against the clientId column AND the existing phone column before
+  // delegating to CreateCustomerService.
+  clientId?: string;
 }
 
 export interface UpdateCustomerInput {

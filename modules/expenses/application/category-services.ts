@@ -48,7 +48,7 @@ export class DeleteExpenseCategoryService {
   async execute(id: string, ctx: RequestContext): Promise<void> {
     const count = await this.repo.countExpenses(id);
     if (count > 0) {
-      throw new BusinessRuleError("Category is in use by existing expenses");
+      throw new BusinessRuleError("Kategori masih dipakai pengeluaran lain.");
     }
     await this.repo.delete(id, ctx.branchId);
   }

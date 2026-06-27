@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { getApiSession } from "@/lib/get-session";
 import { prisma } from "@/lib/prisma";
 import {
   withErrorHandler,
@@ -15,7 +15,9 @@ import {
  * permissions have been updated and the JWT needs to be refreshed.
  */
 export const GET = withErrorHandler(async () => {
-  const session = await auth();
+  // getApiSession() (bearer-aware) so mobile/Flutter clients can poll this
+  // with their token; falls back to the cookie path for the web client.
+  const session = await getApiSession();
   if (!session?.user?.id) {
     throw new UnauthenticatedError();
   }

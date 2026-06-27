@@ -22,13 +22,16 @@
   --color-secondary: #10b981;
   --color-secondary-foreground: #ffffff;
 
-  /* ─── Storefront brand (amber/honey) ─── */
-  --color-brand: #f59e0b;
+  /* ─── Storefront brand (orange — collapsed with secondary, see AUDIT D1.1) ─── */
+  /* ponytail: was amber #f59e0b. Collapsed to orange-700 so it matches
+     --color-secondary under .pub-scope (landing), eliminating the warm-hue
+     clash. Shade variants follow codebase convention (600+ darker than base). */
+  --color-brand: #c2410c;
   --color-brand-foreground: #ffffff;
-  --color-brand-light: #fef3c7;
-  --color-brand-600: oklch(0.72 0.17 75);
-  --color-brand-700: oklch(0.68 0.19 65);
-  --color-brand-800: oklch(0.62 0.22 55);
+  --color-brand-light: #fff7ed;
+  --color-brand-600: oklch(0.50 0.21 50);
+  --color-brand-700: oklch(0.42 0.20 50);
+  --color-brand-800: oklch(0.35 0.18 50);
 
   /* ─── Heatmap intensity scale (6 levels: empty → peak) ─── */
   --heat-0: oklch(0.96 0.006 75);
@@ -89,9 +92,9 @@
   --color-primary-foreground: #ffffff;
   --color-secondary: #10b981;
   --color-secondary-foreground: #ffffff;
-  --color-brand: #f59e0b;
+  --color-brand: #c2410c;
   --color-brand-foreground: #ffffff;
-  --color-brand-light: #1a1410;
+  --color-brand-light: #2a160a;
 
   /* ─── Heatmap intensity scale (dark: inverted lightness) ─── */
   --heat-0: oklch(0.20 0.01 75);
@@ -320,17 +323,14 @@ body {
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── Glass card (frosted glass surface) ─── */
+/* ponytail: landing-only, light-only — no dark variant. Only used under
+   .pub-scope (LandingNav, LandingHero), which never enters dark mode. */
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-}
-
-.dark .glass-card {
-  background: rgba(17, 17, 24, 0.7);
-  border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ─── Heatmap high-intensity pattern (colorblind a11y) ─── */
@@ -377,8 +377,10 @@ body {
      ponytail: overriding --color-secondary here (set globally in @theme to
      emerald #10b981) means every text-secondary / bg-secondary / to-secondary
      utility in landing picks up orange with zero component edits.
-     Hex (not oklch) so iOS Safari < 15.4 doesn't drop the declaration. */
-  --color-secondary: #ea580c;
+     Hex (not oklch) so iOS Safari < 15.4 doesn't drop the declaration.
+     #c2410c (orange-700) not #ea580c (orange-600) — needs ≥4.5:1 on white
+     for WCAG AA on small text badges ("hivePOS", "HEMAT 38%"). */
+  --color-secondary: #c2410c;
   --color-secondary-foreground: #ffffff;
 
   /* indigo → trust blue (#2563EB family). Standard Tailwind blue ramp. */
@@ -435,4 +437,13 @@ body {
 /* Tabular figures on prices — prevents layout shift when counters animate */
 .pub-scope .price {
   font-variant-numeric: tabular-nums;
+}
+
+/* Receipt on-screen preview width per paper size — gives a realistic sense of
+   56/58/80mm so switching size visibly changes the layout. Scoped to screen so
+   browser-print (@page size) is unaffected. */
+@media screen {
+  .receipt-56mm { max-width: 200px; margin-inline: auto; }
+  .receipt-58mm { max-width: 224px; margin-inline: auto; }
+  .receipt-80mm { max-width: 300px; margin-inline: auto; }
 }

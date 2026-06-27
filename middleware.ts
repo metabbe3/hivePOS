@@ -22,6 +22,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Service worker must be public — the browser fetches /sw.js without auth
+  // cookies during scope resolution. Without this it redirects to /login and
+  // SW registration fails silently.
+  if (pathname === "/sw.js") return NextResponse.next();
+
   // ── Extract tenant slug from subdomain ──
   const host = req.headers.get("host") || "";
   let tenantSlug: string | null = null;
@@ -76,6 +81,8 @@ export function middleware(req: NextRequest) {
     pathname === "/" ||
     pathname === "/landing" ||
     pathname.startsWith("/register") ||
+    pathname.startsWith("/terms") ||
+    pathname.startsWith("/alternatif-moka-pos-laundry") ||
     pathname.startsWith("/track") ||
     pathname.startsWith("/pickup") ||
     pathname.startsWith("/support");
@@ -90,6 +97,11 @@ export function middleware(req: NextRequest) {
 
   // Health check — unauthed, for Docker/k8s liveness probes (Phase 8)
   if (pathname === "/api/health") return NextResponse.next();
+
+  // PWA nonce — unauthed, polled by every installed client to detect
+  // super-admin force-update. Session-gating it would block the poll when
+  // the user is logged out (installed PWA, pre-login), defeating the purpose.
+  if (pathname === "/api/pwa/nonce") return NextResponse.next();
 
   // Midtrans webhook — unauthed; signature verified in the route handler.
   if (pathname === "/api/billing/webhook") return NextResponse.next();

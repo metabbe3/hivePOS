@@ -94,6 +94,9 @@ export interface FormSchema {
   /** Opt all fields into 44px touch-target sizing. Default false (dashboard density). */
   touchTargets?: boolean;
 
+  /** Submit button renders full-width, no add/save icon. For primary auth CTAs (login, register). */
+  submitFullWidth?: boolean;
+
   /** Extra data to merge into payload on submit (e.g. branchId, tenantId) */
   extraData?: Record<string, unknown>;
 

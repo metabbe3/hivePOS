@@ -66,6 +66,7 @@ export const ModelName = {
   Service: 'Service',
   ServiceGroup: 'ServiceGroup',
   Order: 'Order',
+  OrderPhoto: 'OrderPhoto',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
   PickupRequest: 'PickupRequest',
@@ -78,7 +79,9 @@ export const ModelName = {
   PromoRedemption: 'PromoRedemption',
   SaaSPayment: 'SaaSPayment',
   FeatureFlag: 'FeatureFlag',
-  TenantFeatureFlag: 'TenantFeatureFlag'
+  TenantFeatureFlag: 'TenantFeatureFlag',
+  SystemSetting: 'SystemSetting',
+  TelemetryEvent: 'TelemetryEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -221,6 +224,7 @@ export const TenantScalarFieldEnum = {
   isActive: 'isActive',
   approvedAt: 'approvedAt',
   trialEndsAt: 'trialEndsAt',
+  trialTier: 'trialTier',
   websiteEnabled: 'websiteEnabled',
   websitePublishedAt: 'websitePublishedAt',
   createdAt: 'createdAt',
@@ -322,6 +326,7 @@ export const CustomerScalarFieldEnum = {
   notes: 'notes',
   balance: 'balance',
   branchId: 'branchId',
+  clientId: 'clientId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -375,6 +380,7 @@ export const OrderScalarFieldEnum = {
   notes: 'notes',
   module: 'module',
   branchId: 'branchId',
+  clientId: 'clientId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   receivedAt: 'receivedAt',
@@ -384,6 +390,24 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderPhotoScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  branchId: 'branchId',
+  kind: 'kind',
+  storagePath: 'storagePath',
+  bytes: 'bytes',
+  width: 'width',
+  height: 'height',
+  mime: 'mime',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderPhotoScalarFieldEnum = (typeof OrderPhotoScalarFieldEnum)[keyof typeof OrderPhotoScalarFieldEnum]
 
 
 export const OrderItemScalarFieldEnum = {
@@ -595,6 +619,27 @@ export const TenantFeatureFlagScalarFieldEnum = {
 export type TenantFeatureFlagScalarFieldEnum = (typeof TenantFeatureFlagScalarFieldEnum)[keyof typeof TenantFeatureFlagScalarFieldEnum]
 
 
+export const SystemSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
+export const TelemetryEventScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  kind: 'kind',
+  payload: 'payload',
+  createdAt: 'createdAt'
+} as const
+
+export type TelemetryEventScalarFieldEnum = (typeof TelemetryEventScalarFieldEnum)[keyof typeof TelemetryEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -609,6 +654,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

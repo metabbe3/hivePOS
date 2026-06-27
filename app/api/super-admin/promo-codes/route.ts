@@ -1,26 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { getApiSession } from "@/lib/get-session";
 import {
   withErrorHandler,
   apiSuccess,
   ValidationError,
   ConflictError,
-  ForbiddenError,
+  NotFoundError,
 } from "@/modules/shared";
-
-// ─── AUTH: Super admin only ───
-async function assertSuperAdmin() {
-  const session = (await getApiSession()) as any;
-  if (!session || session.user.role !== "SUPER_ADMIN") {
-    return null;
-  }
-  return session;
-}
+import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
+import { auditLog } from "@/lib/audit";
 
 // GET — list all promo codes
 export const GET = withErrorHandler(async () => {
-  const session = await assertSuperAdmin();
-  if (!session) throw new ForbiddenError("Super admin access required");
+  await assertSuperAdminOrThrow("SUPER_ADMIN");
 
   const codes = await prisma.promoCode.findMany({
     orderBy: { createdAt: "desc" },
@@ -48,28 +39,28 @@ export const GET = withErrorHandler(async () => {
 
 // POST — create a new promo code
 export const POST = withErrorHandler(async (req: Request) => {
-  const session = await assertSuperAdmin();
-  if (!session) throw new ForbiddenError("Super admin access required");
+  const { session } = await assertSuperAdminOrThrow("SUPER_ADMIN");
+  const actor = { id: session.user.id!, email: session.user.email! };
 
   const body = await req.json();
 
   // ── Validate required fields ──
   const code = (body?.code as string | undefined)?.trim().toUpperCase();
   if (!code) {
-    throw new ValidationError("Code is required");
+    throw new ValidationError("Kode wajib diisi.");
   }
 
   const type = body?.type as string | undefined;
   if (!["FREE_MONTH", "DISCOUNT_PERCENT", "DISCOUNT_FIXED"].includes(type ?? "")) {
-    throw new ValidationError("Invalid type");
+    throw new ValidationError("Jenis promo tidak valid.");
   }
 
   const value = Number(body?.value);
   if (!Number.isFinite(value) || value <= 0) {
-    throw new ValidationError("Value must be a positive number");
+    throw new ValidationError("Nilai harus lebih dari 0.");
   }
   if (type === "DISCOUNT_PERCENT" && value > 100) {
-    throw new ValidationError("Percent discount cannot exceed 100");
+    throw new ValidationError("Diskon persen maksimal 100.");
   }
 
   const maxRedemptions =
@@ -77,7 +68,7 @@ export const POST = withErrorHandler(async (req: Request) => {
       ? null
       : Math.max(0, Math.floor(Number(body.maxRedemptions)));
   if (maxRedemptions !== null && (!Number.isFinite(maxRedemptions) || maxRedemptions < 0)) {
-    throw new ValidationError("maxRedemptions must be a non-negative integer or null");
+    throw new ValidationError("Jumlah redempsi tidak boleh negatif.");
   }
 
   // ── Parse optional validity window ──
@@ -95,20 +86,30 @@ export const POST = withErrorHandler(async (req: Request) => {
   // ── Enforce code uniqueness ──
   const existing = await prisma.promoCode.findUnique({ where: { code } });
   if (existing) {
-    throw new ConflictError("Code already exists");
+    throw new ConflictError("Kode sudah dipakai.");
   }
 
-  const created = await prisma.promoCode.create({
-    data: {
-      code,
-      description: (body?.description as string | undefined)?.trim() || null,
-      type: type as "FREE_MONTH" | "DISCOUNT_PERCENT" | "DISCOUNT_FIXED",
-      value,
-      maxRedemptions,
-      validFrom,
-      validUntil,
-      isActive: body?.isActive !== false,
-    },
+  const created = await prisma.$transaction(async (tx) => {
+    const promoCode = await tx.promoCode.create({
+      data: {
+        code,
+        description: (body?.description as string | undefined)?.trim() || null,
+        type: type as "FREE_MONTH" | "DISCOUNT_PERCENT" | "DISCOUNT_FIXED",
+        value,
+        maxRedemptions,
+        validFrom,
+        validUntil,
+        isActive: body?.isActive !== false,
+      },
+    });
+    await auditLog(tx, {
+      actor,
+      action: "promoCode.create",
+      target: { type: "PromoCode", id: promoCode.id },
+      diff: { code, type, value, maxRedemptions },
+      req,
+    });
+    return promoCode;
   });
 
   return apiSuccess({
@@ -123,19 +124,36 @@ export const POST = withErrorHandler(async (req: Request) => {
 
 // PATCH — toggle active state (deactivate / reactivate)
 export const PATCH = withErrorHandler(async (req: Request) => {
-  const session = await assertSuperAdmin();
-  if (!session) throw new ForbiddenError("Super admin access required");
+  const { session } = await assertSuperAdminOrThrow("SUPER_ADMIN");
+  const actor = { id: session.user.id!, email: session.user.email! };
 
   const body = await req.json();
   const id = body?.id as string | undefined;
   if (!id) {
-    throw new ValidationError("id is required");
+    throw new ValidationError("ID wajib diisi.");
   }
 
-  const updated = await prisma.promoCode.update({
+  const newIsActive = Boolean(body?.isActive);
+  const existing = await prisma.promoCode.findUnique({
     where: { id },
-    data: { isActive: Boolean(body?.isActive) },
-    select: { id: true, code: true, isActive: true },
+    select: { isActive: true },
+  });
+  if (!existing) throw new NotFoundError("PromoCode", id);
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const promoCode = await tx.promoCode.update({
+      where: { id },
+      data: { isActive: newIsActive },
+      select: { id: true, code: true, isActive: true },
+    });
+    await auditLog(tx, {
+      actor,
+      action: "promoCode.toggle",
+      target: { type: "PromoCode", id },
+      diff: { before: { isActive: existing.isActive }, after: { isActive: newIsActive } },
+      req,
+    });
+    return promoCode;
   });
 
   return apiSuccess({ promoCode: updated });

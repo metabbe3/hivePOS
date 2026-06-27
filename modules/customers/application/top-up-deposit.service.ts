@@ -15,7 +15,7 @@ export class TopUpDepositService {
     ctx: RequestContext,
   ): Promise<DepositTransactionDTO> {
     if (input.amount <= 0) {
-      throw new ValidationError("Top-up amount must be positive");
+      throw new ValidationError("Jumlah top-up harus lebih dari 0.");
     }
 
     // Verify customer exists within branch

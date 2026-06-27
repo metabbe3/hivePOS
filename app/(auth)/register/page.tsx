@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import { BrandMark } from "@/components/public/brand-logo";
+import { GoogleIcon } from "@/components/auth/google-icon";
 import { DynamicForm } from "@/lib/forms/dynamic-form";
 import { registerSchema } from "@/lib/forms/schemas";
 
@@ -20,19 +21,56 @@ function RegisterForm() {
   const googleName = searchParams.get("googleName") ?? "";
   const googleId = searchParams.get("googleId") ?? "";
   const isGoogleFlow = !!googleId;
+  // ?plan=growth|pro picks which tier to trial. Default: PRO (full features 14 days).
+  const trialTier = searchParams.get("plan") === "growth" ? "GROWTH" : "PRO";
+
+  // Override the agreeTerms field with a render that has a clickable T&C link.
+  const registerSchemaWithLink = useMemo(
+    () => ({
+      ...registerSchema,
+      fields: registerSchema.fields.map((f) =>
+        f.name === "agreeTerms"
+          ? {
+              ...f,
+              label: undefined,
+              hint: undefined,
+              render: ({ value, onChange, disabled }: { value: unknown; onChange: (v: unknown) => void; disabled?: boolean }) => (
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!!value}
+                    onChange={(e) => onChange(e.target.checked)}
+                    disabled={disabled}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                  <span>
+                    Saya setuju dengan{" "}
+                    <Link href="/terms" target="_blank" className="text-[var(--color-primary)] font-semibold hover:underline">
+                      Syarat &amp; Ketentuan
+                    </Link>{" "}
+                    hivePOS
+                  </span>
+                </label>
+              ),
+            }
+          : f,
+      ),
+    }),
+    [],
+  );
 
   async function handleRegister(values: Record<string, unknown>) {
     setLoading(true);
     try {
       await apiFetch("/api/register", {
         method: "POST",
-        body: { ...values, ...(googleId ? { googleId } : {}) },
+        body: { ...values, trialTier, ...(googleId ? { googleId } : {}) },
       });
 
-      // ponytail: previously branched on googleId — now both flows go through
-      // approval, so they converge. Auto-signin via Google would reject
-      // (tenant.isActive=false), so just redirect to /login with a clear message.
-      toast.success("Pendaftaran diterima! Admin akan meninjau dalam 1×24 jam.");
+      // Account is auto-active (no admin approval). Redirect to login so the user
+      // signs in with the credentials they just set. Auto-signin skipped to keep
+      // the password + Google flows on one path (ponytail).
+      toast.success("Pendaftaran berhasil! Akun langsung aktif — silakan masuk.");
       router.push("/login");
     } catch (err) {
       toast.error(err instanceof ApiClientError ? err.message : "Terjadi kesalahan");
@@ -51,9 +89,9 @@ function RegisterForm() {
             </span>
             hive<span className="text-[var(--color-primary)]">POS</span>
           </Link>
-          <h1 className="text-3xl font-black mt-6">Daftar Beta Partner</h1>
+          <h1 className="text-3xl font-bold mt-6">Daftar Bisnis Laundry Anda</h1>
           <p className="text-[var(--color-muted-foreground)] mt-2">
-            Gratis 3 bulan. Aktif setelah disetujui admin.
+            Gratis 1 outlet selamanya. Setup 2 menit, aktif langsung — 14 hari Growth gratis.
           </p>
         </div>
 
@@ -80,12 +118,7 @@ function RegisterForm() {
               onClick={() => signIn("google", { callbackUrl: "/register" })}
               className="w-full py-3 rounded-xl border border-[var(--color-border)] font-semibold flex items-center justify-center gap-3 hover:bg-[var(--color-muted)] transition"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
+              <GoogleIcon />
               Daftar dengan Google
             </button>
             <div className="relative my-4">
@@ -102,7 +135,7 @@ function RegisterForm() {
         )}
 
         <DynamicForm
-          schema={registerSchema}
+          schema={registerSchemaWithLink}
           initialData={{
             email: googleEmail,
             ownerName: googleName,

@@ -35,7 +35,7 @@ export const customerSchema: FormSchema = {
       placeholder: "08xxxxxxxxxx (opsional)",
       validate: (v) => {
         const s = String(v ?? "").trim();
-        return s && !/^[0-9+\-\s]{6,}$/.test(s) ? "Nomor telepon tidak valid" : null;
+        return s && !/^[0-9+\-\s]{6,}$/.test(s) ? "Nomor telepon salah." : null;
       },
     },
     {
@@ -66,12 +66,12 @@ export const expenseSchema: FormSchema = {
       validate: (v) => (!v || Number(v) <= 0 ? "Jumlah harus lebih dari 0" : null),
     },
     {
-      name: "category",
+      name: "categoryId",
       label: "Kategori",
       type: "select",
       required: true,
       placeholder: "Pilih kategori",
-      optionsEndpoint: "/api/expenses?categories=true",
+      optionsEndpoint: "/api/expense-categories",
     },
     {
       name: "date",
@@ -80,7 +80,13 @@ export const expenseSchema: FormSchema = {
       required: true,
       defaultValue: new Date().toISOString().split("T")[0],
     },
-    notesField(),
+    {
+      name: "description",
+      label: "Catatan",
+      type: "textarea",
+      placeholder: "Catatan tambahan (opsional)",
+      colSpan: 2,
+    },
   ],
 };
 
@@ -125,7 +131,7 @@ export const stockItemSchema: FormSchema = {
       step: 0.001,
     },
     {
-      name: "minStock",
+      name: "lowStockThreshold",
       label: "Minimum Stok",
       type: "number",
       placeholder: "0",
@@ -133,7 +139,7 @@ export const stockItemSchema: FormSchema = {
       step: 0.001,
     },
     {
-      name: "pricePerUnit",
+      name: "purchasePricePerUnit",
       label: "Harga per Satuan",
       type: "currency",
       placeholder: "0",
@@ -163,7 +169,7 @@ export const staffSchema: FormSchema = {
       type: "email",
       required: true,
       placeholder: "staff@laundry.com",
-      validate: (v) => (!v || !String(v).includes("@") ? "Email tidak valid" : null),
+      validate: (v) => (!v || !String(v).includes("@") ? "Format email salah." : null),
     },
     {
       name: "phone",
@@ -172,7 +178,7 @@ export const staffSchema: FormSchema = {
       placeholder: "08xxxxxxxxxx",
       validate: (v) => {
         const s = String(v ?? "").trim();
-        return s && !/^[0-9+\-\s]{6,}$/.test(s) ? "Nomor telepon tidak valid" : null;
+        return s && !/^[0-9+\-\s]{6,}$/.test(s) ? "Nomor telepon salah." : null;
       },
     },
     {
@@ -193,7 +199,7 @@ export const staffSchema: FormSchema = {
       placeholder: "Minimal 8 karakter",
       colSpan: 2,
       condition: (values) => !values.id, // only show on create
-      validate: (v, all) => !all.id && (!v || String(v).length < 8) ? "Password minimal 8 karakter" : null,
+      validate: (v, all) => !all.id && (!v || String(v).length < 8) ? "Kata sandi minimal 8 karakter." : null,
     },
   ],
 };
@@ -230,7 +236,7 @@ export const profileSchema: FormSchema = {
       placeholder: "08xxxxxxxxxx",
       validate: (v) => {
         const s = String(v ?? "").trim();
-        return s && !/^[0-9+\-\s]{6,}$/.test(s) ? "Nomor telepon tidak valid" : null;
+        return s && !/^[0-9+\-\s]{6,}$/.test(s) ? "Nomor telepon salah." : null;
       },
     },
   ],
@@ -243,6 +249,7 @@ export const loginSchema: FormSchema = {
   submitLabel: "Masuk",
   layout: { columns: 1 },
   touchTargets: true,
+  submitFullWidth: true,
   fields: [
     {
       name: "email",
@@ -250,7 +257,7 @@ export const loginSchema: FormSchema = {
       type: "email",
       required: true,
       placeholder: "anda@bisnis.com",
-      validate: (v) => (!v || !String(v).includes("@") ? "Email tidak valid" : null),
+      validate: (v) => (!v || !String(v).includes("@") ? "Format email salah." : null),
     },
     {
       name: "password",
@@ -273,6 +280,7 @@ export const superAdminLoginSchema: FormSchema = {
   submitLabel: "Masuk Panel",
   layout: { columns: 1 },
   touchTargets: true,
+  submitFullWidth: true,
   fields: [
     {
       name: "email",
@@ -280,7 +288,7 @@ export const superAdminLoginSchema: FormSchema = {
       type: "email",
       required: true,
       placeholder: "admin@hivepos.id",
-      validate: (v) => (!v || !String(v).includes("@") ? "Email tidak valid" : null),
+      validate: (v) => (!v || !String(v).includes("@") ? "Format email salah." : null),
     },
     {
       name: "password",
@@ -300,6 +308,7 @@ export const registerSchema: FormSchema = {
   submitLabel: "Buat Bisnis Saya",
   layout: { columns: 2 },
   touchTargets: true,
+  submitFullWidth: true,
   fields: [
     {
       name: "businessName",
@@ -347,7 +356,7 @@ export const registerSchema: FormSchema = {
       type: "email",
       required: true,
       placeholder: "anda@bisnis.com",
-      validate: (v) => (!v || !String(v).includes("@") ? "Email tidak valid" : null),
+      validate: (v) => (!v || !String(v).includes("@") ? "Format email salah." : null),
     },
     {
       name: "password",
@@ -355,7 +364,15 @@ export const registerSchema: FormSchema = {
       type: "password",
       showPasswordToggle: true,
       placeholder: "Minimal 8 karakter",
-      validate: (v, all) => !all.googleId && (!v || String(v).length < 8) ? "Password minimal 8 karakter" : null,
+      validate: (v, all) => !all.googleId && (!v || String(v).length < 8) ? "Kata sandi minimal 8 karakter." : null,
+    },
+    {
+      name: "agreeTerms",
+      label: "Saya setuju dengan Syarat & Ketentuan hivePOS",
+      type: "checkbox",
+      required: true,
+      colSpan: 2,
+      validate: (v: unknown) => (!v ? "Anda harus menyetujui Syarat & Ketentuan." : null),
     },
   ],
 };
@@ -382,7 +399,7 @@ export const pickupPublicSchema: FormSchema = {
       type: "tel",
       required: true,
       placeholder: "08xxxxxxxxxx",
-      validate: (v) => (!v || String(v).trim().length < 8 ? "Nomor telepon tidak valid" : null),
+      validate: (v) => (!v || String(v).trim().length < 8 ? "Nomor telepon salah." : null),
     },
     {
       name: "email",
@@ -543,7 +560,7 @@ export const ticketFormSchema: FormSchema = {
       required: true,
       colSpan: 2,
       placeholder: "Briefly describe the issue",
-      validate: (v) => (!v || String(v).trim().length < 3 ? "Subject must be at least 3 characters" : null),
+      validate: (v) => (!v || String(v).trim().length < 3 ? "Subjek terlalu pendek — minimal 3 huruf." : null),
     },
     {
       name: "category",
@@ -578,7 +595,7 @@ export const ticketFormSchema: FormSchema = {
       required: true,
       colSpan: 2,
       placeholder: "Tell us more about what happened...",
-      validate: (v) => (!v || String(v).trim().length < 10 ? "Description must be at least 10 characters" : null),
+      validate: (v) => (!v || String(v).trim().length < 10 ? "Deskripsi terlalu pendek — minimal 10 huruf." : null),
     },
   ],
 };

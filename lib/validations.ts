@@ -4,7 +4,7 @@ const emailField = z.email();
 const passwordField = (min = 6) => z.string().min(min);
 const slugField = z
   .string()
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug must be lowercase letters, numbers, and hyphens");
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung.");
 
 export const loginSchema = z.object({
   email: emailField,
@@ -12,17 +12,17 @@ export const loginSchema = z.object({
 });
 
 export const customerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
   phone: z.string().optional().or(z.literal("")),
   email: z.string().optional().or(z.literal("")),
   notes: z.string().optional(),
 });
 
 export const serviceSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
   description: z.string().optional(),
   pricingType: z.enum(["PER_KG", "PER_ITEM"]),
-  basePrice: z.coerce.number().positive("Price must be positive"),
+  basePrice: z.coerce.number().positive("Harga harus lebih dari 0."),
   commissionType: z.enum(["NONE", "FLAT", "PERCENTAGE"]).optional(),
   commissionValue: z.coerce.number().min(0).optional(),
   isActive: z.boolean().optional(),
@@ -30,7 +30,7 @@ export const serviceSchema = z.object({
 });
 
 export const serviceGroupSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
   sortOrder: z.number().int().min(0).optional(),
 });
 
@@ -52,16 +52,19 @@ export const orderItemSchema = z.object({
 });
 
 export const orderSchema = z.object({
-  customerId: z.string().min(1, "Customer is required"),
-  items: z.array(orderItemSchema).min(1, "At least one item is required"),
-  notes: z.string().optional(),
+  customerId: z.string().min(1, "Pelanggan wajib dipilih."),
+  items: z.array(orderItemSchema).min(1, "Pilih minimal satu layanan."),
+  // ponytail: cap notes at 2000 chars — bounds IDB row size + limits XSS
+  // surface (React already escapes). 2000 is comfortably above any sane
+  // kasir handoff note.
+  notes: z.string().max(2000).optional(),
   discountType: z.enum(["PERCENTAGE", "FIXED"]).optional(),
   discountAmount: z.coerce.number().min(0).optional(),
   receivedAt: z.string().optional(),
 });
 
 export const paymentSchema = z.object({
-  amount: z.coerce.number().positive("Amount must be positive"),
+  amount: z.coerce.number().positive("Jumlah harus lebih dari 0."),
   paymentMethod: z.enum(["CASH", "DEPOSIT", "QRIS", "TRANSFER"]),
   notes: z.string().optional(),
   paidAt: z.string().optional(),
@@ -86,7 +89,7 @@ export type PaymentInput = z.infer<typeof paymentSchema>;
 export type StatusUpdateInput = z.infer<typeof statusUpdateSchema>;
 
 export const branchSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
   address: z.string().optional(),
   phone: z.string().optional(),
   invoiceFooter: z.string().optional(),
@@ -105,18 +108,18 @@ export const branchSchema = z.object({
 
 export const userCreateSchema = z.object({
   email: emailField,
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
   phone: z.string().optional(),
-  roleId: z.string().min(1, "Role is required"),
-  branchId: z.string().min(1, "Branch is required"),
+  roleId: z.string().min(1, "Peran wajib dipilih."),
+  branchId: z.string().min(1, "Outlet wajib dipilih."),
   password: passwordField(6),
 });
 
 export const userUpdateSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
+  name: z.string().min(1, "Nama wajib diisi.").optional(),
   phone: z.string().optional(),
   roleId: z.string().optional(),
-  branchId: z.string().min(1, "Branch is required").optional(),
+  branchId: z.string().min(1, "Outlet wajib dipilih.").optional(),
   password: passwordField(6).optional(),
 });
 
@@ -125,30 +128,37 @@ export type UserCreateInput = z.infer<typeof userCreateSchema>;
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
 
 export const stockItemSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  unit: z.string().min(1, "Unit is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
+  unit: z.string().min(1, "Satuan wajib diisi."),
   currentQuantity: z.coerce.number().min(0).optional(),
-  lowStockThreshold: z.coerce.number().min(0, "Threshold must be non-negative"),
-  purchasePricePerUnit: z.coerce.number().min(0, "Price must be non-negative"),
+  // ponytail: form marks these optional + DB defaults to 0; coerce empty/NaN to 0 instead of rejecting.
+  lowStockThreshold: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? 0 : v),
+    z.coerce.number().min(0, "Batas minimum tidak boleh negatif."),
+  ),
+  purchasePricePerUnit: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined || Number.isNaN(v) ? 0 : v),
+    z.coerce.number().min(0, "Harga tidak boleh negatif."),
+  ),
   isActive: z.boolean().optional(),
 });
 
 export const stockMovementSchema = z.object({
   type: z.enum(["IN", "OUT"]),
-  quantity: z.coerce.number().positive("Quantity must be positive"),
+  quantity: z.coerce.number().positive("Jumlah harus lebih dari 0."),
   notes: z.string().optional(),
-  date: z.string().min(1, "Date is required"),
+  date: z.string().min(1, "Tanggal wajib diisi."),
 });
 
 export const expenseCategorySchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
 });
 
 export const expenseSchema = z.object({
-  amount: z.coerce.number().positive("Amount must be positive"),
+  amount: z.coerce.number().positive("Jumlah harus lebih dari 0."),
   description: z.string().optional(),
-  date: z.string().min(1, "Date is required"),
-  categoryId: z.string().min(1, "Category is required"),
+  date: z.string().min(1, "Tanggal wajib diisi."),
+  categoryId: z.string().min(1, "Kategori wajib dipilih."),
 });
 
 export type StockItemInput = z.infer<typeof stockItemSchema>;
@@ -157,7 +167,7 @@ export type ExpenseCategoryInput = z.infer<typeof expenseCategorySchema>;
 export type ExpenseInput = z.infer<typeof expenseSchema>;
 
 export const depositTopUpSchema = z.object({
-  amount: z.coerce.number().positive("Amount must be positive"),
+  amount: z.coerce.number().positive("Jumlah harus lebih dari 0."),
   paymentMethod: z.enum(["CASH", "QRIS", "TRANSFER"]),
   description: z.string().optional(),
 });
@@ -165,17 +175,17 @@ export const depositTopUpSchema = z.object({
 export type DepositTopUpInput = z.infer<typeof depositTopUpSchema>;
 
 export const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nama wajib diisi."),
   email: emailField,
   password: passwordField(6),
-  businessName: z.string().min(1, "Business name is required"),
+  businessName: z.string().min(1, "Nama usaha wajib diisi."),
   businessSlug: slugField,
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
 export const profileUpdateSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
+  name: z.string().min(1, "Nama wajib diisi.").optional(),
   phone: z.string().optional(),
   currentPassword: z.string().optional(),
   newPassword: passwordField(6).optional(),
@@ -184,20 +194,20 @@ export const profileUpdateSchema = z.object({
     if (data.newPassword && !data.currentPassword) return false;
     return true;
   },
-  { message: "Current password is required to set a new password", path: ["currentPassword"] }
+  { message: "Isi kata sandi lama untuk mengganti kata sandi.", path: ["currentPassword"] }
 );
 
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
 
 export const roleCreateSchema = z.object({
-  name: z.string().min(1, "Name is required").max(50),
+  name: z.string().min(1, "Nama wajib diisi.").max(50),
   description: z.string().max(200).optional(),
   color: z.string().min(1).optional(),
   permissions: z.array(z.string()),
 });
 
 export const roleUpdateSchema = z.object({
-  name: z.string().min(1, "Name is required").max(50).optional(),
+  name: z.string().min(1, "Nama wajib diisi.").max(50).optional(),
   description: z.string().max(200).nullable().optional(),
   color: z.string().min(1).optional(),
   permissions: z.array(z.string()).optional(),

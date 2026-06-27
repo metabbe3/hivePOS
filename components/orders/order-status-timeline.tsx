@@ -57,7 +57,7 @@ export function OrderStatusTimeline({ order }: Props) {
                     {t(ORDER_STATUS_CONFIG[s].labelKey)}
                   </span>
                   {dateStr && (
-                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {formatDateTime(dateStr)}
                     </span>
                   )}
@@ -97,7 +97,7 @@ export function OrderStatusTimeline({ order }: Props) {
                     {done ? (
                       <Check className="h-3.5 w-3.5" />
                     ) : (
-                      <span className="text-[11px] font-bold">{i + 1}</span>
+                      <span className="text-xs font-bold">{i + 1}</span>
                     )}
                   </div>
                   {!isLast && (

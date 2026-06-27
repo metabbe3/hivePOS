@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight, Check, Sparkles, TrendingUp, Users } from "lucide-react";
 import { ScrollReveal } from "./ScrollReveal";
 import { SAAS_STATS, SAAS_TRUST_BADGES } from "@/lib/landing-data-saas";
@@ -16,13 +17,29 @@ function AnimatedCounter({
   duration?: number;
 }) {
   const [ref, visible] = useScrollReveal<HTMLSpanElement>();
+  const [display, setDisplay] = useState(0);
 
-  // Parse display — we just render the static value when not visible,
-  // and animate via CSS transition on width of a counter. For simplicity,
-  // we show value when visible.
+  // ponytail: rAF tween 0 → value on visibility. One rAF chain, no library.
+  useEffect(() => {
+    if (!visible) {
+      setDisplay(0);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      // easeOutCubic — feels right for a count-up.
+      setDisplay(Math.round(value * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [visible, value, duration]);
+
   return (
     <span ref={ref} className="tabular-nums">
-      {visible ? value : 0}
+      {display}
       {suffix}
     </span>
   );
@@ -64,28 +81,26 @@ export function LandingHero() {
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/70 px-4 py-1.5 backdrop-blur-sm">
                 <Sparkles className="h-4 w-4 text-secondary" />
                 <span className="text-sm font-bold text-secondary">
-                  Dibuat oleh Owner Laundry, untuk Owner Laundry
+                  hivePOS
                 </span>
               </div>
             </ScrollReveal>
 
             <ScrollReveal delay={1}>
               <h1 className="mb-6 font-display text-4xl font-extrabold leading-[0.95] tracking-tight text-zinc-900 sm:text-5xl md:text-6xl lg:text-7xl">
-                Aplikasi Kasir
+                Kasir laundry,
                 <br />
                 <span className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-secondary bg-clip-text text-transparent">
-                  Laundry.
+                  tinggal buka browser.
                 </span>
               </h1>
             </ScrollReveal>
 
             <ScrollReveal delay={2}>
               <p className="mb-8 max-w-xl text-lg leading-relaxed text-zinc-600 md:text-xl">
-                Dibuat karena kami sendiri{" "}
-                <strong className="font-bold text-zinc-900">laundry owner</strong>{" "}
-                dan capek pakai sistem manual. Kelola pesanan kiloan &amp;
-                satuan, kanban status, deposit wallet, dan laporan keuangan —
-                semua di satu tempat.
+                Tanpa install, tanpa ribet. hivePOS dirancang khusus untuk
+                laundry UMKM Indonesia — kiloan, satuan, express, semua di
+                satu browser.
               </p>
             </ScrollReveal>
 
@@ -121,6 +136,22 @@ export function LandingHero() {
                   </li>
                 ))}
               </ul>
+            </ScrollReveal>
+
+            <ScrollReveal delay={3}>
+              <div className="mt-6 flex items-start gap-3 rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur-sm">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-emerald-600 text-white">
+                  <Check className="h-4 w-4" strokeWidth={3} />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-zinc-900">
+                    Dibuat dan dipakai sendiri di laundry kami.
+                  </p>
+                  <p className="mt-0.5 text-sm text-zinc-500">
+                    Kami tau persis ribetnya manual — itu yang kami selesaikan.
+                  </p>
+                </div>
+              </div>
             </ScrollReveal>
           </div>
 

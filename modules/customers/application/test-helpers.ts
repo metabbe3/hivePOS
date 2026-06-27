@@ -22,6 +22,7 @@ export function mockCustomerRepo(overrides: Partial<CustomerRepository> = {}): C
     update: vi.fn().mockResolvedValue(testCustomerRecord()),
     delete: vi.fn().mockResolvedValue(undefined),
     findByPhone: vi.fn().mockResolvedValue(null),
+    findByClientId: vi.fn().mockResolvedValue(null),
     countOrders: vi.fn().mockResolvedValue(0),
     ...overrides,
   };

@@ -23,25 +23,25 @@ export class CreatePickupRequestService {
   async execute(input: CreatePickupRequestInput): Promise<PickupRequest> {
     // ── 1. Resolve branch by slug ──
     if (!input.branchSlug) {
-      throw new ValidationError("Branch slug is required");
+      throw new ValidationError("Outlet wajib dipilih.");
     }
     const branch = await this.branchPort.findBySlug(input.branchSlug);
     if (!branch || !branch.slug) {
-      throw new ValidationError("Branch not found or pickup not enabled for this outlet");
+      throw new ValidationError("Outlet tidak ditemukan atau pickup belum diaktifkan.");
     }
 
     // ── 2. Validate required fields ──
     const customerName = input.customerName?.trim();
     const rawPhone = input.customerPhone?.trim();
     if (!customerName) {
-      throw new ValidationError("Name is required");
+      throw new ValidationError("Nama wajib diisi.");
     }
     if (!rawPhone) {
-      throw new ValidationError("Phone number is required");
+      throw new ValidationError("Nomor telepon wajib diisi.");
     }
     const customerPhone = normalizePhone(rawPhone);
     if (!customerPhone) {
-      throw new ValidationError("Phone number is invalid");
+      throw new ValidationError("Nomor telepon salah.");
     }
 
     // ── 3. Location: require either GPS coords OR manual address ──
@@ -50,7 +50,7 @@ export class CreatePickupRequestService {
     const addressText = input.addressText?.trim() || null;
     if (!hasGps && !addressText) {
       throw new ValidationError(
-        "Please share your location or enter an address so we can find you",
+        "Bagikan lokasi atau masukkan alamat agar bisa kami temukan.",
       );
     }
 
@@ -60,7 +60,7 @@ export class CreatePickupRequestService {
       const lat = input.latitude as number;
       const lng = input.longitude as number;
       if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-        throw new ValidationError("GPS coordinates are out of valid range");
+        throw new ValidationError("Koordinat lokasi tidak valid.");
       }
     }
 
@@ -72,7 +72,7 @@ export class CreatePickupRequestService {
     // ── 4. Optional email ──
     const customerEmail = input.customerEmail?.trim() || null;
     if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-      throw new ValidationError("Email format is invalid");
+      throw new ValidationError("Format email salah.");
     }
 
     // ── 5. Optional scheduling (customer can pre-pick a slot) ──
@@ -80,7 +80,7 @@ export class CreatePickupRequestService {
     if (input.requestedDate) {
       const d = new Date(input.requestedDate);
       if (isNaN(d.getTime())) {
-        throw new ValidationError("requestedDate is invalid");
+        throw new ValidationError("Tanggal pengambilan tidak valid.");
       }
       // Normalize to midnight UTC to avoid timezone drift in date-only fields
       requestedDate = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));

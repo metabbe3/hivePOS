@@ -11,9 +11,9 @@ import { rateLimit } from "@/lib/rate-limit";
  * status=PENDING for staff review.
  */
 const pickupRequestSchema = z.object({
-  branchSlug: z.string().min(1, "Branch slug is required"),
-  customerName: z.string().min(1, "Name is required"),
-  customerPhone: z.string().min(1, "Phone number is required"),
+  branchSlug: z.string().min(1, "Outlet wajib dipilih."),
+  customerName: z.string().min(1, "Nama wajib diisi."),
+  customerPhone: z.string().min(1, "Nomor telepon wajib diisi."),
   customerEmail: z.string().optional().or(z.literal("")),
   latitude: z.number().optional(),
   longitude: z.number().optional(),

@@ -21,6 +21,7 @@ export class CreateCustomerService {
       email: input.email || null,
       notes: input.notes || null,
       branchId: ctx.branchId,
+      clientId: input.clientId,
     });
 
     return {

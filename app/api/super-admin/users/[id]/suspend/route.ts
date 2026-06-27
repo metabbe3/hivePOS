@@ -15,7 +15,7 @@ export const POST = withErrorHandler(
     const body = await req.json().catch(() => ({}));
     const reason = typeof body?.reason === "string" ? body.reason.trim() : "";
     if (reason.length < 10) {
-      throw new ValidationError("Reason must be at least 10 characters");
+      throw new ValidationError("Alasan terlalu pendek — minimal 10 huruf.");
     }
     await suspendUser(id, actor, reason, req);
     return apiSuccess({ user: { id, isActive: false } });

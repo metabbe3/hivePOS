@@ -34,6 +34,15 @@ export interface OrderDetailRecord extends OrderRecord {
   readyAt: Date | null;
   deliveredAt: Date | null;
   customerBalance: number;
+  /** Tenant's QRIS image URL (settings.website.qrisImageUrl) — for the
+   * WhatsApp receipt's payment line. null when not configured. */
+  qrisUrl: string | null;
+  /** Branch receipt/footer terms — drives the WhatsApp receipt {{terms}} block
+   * (single source of truth with the printed receipt + tracking page). */
+  invoiceFooter: string | null;
+  /** Branch thermal-paper size ("56mm" | "58mm" | "80mm" | null) — drives the
+   * receipt page's char width. null → caller defaults to 58mm. */
+  printerPaperSize: string | null;
   orderItems: Array<{
     id: string;
     serviceId: string;
@@ -67,6 +76,10 @@ export interface CreateOrderData {
   receivedAt: Date;
   notes: string | null;
   items: PricedItem[];
+  // ponytail: optional idempotency key for offline-created orders. Stored
+  // on the row; the API route short-circuits if an order with this clientId
+  // already exists. See OrderRepository.findByClientId.
+  clientId?: string;
 }
 
 /** Data needed to replace an order's items (PUT update). */
@@ -146,6 +159,8 @@ export interface OrderRepository {
   ): Promise<OrderRecord>;
   /** Highest sequence number used for a given date prefix (for order number generation). */
   getLastSequenceForPrefix(prefix: string): Promise<number>;
+  /** Idempotency lookup — returns an order previously created with this clientId, or null. */
+  findByClientId(clientId: string): Promise<OrderRecord | null>;
 }
 
 /**
