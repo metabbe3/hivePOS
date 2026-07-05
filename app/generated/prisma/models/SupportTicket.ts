@@ -724,10 +724,6 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type SupportTicketCreateNestedOneWithoutCommentsInput = {
   create?: Prisma.XOR<Prisma.SupportTicketCreateWithoutCommentsInput, Prisma.SupportTicketUncheckedCreateWithoutCommentsInput>
   connectOrCreate?: Prisma.SupportTicketCreateOrConnectWithoutCommentsInput

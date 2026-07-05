@@ -217,4 +217,28 @@ describe("CreateCheckoutService", () => {
     expect(result.status).toBe("PAID");
     expect(repo.markPaymentPaidAndRecompute).toHaveBeenCalled();
   });
+
+  // ── Pro no-downgrade guard ──
+
+  it("forces PRO pricing when tenant is already PRO (no downgrade)", async () => {
+    const createPayment = vi.fn().mockResolvedValue(testPayment({ id: "pay-pro" }));
+    const repo = mockBillingRepo({
+      getTenantPlan: async () => "PRO",
+      findBranchesByIds: async () => [
+        { id: "b1", name: "Branch", isFreeTier: false, coverageEnd: null },
+      ],
+      createPayment,
+    });
+    const service = new CreateCheckoutService(repo, mockMidtransPort());
+
+    await service.execute(
+      { months: 1, branchIds: ["b1"], planTier: "GROWTH" },
+      testContext(),
+    );
+
+    // Requested Growth (49k) but tenant is Pro → must record Pro pricing (79k).
+    expect(createPayment).toHaveBeenCalledWith(
+      expect.objectContaining({ unitPrice: 79000 }),
+    );
+  });
 });

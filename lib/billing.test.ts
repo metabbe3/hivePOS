@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveTrialPlan, TRIAL_DAYS } from "./billing";
+import { resolveTrialPlan, TRIAL_DAYS, calculateBill } from "./billing";
 
 const NOW = new Date("2026-06-25T12:00:00Z");
 const future = (days: number) => new Date(NOW.getTime() + days * 86_400_000);
@@ -38,5 +38,29 @@ describe("resolveTrialPlan", () => {
   it("defaults an unknown/missing trialTier to GROWTH", () => {
     expect(resolveTrialPlan({ trialEndsAt: future(3), trialTier: null, now: NOW })).toBe("GROWTH");
     expect(resolveTrialPlan({ trialEndsAt: future(3), trialTier: "garbage", now: NOW })).toBe("GROWTH");
+  });
+});
+
+describe("calculateBill — promo types", () => {
+  const unit = 79000;
+
+  it("FREE_MONTH grants `value` free months", () => {
+    const calc = calculateBill(2, 3, { type: "FREE_MONTH", value: 1 } as any, unit);
+    expect(calc.freeMonths).toBe(1);
+    // gross 2×3×79k = 474k; charge 2 months → discount = 1 free month × 2 outlets
+    expect(calc.discount).toBe(unit * 2 * 1);
+    expect(calc.total).toBe(unit * 2 * 2);
+  });
+
+  it("DISCOUNT_PERCENT applies percent off gross", () => {
+    const calc = calculateBill(1, 1, { type: "DISCOUNT_PERCENT", value: 50 } as any, unit);
+    expect(calc.discount).toBe(Math.round((unit * 50) / 100));
+    expect(calc.total).toBe(unit - calc.discount);
+  });
+
+  it("DISCOUNT_FIXED is capped at grossTotal", () => {
+    const calc = calculateBill(1, 1, { type: "DISCOUNT_FIXED", value: 999999 } as any, unit);
+    expect(calc.discount).toBe(unit); // capped, not 999999
+    expect(calc.total).toBe(0);
   });
 });

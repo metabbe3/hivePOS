@@ -46,6 +46,12 @@ export const PATCH = withErrorHandler(
       data.modules = body.modules.filter((m: unknown): m is string => typeof m === "string");
     }
     if (body?.features !== undefined) data.features = body.features as any;
+    if (body?.tier !== undefined) {
+      data.tier =
+        body.tier === "FREE" || body.tier === "GROWTH" || body.tier === "PRO"
+          ? body.tier
+          : null;
+    }
     if (typeof body?.isActive === "boolean") data.isActive = body.isActive;
 
     if (Object.keys(data).length === 0) {

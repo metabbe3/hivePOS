@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePermissionGuard } from "@/hooks/use-permission-guard";
 import { useTranslation } from "@/hooks/use-translation";
@@ -66,6 +66,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { apiFetch, ApiClientError } from "@/modules/shared";
+import { useUrlState } from "@/hooks/use-url-filters";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 
 interface ExpenseCategory {
@@ -188,7 +189,7 @@ function CategoryField({
   );
 }
 
-export default function ExpensesPage() {
+function ExpensesContent() {
   const { t } = useTranslation();
   const confirm = useConfirm();
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -199,10 +200,11 @@ export default function ExpensesPage() {
   const [editing, setEditing] = useState<Expense | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [filterFrom, setFilterFrom] = useState("");
-  const [filterTo, setFilterTo] = useState("");
-  const [expensePage, setExpensePage] = useState(1);
+  const [filterCategory, setFilterCategory] = useUrlState("category", "all");
+  const [filterFrom, setFilterFrom] = useUrlState("from", "");
+  const [filterTo, setFilterTo] = useUrlState("to", "");
+  const [expensePageStr, setExpensePageStr] = useUrlState("page", "1");
+  const expensePage = parseInt(expensePageStr, 10) || 1;
 
   const { allowed, isLoading: roleLoading } = usePermissionGuard("expenses", "read", "/laundry/orders");
 
@@ -237,7 +239,7 @@ export default function ExpensesPage() {
   }, []);
 
   useEffect(() => {
-    setExpensePage(1); // filters changed → back to first page
+    setExpensePageStr("1"); // filters changed → back to first page
     loadExpenses();
   }, [filterCategory, filterFrom, filterTo]);
 
@@ -534,7 +536,7 @@ export default function ExpensesPage() {
           <SimplePagination
             page={safeExpensePage}
             totalPages={expenseTotalPages}
-            onPageChange={setExpensePage}
+            onPageChange={(p: number) => setExpensePageStr(String(p))}
             total={expenses.length}
           />
         </>
@@ -576,7 +578,7 @@ export default function ExpensesPage() {
         open={categoryDialogOpen}
         onOpenChange={setCategoryDialogOpen}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>{t("branchDetails.expenseCategories")}</DialogTitle>
           </DialogHeader>
@@ -621,5 +623,13 @@ export default function ExpensesPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function ExpensesPage() {
+  return (
+    <Suspense>
+      <ExpensesContent />
+    </Suspense>
   );
 }

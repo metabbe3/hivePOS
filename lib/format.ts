@@ -1,4 +1,4 @@
-import { endOfDay } from "./dates";
+import { wibDateBounds } from "./dates";
 
 export function formatCurrency(amount: number | string): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
@@ -66,13 +66,10 @@ export function buildDateFilter(fromStr: string | null, toStr: string | null): {
   hasFilter: boolean;
   dateFilter: { gte?: Date; lte?: Date };
 } {
-  const dateFilter: { gte?: Date; lte?: Date } = {};
-  if (fromStr) dateFilter.gte = new Date(fromStr);
-  if (toStr) {
-    const to = endOfDay(new Date(toStr));
-    dateFilter.lte = to;
-  }
-  const hasFilter = Object.keys(dateFilter).length > 0;
+  // WIB (UTC+7) calendar-day bounds — see wibDateBounds. Avoids the UTC-midnight
+  // parse of date-only strings that shifted report/dashboard filters ~7h.
+  const dateFilter = wibDateBounds({ from: fromStr, to: toStr });
+  const hasFilter = !!(dateFilter.gte || dateFilter.lte);
   return {
     where: hasFilter
       ? { OR: [{ receivedAt: dateFilter }, { receivedAt: null, createdAt: dateFilter }] }

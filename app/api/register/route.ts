@@ -5,6 +5,8 @@ import { z } from "zod";
 import { seedDefaultRoles, backfillUserRoles } from "@/lib/permissions/seed";
 import { rateLimit } from "@/lib/rate-limit";
 import { TRIAL_DAYS } from "@/lib/billing";
+import { generateUniqueReferralCode, attachReferral } from "@/lib/referrals";
+import { DEFAULT_PICKUP_SLOTS } from "@/lib/pickup-slots";
 
 const registerSchema = z.object({
   businessName: z.string().min(2),
@@ -17,6 +19,9 @@ const registerSchema = z.object({
   googleId: z.string().optional(),
   /// Which tier to trial: "PRO" (default — full features for 14 days) or "GROWTH".
   trialTier: z.enum(["GROWTH", "PRO"]).optional(),
+  /// Referral code from /register?ref=CODE (optional). Links the new tenant to
+  /// a referrer; reward unlocks on the new tenant's first paid payment.
+  referralCode: z.string().optional(),
 });
 
 export const POST = withErrorHandler(async (req) => {
@@ -53,6 +58,10 @@ export const POST = withErrorHandler(async (req) => {
     where: { name: "Free" },
   });
 
+  // Generate a unique referral code for the new tenant up-front (the @unique
+  // guard is the real collision backstop; pre-check avoids a rare tx rollback).
+  const referralCode = await generateUniqueReferralCode();
+
   // Create tenant + branch + owner + subscription in a transaction
   const result = await prisma.$transaction(async (tx) => {
     const now = new Date();
@@ -71,10 +80,18 @@ export const POST = withErrorHandler(async (req) => {
         approvedAt: now,
         trialEndsAt,
         trialTier: data.trialTier ?? "PRO",
+        referralCode,
       },
     });
 
-    // Create default branch
+    // Create default branch. Seed a public slug + the default pickup schedule so
+    // /pickup/[slug] works out of the box (previously silent: no slots offered).
+    // Reuse the (globally-unique) tenant slug; on the rare collision with an
+    // existing branch slug (e.g. the demo seed), suffix with a slice of tenant id.
+    let branchSlug = data.slug;
+    if (await tx.branch.findUnique({ where: { slug: branchSlug } })) {
+      branchSlug = `${data.slug}-${tenant.id.slice(0, 6)}`;
+    }
     // ponytail: isFreeTier=true so the order guard doesn't block newly-approved
     // free-tier tenants (branch with isFreeTier=false + coverageEnd=null is treated
     // as LOCKED by create-order.service.ts). Flipped to false + coverageEnd set on
@@ -84,6 +101,8 @@ export const POST = withErrorHandler(async (req) => {
         name: data.branchName,
         tenantId: tenant.id,
         isFreeTier: true,
+        slug: branchSlug,
+        pickupSlots: [...DEFAULT_PICKUP_SLOTS],
       },
     });
 
@@ -136,6 +155,9 @@ export const POST = withErrorHandler(async (req) => {
         branchId: branch.id,
       })),
     });
+
+    // Link to referrer if a code was supplied (self-referral → REJECTED, no reward).
+    await attachReferral(tx, tenant.id, data.referralCode, data.email, data.ownerPhone);
 
     return tenant;
   });

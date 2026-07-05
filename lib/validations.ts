@@ -26,6 +26,7 @@ export const serviceSchema = z.object({
   commissionType: z.enum(["NONE", "FLAT", "PERCENTAGE"]).optional(),
   commissionValue: z.coerce.number().min(0).optional(),
   isActive: z.boolean().optional(),
+  isDefaultSpeed: z.boolean().optional(),
   groupId: z.string().optional().or(z.literal("")),
 });
 

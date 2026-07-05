@@ -5,6 +5,7 @@ export interface CreateServiceInput {
   description?: string | null;
   pricingType: PricingType;
   basePrice: number;
+  isDefaultSpeed?: boolean;
   commissionType?: CommissionType;
   commissionValue?: number;
   isActive?: boolean;
@@ -16,6 +17,7 @@ export interface UpdateServiceInput {
   description?: string | null;
   pricingType?: PricingType;
   basePrice?: number;
+  isDefaultSpeed?: boolean;
   commissionType?: CommissionType;
   commissionValue?: number;
   isActive?: boolean;
@@ -32,6 +34,7 @@ export interface ServiceDTO {
   description: string | null;
   pricingType: PricingType;
   basePrice: number;
+  isDefaultSpeed: boolean;
   commissionType: CommissionType;
   commissionValue: number;
   module: string;

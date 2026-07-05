@@ -32,6 +32,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { apiFetch, ApiClientError } from "@/modules/shared";
+import { ReferralCard } from "@/components/billing/referral-card";
 
 // ── Types ──
 interface Outlet {
@@ -170,14 +171,9 @@ export default function BillingPage() {
     fetchStatus();
   }, [fetchStatus]);
 
-  // ponytail: promo preview math (server-side /api/billing/promo/validate) uses
-  // PRICE_PER_OUTLET (49K) and isn't tier-aware. Clearing the applied promo on
-  // tier switch prevents showing a stale discount. Revisit when promo API
-  // accepts planTier.
-  useEffect(() => {
-    handleRemovePromo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [planTier]);
+  // ponytail: promo preview is now tier-aware — /api/billing/promo/validate
+  // accepts planTier, so no need to clear on switch. Manual tier changes clear
+  // the promo in the button onClick (keeps the discount preview consistent).
 
   // ── Outlet selection ──
   function toggleOutlet(id: string) {
@@ -223,6 +219,7 @@ export default function BillingPage() {
           code,
           branchIds: Array.from(selectedIds),
           months,
+          planTier,
         },
       });
       const data = res.data;
@@ -324,6 +321,8 @@ export default function BillingPage() {
 
   // ── Derived values ──
   const isPaid = status?.limits.isPaid ?? false;
+  // Downgrade guard: a Pro tenant can only extend/upgrade — lock out Growth.
+  const isProTenant = status?.limits.planName === "Pro";
   // ponytail: server returns Growth pricing (49K/79K) regardless of tier.
   // Override on the client based on toggle so totals recompute correctly.
   const unitPrice = planTier === "PRO" ? 79000 : (status?.pricing.unitPrice ?? 49000);
@@ -383,6 +382,9 @@ export default function BillingPage() {
       />
 
       <PageHeader title="Billing" description="Kelola langganan dan pembayaran Anda" />
+
+      {/* ── Referral: invite other laundry owners, earn a free month ── */}
+      <ReferralCard />
 
       {/* ── Status Card ── */}
       <CardListItem>
@@ -528,9 +530,15 @@ export default function BillingPage() {
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setPlanTier("GROWTH")}
+                disabled={isProTenant}
+                onClick={() => {
+                  if (isProTenant) return;
+                  handleRemovePromo();
+                  setPlanTier("GROWTH");
+                }}
                 className={cn(
                   "rounded-lg border px-4 py-3 text-left transition-all",
+                  isProTenant && "cursor-not-allowed opacity-50",
                   planTier === "GROWTH"
                     ? "border-primary bg-primary text-primary-foreground shadow-sm"
                     : "border-border/40 bg-background hover:bg-muted/50",
@@ -546,7 +554,10 @@ export default function BillingPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setPlanTier("PRO")}
+                onClick={() => {
+                  handleRemovePromo();
+                  setPlanTier("PRO");
+                }}
                 className={cn(
                   "rounded-lg border px-4 py-3 text-left transition-all",
                   planTier === "PRO"

@@ -67,12 +67,12 @@ export function CollapsibleSection({
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between border-b border-border/60 pb-2">
+      <div className="flex items-center justify-between border-b border-border pb-2">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted">
-            <Icon className="h-4 w-4 text-foreground/70" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+            <Icon className="h-4 w-4 text-primary" />
           </div>
-          <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
+          <h2 className="text-sm font-bold tracking-tight">{title}</h2>
         </div>
         <Button
           variant="ghost"

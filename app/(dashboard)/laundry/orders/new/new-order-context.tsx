@@ -29,6 +29,7 @@ export interface Service {
   pricingType: "PER_KG" | "PER_ITEM";
   basePrice: number;
   isActive: boolean;
+  isDefaultSpeed: boolean;
   groupId: string | null;
   group: { id: string; name: string } | null;
 }
@@ -175,40 +176,43 @@ export function NewOrderProvider({ children }: { children: ReactNode }) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PAY_LATER");
   const [cashReceived, setCashReceived] = useState<number | null>(null);
 
-  // Initial load
+  // Initial load — allSettled so a single failed fetch (e.g. a missing
+  // permission or one offline resource) doesn't blank the whole order page;
+  // each picker loads what it can. Falls back to the offline cache only if all
+  // three came back empty.
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       apiFetch<Service[]>("/api/services"),
       apiFetch<Customer[]>("/api/customers"),
       apiFetch<ServiceGroup[]>("/api/service-groups"),
-    ]).then(async ([svcs, custs, groups]) => {
-      const active = svcs.data.filter((s) => s.isActive);
+    ]).then(async ([svcsR, custsR, groupsR]) => {
+      const svcs = svcsR.status === "fulfilled" ? svcsR.value.data : [];
+      const custs = custsR.status === "fulfilled" ? custsR.value.data : [];
+      const groups = groupsR.status === "fulfilled" ? groupsR.value.data : [];
+      const active = svcs.filter((s) => s.isActive);
       setServices(active);
-      setCustomers(custs.data);
-      setServiceGroups(groups.data);
+      setCustomers(custs);
+      setServiceGroups(groups);
       setLoading(false);
       // ponytail: warm the offline cache while online so the next visit can
       // fall back if the network is down. Best-effort — failures swallowed.
       try {
         await Promise.all([
           setCachedServices(active as unknown as Array<{ id: string; [k: string]: unknown }>),
-          setCachedCustomers(custs.data as unknown as Array<{ id: string; [k: string]: unknown }>),
+          setCachedCustomers(custs as unknown as Array<{ id: string; [k: string]: unknown }>),
         ]);
       } catch {
         /* offline cache is best-effort */
       }
-    }).catch(async () => {
-      // ponytail: fetch failed (offline at mount or server down). Fall back
-      // to whatever is in the offline cache so the kasir can still work.
-      try {
-        const cached = await getCachedServices();
-        if (cached.length > 0) {
-          setServices(cached as unknown as Service[]);
+      // All empty (offline at mount + nothing cached server-side) → try IDB.
+      if (active.length === 0 && custs.length === 0) {
+        try {
+          const cached = await getCachedServices();
+          if (cached.length > 0) setServices(cached as unknown as Service[]);
+        } catch {
+          /* IDB unavailable */
         }
-      } catch {
-        /* IDB unavailable */
       }
-      setLoading(false);
     });
   }, []);
 
@@ -475,8 +479,8 @@ export function NewOrderProvider({ children }: { children: ReactNode }) {
     setDiscountValue("");
     setPaymentMethod("PAY_LATER");
     setCashReceived(null);
-    setUseCustomTime(false);
-    setCustomDateTime("");
+    // ponytail: keep the last-used custom time so backdating several orders in
+    // a row is fast — useCustomTime + customDateTime persist across "new again".
   }
 
   const value: NewOrderContextValue = {

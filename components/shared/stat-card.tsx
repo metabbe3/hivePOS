@@ -44,9 +44,9 @@ export function StatCard({
   const hasSparkline = sparkline && sparkline.length >= 2;
 
   return (
-    <Card className="h-full group relative overflow-hidden border border-border/40 bg-card shadow-sm transition-shadow hover:shadow-md">
+    <Card className="h-full group relative overflow-hidden border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
       {accentColor && (
-        <div className={`absolute inset-x-0 top-0 h-1 ${accentColor}`} />
+        <div className={`absolute inset-x-0 top-0 h-1.5 ${accentColor}`} />
       )}
       <CardContent className={`flex items-center gap-4 py-4 px-4`}>
         <div
@@ -55,14 +55,14 @@ export function StatCard({
           <Icon className={`${isLg ? "h-6 w-6" : "h-5 w-5"} ${iconColor}`} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
+          <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
             {title}
           </p>
           <div className="mt-0.5 flex items-baseline gap-2">
-            <p className={`${isLg ? "text-3xl" : "text-2xl"} font-bold tracking-tight`}>{value}</p>
+            <p className={`${isLg ? "text-3xl" : "text-2xl"} font-extrabold tabular-nums tracking-tight`}>{value}</p>
           </div>
           {subtitle && (
-            <p className="mt-0.5 text-[11px] text-muted-foreground/60 opacity-70">
+            <p className="mt-0.5 text-[11px] text-muted-foreground/80">
               {subtitle}
             </p>
           )}

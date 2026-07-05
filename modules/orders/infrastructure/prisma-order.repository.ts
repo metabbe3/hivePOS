@@ -209,7 +209,9 @@ export class PrismaOrderRepository implements OrderRepository {
         ? { totalAmount: query.sortOrder ?? "desc" }
         : query.sortBy === "customerName"
           ? { customer: { name: query.sortOrder ?? "desc" } }
-          : { createdAt: query.sortOrder ?? "desc" };
+          : query.sortBy === "receivedAt"
+            ? { receivedAt: { sort: query.sortOrder ?? "desc", nulls: "last" } }
+            : { createdAt: query.sortOrder ?? "desc" };
 
     const [rows, total] = await Promise.all([
       prisma.order.findMany({

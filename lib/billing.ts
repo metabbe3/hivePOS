@@ -73,6 +73,20 @@ export async function getTenantPlan(tenantId: string): Promise<TenantPlan> {
   });
 }
 
+/**
+ * Per-outlet unit price for a tier, read from the active Plan record so plan
+ * pricing is configurable from the super-admin Plans page. Falls back to the
+ * hardcoded constants if no active plan exists for the tier (never breaks).
+ */
+export async function getTierUnitPrice(tier: "GROWTH" | "PRO"): Promise<number> {
+  const plan = await prisma.plan.findFirst({
+    where: { tier, isActive: true },
+    select: { priceMonthly: true },
+  });
+  if (plan) return Number(plan.priceMonthly);
+  return tier === "PRO" ? PRO_PRICE_PER_OUTLET : PRICE_PER_OUTLET;
+}
+
 // Free tier limits (when tenant has no paid outlets)
 export const FREE_TIER = {
   maxOutlets: 1,
@@ -305,7 +319,11 @@ export interface PromoValidationResult {
   error?: string;
 }
 
-export async function validatePromoCode(code: string, tenantId: string): Promise<PromoValidationResult> {
+export async function validatePromoCode(
+  code: string,
+  tenantId: string,
+  planTier?: "GROWTH" | "PRO",
+): Promise<PromoValidationResult> {
   const normalized = code.trim().toUpperCase();
   if (!normalized) return { valid: false, error: "Kode promo tidak boleh kosong." };
 
@@ -329,6 +347,13 @@ export async function validatePromoCode(code: string, tenantId: string): Promise
     where: { promoCodeId_tenantId: { promoCodeId: promo.id, tenantId } },
   });
   if (alreadyRedeemed) return { valid: false, error: "Anda sudah menggunakan kode promo ini." };
+
+  // Plan restriction (null = applies to any tier). Callers pass the effective
+  // planTier so a Pro-only promo can't be applied to a Growth checkout.
+  if (promo.applicablePlan && planTier && promo.applicablePlan !== planTier) {
+    const planLabel = promo.applicablePlan === "PRO" ? "Pro" : "Growth";
+    return { valid: false, error: `Promo ini hanya untuk paket ${planLabel}.` };
+  }
 
   return { valid: true, promoCode: promo };
 }

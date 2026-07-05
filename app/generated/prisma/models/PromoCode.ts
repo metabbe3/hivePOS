@@ -49,6 +49,7 @@ export type PromoCodeMinAggregateOutputType = {
   validFrom: Date | null
   validUntil: Date | null
   isActive: boolean | null
+  applicablePlan: string | null
   createdAt: Date | null
 }
 
@@ -63,6 +64,7 @@ export type PromoCodeMaxAggregateOutputType = {
   validFrom: Date | null
   validUntil: Date | null
   isActive: boolean | null
+  applicablePlan: string | null
   createdAt: Date | null
 }
 
@@ -77,6 +79,7 @@ export type PromoCodeCountAggregateOutputType = {
   validFrom: number
   validUntil: number
   isActive: number
+  applicablePlan: number
   createdAt: number
   _all: number
 }
@@ -105,6 +108,7 @@ export type PromoCodeMinAggregateInputType = {
   validFrom?: true
   validUntil?: true
   isActive?: true
+  applicablePlan?: true
   createdAt?: true
 }
 
@@ -119,6 +123,7 @@ export type PromoCodeMaxAggregateInputType = {
   validFrom?: true
   validUntil?: true
   isActive?: true
+  applicablePlan?: true
   createdAt?: true
 }
 
@@ -133,6 +138,7 @@ export type PromoCodeCountAggregateInputType = {
   validFrom?: true
   validUntil?: true
   isActive?: true
+  applicablePlan?: true
   createdAt?: true
   _all?: true
 }
@@ -234,6 +240,7 @@ export type PromoCodeGroupByOutputType = {
   validFrom: Date | null
   validUntil: Date | null
   isActive: boolean
+  applicablePlan: string | null
   createdAt: Date
   _count: PromoCodeCountAggregateOutputType | null
   _avg: PromoCodeAvgAggregateOutputType | null
@@ -271,6 +278,7 @@ export type PromoCodeWhereInput = {
   validFrom?: Prisma.DateTimeNullableFilter<"PromoCode"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableFilter<"PromoCode"> | Date | string | null
   isActive?: Prisma.BoolFilter<"PromoCode"> | boolean
+  applicablePlan?: Prisma.StringNullableFilter<"PromoCode"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PromoCode"> | Date | string
   redemptions?: Prisma.PromoRedemptionListRelationFilter
   payments?: Prisma.SaaSPaymentListRelationFilter
@@ -287,6 +295,7 @@ export type PromoCodeOrderByWithRelationInput = {
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   validUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  applicablePlan?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   redemptions?: Prisma.PromoRedemptionOrderByRelationAggregateInput
   payments?: Prisma.SaaSPaymentOrderByRelationAggregateInput
@@ -306,6 +315,7 @@ export type PromoCodeWhereUniqueInput = Prisma.AtLeast<{
   validFrom?: Prisma.DateTimeNullableFilter<"PromoCode"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableFilter<"PromoCode"> | Date | string | null
   isActive?: Prisma.BoolFilter<"PromoCode"> | boolean
+  applicablePlan?: Prisma.StringNullableFilter<"PromoCode"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PromoCode"> | Date | string
   redemptions?: Prisma.PromoRedemptionListRelationFilter
   payments?: Prisma.SaaSPaymentListRelationFilter
@@ -322,6 +332,7 @@ export type PromoCodeOrderByWithAggregationInput = {
   validFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   validUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  applicablePlan?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.PromoCodeCountOrderByAggregateInput
   _avg?: Prisma.PromoCodeAvgOrderByAggregateInput
@@ -344,6 +355,7 @@ export type PromoCodeScalarWhereWithAggregatesInput = {
   validFrom?: Prisma.DateTimeNullableWithAggregatesFilter<"PromoCode"> | Date | string | null
   validUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"PromoCode"> | Date | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"PromoCode"> | boolean
+  applicablePlan?: Prisma.StringNullableWithAggregatesFilter<"PromoCode"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PromoCode"> | Date | string
 }
 
@@ -358,6 +370,7 @@ export type PromoCodeCreateInput = {
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   isActive?: boolean
+  applicablePlan?: string | null
   createdAt?: Date | string
   redemptions?: Prisma.PromoRedemptionCreateNestedManyWithoutPromoCodeInput
   payments?: Prisma.SaaSPaymentCreateNestedManyWithoutPromoCodeInput
@@ -374,6 +387,7 @@ export type PromoCodeUncheckedCreateInput = {
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   isActive?: boolean
+  applicablePlan?: string | null
   createdAt?: Date | string
   redemptions?: Prisma.PromoRedemptionUncheckedCreateNestedManyWithoutPromoCodeInput
   payments?: Prisma.SaaSPaymentUncheckedCreateNestedManyWithoutPromoCodeInput
@@ -390,6 +404,7 @@ export type PromoCodeUpdateInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   redemptions?: Prisma.PromoRedemptionUpdateManyWithoutPromoCodeNestedInput
   payments?: Prisma.SaaSPaymentUpdateManyWithoutPromoCodeNestedInput
@@ -406,6 +421,7 @@ export type PromoCodeUncheckedUpdateInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   redemptions?: Prisma.PromoRedemptionUncheckedUpdateManyWithoutPromoCodeNestedInput
   payments?: Prisma.SaaSPaymentUncheckedUpdateManyWithoutPromoCodeNestedInput
@@ -422,6 +438,7 @@ export type PromoCodeCreateManyInput = {
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   isActive?: boolean
+  applicablePlan?: string | null
   createdAt?: Date | string
 }
 
@@ -436,6 +453,7 @@ export type PromoCodeUpdateManyMutationInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -450,6 +468,7 @@ export type PromoCodeUncheckedUpdateManyInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -464,6 +483,7 @@ export type PromoCodeCountOrderByAggregateInput = {
   validFrom?: Prisma.SortOrder
   validUntil?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  applicablePlan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -484,6 +504,7 @@ export type PromoCodeMaxOrderByAggregateInput = {
   validFrom?: Prisma.SortOrder
   validUntil?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  applicablePlan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -498,6 +519,7 @@ export type PromoCodeMinOrderByAggregateInput = {
   validFrom?: Prisma.SortOrder
   validUntil?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  applicablePlan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -562,6 +584,7 @@ export type PromoCodeCreateWithoutRedemptionsInput = {
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   isActive?: boolean
+  applicablePlan?: string | null
   createdAt?: Date | string
   payments?: Prisma.SaaSPaymentCreateNestedManyWithoutPromoCodeInput
 }
@@ -577,6 +600,7 @@ export type PromoCodeUncheckedCreateWithoutRedemptionsInput = {
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   isActive?: boolean
+  applicablePlan?: string | null
   createdAt?: Date | string
   payments?: Prisma.SaaSPaymentUncheckedCreateNestedManyWithoutPromoCodeInput
 }
@@ -608,6 +632,7 @@ export type PromoCodeUpdateWithoutRedemptionsInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.SaaSPaymentUpdateManyWithoutPromoCodeNestedInput
 }
@@ -623,6 +648,7 @@ export type PromoCodeUncheckedUpdateWithoutRedemptionsInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payments?: Prisma.SaaSPaymentUncheckedUpdateManyWithoutPromoCodeNestedInput
 }
@@ -638,6 +664,7 @@ export type PromoCodeCreateWithoutPaymentsInput = {
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   isActive?: boolean
+  applicablePlan?: string | null
   createdAt?: Date | string
   redemptions?: Prisma.PromoRedemptionCreateNestedManyWithoutPromoCodeInput
 }
@@ -653,6 +680,7 @@ export type PromoCodeUncheckedCreateWithoutPaymentsInput = {
   validFrom?: Date | string | null
   validUntil?: Date | string | null
   isActive?: boolean
+  applicablePlan?: string | null
   createdAt?: Date | string
   redemptions?: Prisma.PromoRedemptionUncheckedCreateNestedManyWithoutPromoCodeInput
 }
@@ -684,6 +712,7 @@ export type PromoCodeUpdateWithoutPaymentsInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   redemptions?: Prisma.PromoRedemptionUpdateManyWithoutPromoCodeNestedInput
 }
@@ -699,6 +728,7 @@ export type PromoCodeUncheckedUpdateWithoutPaymentsInput = {
   validFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   validUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  applicablePlan?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   redemptions?: Prisma.PromoRedemptionUncheckedUpdateManyWithoutPromoCodeNestedInput
 }
@@ -754,6 +784,7 @@ export type PromoCodeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   validFrom?: boolean
   validUntil?: boolean
   isActive?: boolean
+  applicablePlan?: boolean
   createdAt?: boolean
   redemptions?: boolean | Prisma.PromoCode$redemptionsArgs<ExtArgs>
   payments?: boolean | Prisma.PromoCode$paymentsArgs<ExtArgs>
@@ -771,6 +802,7 @@ export type PromoCodeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   validFrom?: boolean
   validUntil?: boolean
   isActive?: boolean
+  applicablePlan?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["promoCode"]>
 
@@ -785,6 +817,7 @@ export type PromoCodeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   validFrom?: boolean
   validUntil?: boolean
   isActive?: boolean
+  applicablePlan?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["promoCode"]>
 
@@ -799,10 +832,11 @@ export type PromoCodeSelectScalar = {
   validFrom?: boolean
   validUntil?: boolean
   isActive?: boolean
+  applicablePlan?: boolean
   createdAt?: boolean
 }
 
-export type PromoCodeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "description" | "type" | "value" | "maxRedemptions" | "redemptionCount" | "validFrom" | "validUntil" | "isActive" | "createdAt", ExtArgs["result"]["promoCode"]>
+export type PromoCodeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "description" | "type" | "value" | "maxRedemptions" | "redemptionCount" | "validFrom" | "validUntil" | "isActive" | "applicablePlan" | "createdAt", ExtArgs["result"]["promoCode"]>
 export type PromoCodeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   redemptions?: boolean | Prisma.PromoCode$redemptionsArgs<ExtArgs>
   payments?: boolean | Prisma.PromoCode$paymentsArgs<ExtArgs>
@@ -828,6 +862,7 @@ export type $PromoCodePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     validFrom: Date | null
     validUntil: Date | null
     isActive: boolean
+    applicablePlan: string | null
     createdAt: Date
   }, ExtArgs["result"]["promoCode"]>
   composites: {}
@@ -1264,6 +1299,7 @@ export interface PromoCodeFieldRefs {
   readonly validFrom: Prisma.FieldRef<"PromoCode", 'DateTime'>
   readonly validUntil: Prisma.FieldRef<"PromoCode", 'DateTime'>
   readonly isActive: Prisma.FieldRef<"PromoCode", 'Boolean'>
+  readonly applicablePlan: Prisma.FieldRef<"PromoCode", 'String'>
   readonly createdAt: Prisma.FieldRef<"PromoCode", 'DateTime'>
 }
     

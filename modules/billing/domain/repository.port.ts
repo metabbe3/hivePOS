@@ -20,6 +20,7 @@ import type {
   SnapTransactionResult,
   MidtransNotification,
   SaaSPaymentStatus,
+  TenantPlan,
 } from "./types";
 
 export interface BillingRepository {
@@ -32,8 +33,11 @@ export interface BillingRepository {
   validatePromoCode(
     code: string,
     tenantId: string,
+    planTier?: "GROWTH" | "PRO",
   ): Promise<PromoValidationResult>;
   redeemPromoCode(promoCodeId: string, tenantId: string): Promise<void>;
+  getTenantPlan(tenantId: string): Promise<TenantPlan>;
+  getTierUnitPrice(tier: "GROWTH" | "PRO"): Promise<number>;
 
   // ── Payment lifecycle (from lib/billing.ts + Prisma) ──
   createPayment(data: CreatePaymentData): Promise<SaaSPaymentRecord>;

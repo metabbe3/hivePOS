@@ -22,16 +22,15 @@
   --color-secondary: #10b981;
   --color-secondary-foreground: #ffffff;
 
-  /* ─── Storefront brand (orange — collapsed with secondary, see AUDIT D1.1) ─── */
-  /* ponytail: was amber #f59e0b. Collapsed to orange-700 so it matches
-     --color-secondary under .pub-scope (landing), eliminating the warm-hue
-     clash. Shade variants follow codebase convention (600+ darker than base). */
-  --color-brand: #c2410c;
+  /* ─── App brand (indigo) — unified with --color-primary so CTAs match the
+     logo/links. .pub-scope (landing/login) overrides this to sky blue. ─── */
+  --color-brand: #4f46e5;
   --color-brand-foreground: #ffffff;
-  --color-brand-light: #fff7ed;
-  --color-brand-600: oklch(0.50 0.21 50);
-  --color-brand-700: oklch(0.42 0.20 50);
-  --color-brand-800: oklch(0.35 0.18 50);
+  --color-brand-light: #eef2ff;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
 
   /* ─── Heatmap intensity scale (6 levels: empty → peak) ─── */
   --heat-0: oklch(0.96 0.006 75);
@@ -92,9 +91,9 @@
   --color-primary-foreground: #ffffff;
   --color-secondary: #10b981;
   --color-secondary-foreground: #ffffff;
-  --color-brand: #c2410c;
+  --color-brand: #6366f1;
   --color-brand-foreground: #ffffff;
-  --color-brand-light: #2a160a;
+  --color-brand-light: #1e1b4b;
 
   /* ─── Heatmap intensity scale (dark: inverted lightness) ─── */
   --heat-0: oklch(0.20 0.01 75);
@@ -254,6 +253,23 @@ body {
   animation: scroll-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ponytail: never trap content at opacity:0 for reduced-motion users.
+   Reveal animations are decorative — content must be visible without them. */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .animate-float,
+  .animate-gradient,
+  .animate-marquee,
+  .animate-soft-pulse {
+    animation: none !important;
+  }
+}
+
 /* ─── Marquee (infinite horizontal scroll) ─── */
 @keyframes marquee {
   from {
@@ -363,25 +379,22 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Public Surface Palette — trust blue + orange CTA accent
-   Scoped to .pub-scope so the dashboard (amber brand) is untouched.
-   Mechanism: override the stock Tailwind color variables *locally*,
-   so existing bg-indigo-600 / text-emerald-500 / from-amber-400
-   utilities in landing + public components pick up the new palette
-   with zero component edits.
-   ponytail: scoped token override instead of 29 component edits —
-   add a new palette hue here if the brand shifts again.
+   Public Surface Palette — white + sky blue
+   Scoped to .pub-scope so the dashboard (indigo brand) keeps its own hue.
+   Mechanism: override the stock Tailwind color variables *locally*, so every
+   bg-indigo-600 / text-emerald-500 / from-amber-400 / bg-brand / text-secondary
+   utility on public pages (landing, login, register, comparison, tenant-site)
+   resolves to sky blue with zero component edits.
+   ponytail: scoped token override instead of N component edits — shift the
+   public hue here in one place.
    ═══════════════════════════════════════════════════════════════ */
 .pub-scope {
-  /* secondary → orange CTA accent.
-     ponytail: overriding --color-secondary here (set globally in @theme to
-     emerald #10b981) means every text-secondary / bg-secondary / to-secondary
-     utility in landing picks up orange with zero component edits.
-     Hex (not oklch) so iOS Safari < 15.4 doesn't drop the declaration.
-     #c2410c (orange-700) not #ea580c (orange-600) — needs ≥4.5:1 on white
-     for WCAG AA on small text badges ("hivePOS", "HEMAT 38%"). */
-  --color-secondary: #c2410c;
+  /* Public accent → sky blue (was orange #c2410c). White-dominant surfaces,
+     sky as the single committed accent. Hex (not oklch) for iOS Safari < 15.4. */
+  --color-secondary: #0284c7;
   --color-secondary-foreground: #ffffff;
+  --color-brand: #0284c7;
+  --color-brand-700: #0369a1;
 
   /* indigo → trust blue (#2563EB family). Standard Tailwind blue ramp. */
   --color-indigo-50:  #eff6ff;
@@ -396,30 +409,30 @@ body {
   --color-indigo-900: #1e3a8a;
   --color-indigo-950: #172554;
 
-  /* emerald + amber → orange CTA accent. Standard Tailwind orange ramp. */
-  --color-emerald-50:  #fff7ed;
-  --color-emerald-100: #ffedd5;
-  --color-emerald-200: #fed7aa;
-  --color-emerald-300: #fdba74;
-  --color-emerald-400: #fb923c;
-  --color-emerald-500: #f97316;
-  --color-emerald-600: #ea580c;
-  --color-emerald-700: #c2410c;
-  --color-emerald-800: #9a3412;
-  --color-emerald-900: #7c2d12;
-  --color-emerald-950: #431407;
+  /* emerald + amber → sky ramp (were orange). Standard Tailwind sky ramp. */
+  --color-emerald-50:  #f0f9ff;
+  --color-emerald-100: #e0f2fe;
+  --color-emerald-200: #bae6fd;
+  --color-emerald-300: #7dd3fc;
+  --color-emerald-400: #38bdf8;
+  --color-emerald-500: #0ea5e9;
+  --color-emerald-600: #0284c7;
+  --color-emerald-700: #0369a1;
+  --color-emerald-800: #075985;
+  --color-emerald-900: #0c4a6e;
+  --color-emerald-950: #082f49;
 
-  --color-amber-50:  #fff7ed;
-  --color-amber-100: #ffedd5;
-  --color-amber-200: #fed7aa;
-  --color-amber-300: #fdba74;
-  --color-amber-400: #fb923c;
-  --color-amber-500: #f97316;
-  --color-amber-600: #ea580c;
-  --color-amber-700: #c2410c;
-  --color-amber-800: #9a3412;
-  --color-amber-900: #7c2d12;
-  --color-amber-950: #431407;
+  --color-amber-50:  #f0f9ff;
+  --color-amber-100: #e0f2fe;
+  --color-amber-200: #bae6fd;
+  --color-amber-300: #7dd3fc;
+  --color-amber-400: #38bdf8;
+  --color-amber-500: #0ea5e9;
+  --color-amber-600: #0284c7;
+  --color-amber-700: #0369a1;
+  --color-amber-800: #075985;
+  --color-amber-900: #0c4a6e;
+  --color-amber-950: #082f49;
 
   /* cool slate-white surface. Standard Tailwind slate ramp. */
   --color-zinc-50:  #f8fafc;

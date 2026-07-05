@@ -30,6 +30,7 @@ export const GET = withErrorHandler(async (req: Request) => {
       modules: p.modules,
       features: p.features,
       isActive: p.isActive,
+      tier: p.tier,
       subscriptionCount: p._count.subscriptions,
       createdAt: p.createdAt.toISOString(),
     })),
@@ -57,6 +58,11 @@ export const POST = withErrorHandler(async (req: Request) => {
     ? body.modules.filter((m: unknown): m is string => typeof m === "string")
     : [];
 
+  const tier =
+    body?.tier === "FREE" || body?.tier === "GROWTH" || body?.tier === "PRO"
+      ? body.tier
+      : null;
+
   const existing = await prisma.plan.findUnique({ where: { name } });
   if (existing) throw new ConflictError("Plan name already exists");
 
@@ -72,6 +78,7 @@ export const POST = withErrorHandler(async (req: Request) => {
         priceYearly,
         modules,
         features: (body?.features ?? null) as any,
+        tier,
         isActive: body?.isActive !== false,
       },
     });

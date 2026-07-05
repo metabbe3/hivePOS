@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SuperAdminSidebar } from "@/components/layout/super-admin-sidebar";
 import { SuperAdminHeader } from "@/components/layout/super-admin-header";
 import { SuperAdminSessionGuard } from "@/components/shared/super-admin-session-guard";
+import { SuperAdminAssistant } from "@/components/super-admin/super-admin-assistant";
 
 // ponytail: no I18nProvider, no useSessionSync — super-admin panel is English-only
 // and doesn't use tenant RBAC permissions (different role model entirely).
@@ -22,6 +23,7 @@ export default function SuperAdminPanelLayout({ children }: { children: React.Re
               <main className="relative flex-1 overflow-x-hidden bg-background p-4 md:p-6">
                 <div className="mx-auto max-w-[1600px]">{children}</div>
               </main>
+              <SuperAdminAssistant />
             </SidebarInset>
           </SidebarProvider>
         </TooltipProvider>

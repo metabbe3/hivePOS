@@ -87,6 +87,7 @@ function toDTO(s: ServiceWithGroup): ServiceDTO {
     commissionValue: s.commissionValue,
     module: s.module,
     isActive: s.isActive,
+    isDefaultSpeed: s.isDefaultSpeed,
     groupId: s.groupId,
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt.toISOString(),

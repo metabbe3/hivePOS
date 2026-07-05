@@ -2,7 +2,7 @@ import { withErrorHandler, apiSuccess } from "@/modules/shared";
 import { UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
-import { endOfDay } from "@/lib/dates";
+import { endOfDay, wibDateBounds } from "@/lib/dates";
 
 export const GET = withErrorHandler(async (req) => {
   const ctx = await requireWithBranchOrThrow("dashboard", "read");
@@ -12,18 +12,16 @@ export const GET = withErrorHandler(async (req) => {
 
   const { searchParams } = new URL(req.url);
 
-  // Parse date range, default to today
+  // Parse date range — WIB-correct bounds (default to today)
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = today.toISOString().slice(0, 10);
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const fromStr = searchParams.get("from") || todayStr;
   const toStr = searchParams.get("to") || todayStr;
 
-  const from = new Date(fromStr);
-  from.setHours(0, 0, 0, 0);
-
-  const to = endOfDay(new Date(toStr));
+  const bounds = wibDateBounds({ from: fromStr, to: toStr });
+  const from = bounds.gte!;
+  const to = bounds.lte!;
 
   // Calculate previous period for comparison
   const periodMs = to.getTime() - from.getTime() + 1; // +1 to include full day
@@ -79,11 +77,11 @@ export const GET = withErrorHandler(async (req) => {
     prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, status: "READY" } }),
     prisma.payment.aggregate({
       _sum: { amount: true },
-      where: { order: { branchId: { in: branchIds },module: moduleFilter }, createdAt: { gte: from, lte: to } },
+      where: { order: { branchId: { in: branchIds },module: moduleFilter }, paidAt: { gte: from, lte: to } },
     }),
     prisma.payment.aggregate({
       _sum: { amount: true },
-      where: { order: { branchId: { in: branchIds },module: moduleFilter }, createdAt: { gte: previousFrom, lte: previousTo } },
+      where: { order: { branchId: { in: branchIds },module: moduleFilter }, paidAt: { gte: previousFrom, lte: previousTo } },
     }),
     prisma.order.findMany({
       where: { branchId: { in: branchIds },module: moduleFilter },
@@ -108,7 +106,7 @@ export const GET = withErrorHandler(async (req) => {
     }),
     prisma.payment.groupBy({
       by: ["paymentMethod"],
-      where: { order: { branchId: { in: branchIds },module: moduleFilter }, createdAt: { gte: from, lte: to } },
+      where: { order: { branchId: { in: branchIds },module: moduleFilter }, paidAt: { gte: from, lte: to } },
       _sum: { amount: true },
       _count: true,
     }),

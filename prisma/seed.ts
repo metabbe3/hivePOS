@@ -1,4 +1,4 @@
-import { PrismaClient } from "../app/generated/prisma/client";
+import { PrismaClient, PlanTier } from "../app/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcrypt";
 import pg from "pg";
@@ -18,35 +18,38 @@ async function main() {
     {
       name: "Free",
       description: "Untuk bisnis yang baru memulai",
+      tier: PlanTier.FREE,
       maxOutlets: 1,
       maxUsers: 2,
       maxOrders: 100,
       priceMonthly: 0,
       priceYearly: 0,
       modules: ["laundry"],
-      features: { customBranding: false, api: false, whatsapp: false },
+      features: { customBranding: false, api: false, whatsapp: false, website: false },
+    },
+    {
+      name: "Growth",
+      description: "Per-outlet — semua modul",
+      tier: PlanTier.GROWTH,
+      maxOutlets: 999999,
+      maxUsers: 999999,
+      maxOrders: 999999,
+      priceMonthly: 49000,
+      priceYearly: 490000,
+      modules: ["laundry", "salon", "cleaning", "fnb"],
+      features: { customBranding: true, api: false, whatsapp: true, website: false },
     },
     {
       name: "Pro",
-      description: "Untuk bisnis yang sedang berkembang",
-      maxOutlets: 3,
-      maxUsers: 10,
-      maxOrders: 10000,
-      priceMonthly: 149000,
-      priceYearly: 1490000,
-      modules: ["laundry", "salon", "cleaning", "fnb"],
-      features: { customBranding: true, api: false, whatsapp: true },
-    },
-    {
-      name: "Enterprise",
-      description: "Untuk franchise dan korporasi",
-      maxOutlets: 999,
-      maxUsers: 999,
+      description: "Growth + website laundry profesional",
+      tier: PlanTier.PRO,
+      maxOutlets: 999999,
+      maxUsers: 999999,
       maxOrders: 999999,
-      priceMonthly: 499000,
-      priceYearly: 4990000,
+      priceMonthly: 79000,
+      priceYearly: 790000,
       modules: ["laundry", "salon", "cleaning", "fnb"],
-      features: { customBranding: true, api: true, whatsapp: true, whiteLabel: true },
+      features: { customBranding: true, api: false, whatsapp: true, website: true },
     },
   ];
 

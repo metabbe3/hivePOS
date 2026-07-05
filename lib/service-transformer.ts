@@ -6,6 +6,7 @@ export interface Service {
   pricingType: "PER_KG" | "PER_ITEM";
   basePrice: number;
   isActive: boolean;
+  isDefaultSpeed: boolean;
   groupId: string | null;
   group: { id: string; name: string } | null;
 }
@@ -17,6 +18,7 @@ export interface SpeedVariant {
   name: string;
   basePrice: number;
   speed: SpeedType;
+  isDefault: boolean;
 }
 
 export interface BaseItem {
@@ -98,6 +100,7 @@ export function transformServices(services: Service[]): BaseItem[] {
       name: svc.name,
       basePrice: svc.basePrice,
       speed,
+      isDefault: svc.isDefaultSpeed,
     });
 
     // Update price range
@@ -112,9 +115,10 @@ export function transformServices(services: Service[]): BaseItem[] {
     const speedOrder: Record<SpeedType, number> = { reguler: 0, standalone: 1, express24: 2, express7: 3 };
     item.variants.sort((a, b) => speedOrder[a.speed] - speedOrder[b.speed]);
 
-    // Default to reguler variant
+    // Default: owner-chosen flag wins, else reguler, else first variant.
+    const flagged = item.variants.find((v) => v.isDefault);
     const reguler = item.variants.find((v) => v.speed === "reguler");
-    item.defaultServiceId = reguler ? reguler.serviceId : item.variants[0].serviceId;
+    item.defaultServiceId = (flagged ?? reguler ?? item.variants[0]).serviceId;
   }
 
   // Sort base items alphabetically by name

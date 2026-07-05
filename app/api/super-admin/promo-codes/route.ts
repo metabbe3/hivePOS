@@ -32,6 +32,7 @@ export const GET = withErrorHandler(async () => {
       validFrom: c.validFrom?.toISOString() ?? null,
       validUntil: c.validUntil?.toISOString() ?? null,
       isActive: c.isActive,
+      applicablePlan: c.applicablePlan,
       createdAt: c.createdAt.toISOString(),
     })),
   });
@@ -71,6 +72,12 @@ export const POST = withErrorHandler(async (req: Request) => {
     throw new ValidationError("Jumlah redempsi tidak boleh negatif.");
   }
 
+  // Plan restriction: null = applies to any plan tier.
+  const applicablePlan =
+    body?.applicablePlan === "GROWTH" || body?.applicablePlan === "PRO"
+      ? body.applicablePlan
+      : null;
+
   // ── Parse optional validity window ──
   let validFrom: Date | null = null;
   let validUntil: Date | null = null;
@@ -99,6 +106,7 @@ export const POST = withErrorHandler(async (req: Request) => {
         maxRedemptions,
         validFrom,
         validUntil,
+        applicablePlan,
         isActive: body?.isActive !== false,
       },
     });
@@ -106,7 +114,7 @@ export const POST = withErrorHandler(async (req: Request) => {
       actor,
       action: "promoCode.create",
       target: { type: "PromoCode", id: promoCode.id },
-      diff: { code, type, value, maxRedemptions },
+      diff: { code, type, value, maxRedemptions, applicablePlan },
       req,
     });
     return promoCode;
@@ -157,4 +165,64 @@ export const PATCH = withErrorHandler(async (req: Request) => {
   });
 
   return apiSuccess({ promoCode: updated });
+});
+
+// PUT — edit an existing promo code (type/value/plan/validity/active). Today only
+// PATCH-toggle exists; full editing is part of "all promo functions work".
+export const PUT = withErrorHandler(async (req: Request) => {
+  const { session } = await assertSuperAdminOrThrow("SUPER_ADMIN");
+  const actor = { id: session.user.id!, email: session.user.email! };
+
+  const body = await req.json();
+  const id = body?.id as string | undefined;
+  if (!id) throw new ValidationError("ID wajib diisi.");
+
+  const existing = await prisma.promoCode.findUnique({ where: { id } });
+  if (!existing) throw new NotFoundError("PromoCode", id);
+
+  const data: Record<string, unknown> = {};
+  if (typeof body?.description === "string") {
+    data.description = body.description.trim() || null;
+  }
+  if (body?.type && ["FREE_MONTH", "DISCOUNT_PERCENT", "DISCOUNT_FIXED"].includes(body.type)) {
+    data.type = body.type;
+  }
+  if (body?.value !== undefined) {
+    const v = Number(body.value);
+    if (!Number.isFinite(v) || v <= 0) throw new ValidationError("Nilai harus lebih dari 0.");
+    const effectiveType = (data.type as string | undefined) ?? existing.type;
+    if (effectiveType === "DISCOUNT_PERCENT" && v > 100) {
+      throw new ValidationError("Diskon persen maksimal 100.");
+    }
+    data.value = v;
+  }
+  if (body?.maxRedemptions !== undefined && body?.maxRedemptions !== "") {
+    data.maxRedemptions =
+      body.maxRedemptions === null ? null : Math.max(0, Math.floor(Number(body.maxRedemptions)));
+  }
+  if (body?.validUntil !== undefined) {
+    const d = body.validUntil ? new Date(body.validUntil) : null;
+    data.validUntil = d && !isNaN(d.getTime()) ? d : null;
+  }
+  if (body?.applicablePlan !== undefined) {
+    data.applicablePlan =
+      body.applicablePlan === "GROWTH" || body.applicablePlan === "PRO"
+        ? body.applicablePlan
+        : null;
+  }
+  if (typeof body?.isActive === "boolean") data.isActive = body.isActive;
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const promoCode = await tx.promoCode.update({ where: { id }, data });
+    await auditLog(tx, {
+      actor,
+      action: "promoCode.update",
+      target: { type: "PromoCode", id },
+      diff: data,
+      req,
+    });
+    return promoCode;
+  });
+
+  return apiSuccess({ promoCode: { id: updated.id, code: updated.code } });
 });

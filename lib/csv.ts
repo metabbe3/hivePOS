@@ -16,6 +16,38 @@ export function toCSV(headers: string[], rows: (string | number | boolean | null
   return lines.join("\r\n");
 }
 
+// ponytail: hand-rolled RFC 4180 parser (quotes/commas/embedded newlines).
+// No streaming — imports are capped client-side. If a 2nd import feature lands,
+// swap for a streaming parser (papaparse). Symmetric with toCSV above.
+export function parseCSV(text: string): string[][] {
+  const rows: string[][] = [];
+  let field = "";
+  let row: string[] = [];
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; } // escaped quote
+        else inQuotes = false;
+      } else {
+        field += c; // incl. embedded newline / comma
+      }
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === ",") {
+      row.push(field); field = "";
+    } else if (c === "\n") {
+      row.push(field); rows.push(row); field = ""; row = [];
+    } else if (c !== "\r") {
+      field += c;
+    }
+  }
+  // Trailing field/row when the file has no final newline.
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows.filter((r) => r.some((c) => c.trim() !== ""));
+}
+
 export function csvResponse(filename: string, csv: string): Response {
   return new Response(csv, {
     status: 200,

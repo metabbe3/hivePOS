@@ -507,18 +507,18 @@ export default async function TenantSitePage() {
   // Static CSS — no tenant data interpolated here. Safe.
   const styleCss = `
     .pub-scope {
-      --brand: #1E40AF;
-      --brand-deep: #1E3A8A;
-      --brand-soft: #C7D2FE;
-      --accent: #F59E0B;
-      --accent-deep: #D97706;
+      --brand: #0284C7;
+      --brand-deep: #0369A1;
+      --brand-soft: #BAE6FD;
+      --accent: #16A34A;
+      --accent-deep: #15803D;
       --ink: #0F172A;
       --ink-2: #334155;
       --muted: #64748B;
       --border: #E2E8F0;
       --surface: #FFFFFF;
-      --surface-2: #EEF2FF;
-      --bg: #F8FAFC;
+      --surface-2: #F0F9FF;
+      --bg: #FFFFFF;
       --success: #16A34A;
       --violet: #7C3AED;
       --emerald: #059669;
@@ -551,8 +551,8 @@ export default async function TenantSitePage() {
     @media (hover: hover) {
       .pub-scope .service-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 32px -8px rgba(30, 64, 175, 0.18);
-        border-color: var(--brand-soft);
+        box-shadow: 0 16px 40px -8px rgba(2, 132, 199, 0.25);
+        border-color: var(--brand);
       }
     }
     .pub-scope .cta-primary {
@@ -587,11 +587,32 @@ export default async function TenantSitePage() {
       .pub-scope .reveal { opacity: 1; transform: none; }
     }
     .pub-scope .hero-gradient {
-      background:
-        radial-gradient(at 20% 20%, #C7D2FE 0%, transparent 50%),
-        radial-gradient(at 80% 0%, #FDE68A 0%, transparent 40%),
-        radial-gradient(at 60% 100%, #DBEAFE 0%, transparent 55%),
-        linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+      background: linear-gradient(135deg, #0284C7 0%, #0369A1 50%, #075985 100%);
+      color: #fff;
+    }
+    .pub-scope .hero-gradient h1,
+    .pub-scope .hero-gradient h2,
+    .pub-scope .hero-gradient p,
+    .pub-scope .hero-gradient span {
+      color: #fff !important;
+    }
+    .pub-scope .hero-gradient .eyebrow { color: rgba(255,255,255,0.85) !important; }
+    .pub-scope .hero-gradient .cta-primary {
+      background: #fff !important;
+      color: var(--accent) !important;
+    }
+    .pub-scope .hero-gradient .cta-primary:hover { background: rgba(255,255,255,0.92) !important; }
+    .pub-scope .hero-gradient .cta-ghost {
+      background: rgba(255,255,255,0.15) !important;
+      color: #fff !important;
+      border-color: rgba(255,255,255,0.35) !important;
+    }
+    .pub-scope .hero-gradient .cta-ghost:hover {
+      background: rgba(255,255,255,0.25) !important;
+      border-color: rgba(255,255,255,0.5) !important;
+    }
+    .pub-scope .hero-gradient a:not(.cta-primary):not(.cta-ghost) {
+      color: rgba(255,255,255,0.9) !important;
     }
     .pub-scope .floating-wa {
       position: fixed;
@@ -664,7 +685,7 @@ export default async function TenantSitePage() {
 
   return (
     <div
-      className={`pub-scope ${fontClass} min-h-screen bg-[#F8FBFF] text-[#0F172A]`}
+      className={`pub-scope ${fontClass} min-h-screen bg-white text-[#0F172A]`}
       style={{ fontFamily: "var(--font-body), system-ui, sans-serif" }}
     >
       <style dangerouslySetInnerHTML={{ __html: styleCss }} />
@@ -729,7 +750,7 @@ export default async function TenantSitePage() {
 
       <main id="top">
         {/* ─── Hero ─── */}
-        <header className="relative overflow-hidden border-b border-[#E2E8F0]">
+        <header className="hero-gradient relative overflow-hidden">
           <div className="mx-auto max-w-6xl px-6 sm:px-10 py-16 sm:py-24 md:py-28">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 items-center">
               <div className="md:col-span-7">
@@ -817,7 +838,7 @@ export default async function TenantSitePage() {
 
               {/* Hero visual */}
               <div className="md:col-span-5">
-                <div className="hero-gradient relative aspect-[4/5] sm:aspect-[5/4] md:aspect-[4/5] rounded-3xl overflow-hidden border border-[#E0F2FE] shadow-sm">
+                <div className="relative aspect-[4/5] sm:aspect-[5/4] md:aspect-[4/5] rounded-3xl overflow-hidden border border-white/20 shadow-lg">
                   {settings.heroPhotoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -883,7 +904,7 @@ export default async function TenantSitePage() {
             <div className="reveal max-w-2xl">
               <div className="eyebrow" style={{ color: "#7C3AED" }}>
                 <Icon name="listChecks" size={14} />
-                01 — Proses
+                Proses
               </div>
               <h2
                 id="proses-h2"
@@ -936,7 +957,7 @@ export default async function TenantSitePage() {
               <div className="reveal max-w-2xl">
                 <div className="eyebrow">
                   <Icon name="drop" size={14} />
-                  02 — Layanan
+                  Layanan
                 </div>
                 <h2
                   id="layanan-h2"
@@ -956,30 +977,41 @@ export default async function TenantSitePage() {
                   return (
                     <article
                       key={svc.name}
-                      className="service-card reveal bg-white rounded-2xl border border-[#E2E8F0] p-6 flex flex-col gap-4"
+                      className="service-card reveal bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden flex flex-col"
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center justify-between px-5 pt-5 pb-3 bg-[#F0F9FF]">
                         <div
                           className="flex h-11 w-11 items-center justify-center rounded-xl"
-                          style={{ background: "#EFF6FF", color: "#0284C7" }}
+                          style={{ background: "#fff", color: "#0284C7" }}
                         >
                           <Icon name={icon} size={24} />
                         </div>
                         <div className="text-right">
-                          <div className="font-display font-bold text-lg text-[#0F172A]">
+                          <div className="font-display font-extrabold text-xl text-[#0284C7] tabular-nums">
                             {formatPrice(Number(svc.basePrice))}
                           </div>
-                          <div className="eyebrow mt-0.5" style={{ color: "#64748B" }}>
+                          <div className="text-xs text-[#64748B] mt-0.5">
                             {pricingLabel(svc.pricingType)}
                           </div>
                         </div>
                       </div>
-                      <div>
+                      <div className="flex-1 px-5 py-4">
                         <h3 className="font-display font-bold text-base text-[#0F172A]">{svc.name}</h3>
                         {svc.description && (
-                          <p className="mt-1.5 text-sm text-[#334155] leading-relaxed">{svc.description}</p>
+                          <p className="mt-1 text-sm text-[#334155] leading-relaxed">{svc.description}</p>
                         )}
                       </div>
+                      {waOrder && (
+                        <a
+                          href={waOrder}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="cta-primary flex items-center justify-center gap-2 py-3 text-sm font-semibold"
+                        >
+                          <Icon name="whatsapp" size={16} />
+                          Pesan
+                        </a>
+                      )}
                     </article>
                   );
                 })}
@@ -997,7 +1029,7 @@ export default async function TenantSitePage() {
             <div className="reveal max-w-2xl">
               <div className="eyebrow" style={{ color: "#059669" }}>
                 <Icon name="shieldCheck" size={14} />
-                03 — Keunggulan
+                Keunggulan
               </div>
               <h2
                 id="why-h2"
@@ -1477,7 +1509,7 @@ export default async function TenantSitePage() {
           </p>
           <a
             href={SITE_URL}
-            className="text-xs font-medium text-[#64748B] hover:text-[#1E40AF] transition-colors"
+            className="text-xs font-medium text-[#64748B] hover:text-[#0284C7] transition-colors"
           >
             Dibuat dengan hivePOS
           </a>

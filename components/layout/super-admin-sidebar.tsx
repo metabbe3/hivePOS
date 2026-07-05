@@ -18,6 +18,8 @@ import {
   Settings,
   Flag,
   Cable,
+  Gift,
+  FileText,
 } from "lucide-react";
 import { BrandMark } from "@/components/public/brand-logo";
 import {
@@ -61,6 +63,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { title: "Tenants", href: "/super-admin/tenants", icon: Building2 },
       { title: "Plans", href: "/super-admin/plans", icon: Layers },
       { title: "Promo Codes", href: "/super-admin/promo-codes", icon: Tag },
+      { title: "Referrals", href: "/super-admin/referrals", icon: Gift },
       { title: "Billing", href: "/super-admin/billing", icon: CreditCard },
       { title: "Users", href: "/super-admin/users", icon: Users },
     ],
@@ -75,6 +78,10 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
       { title: "Feature Flags", href: "/super-admin/feature-flags", icon: Flag, superAdminOnly: true },
       { title: "Settings", href: "/super-admin/settings", icon: Settings },
     ],
+  },
+  {
+    label: "Content",
+    items: [{ title: "Blog", href: "/super-admin/blog", icon: FileText }],
   },
 ];
 

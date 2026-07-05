@@ -1,97 +1,97 @@
-import { Zap } from "lucide-react";
 import { ScrollReveal } from "./ScrollReveal";
 import { SAAS_FEATURES } from "@/lib/landing-data-saas";
 
-function MiniChart() {
-  return (
-    <div className="mt-4 flex h-12 items-end justify-between gap-1 opacity-70 sm:h-16">
-      {[30, 50, 40, 70, 55, 85, 60, 90].map((h, i) => (
-        <div
-          key={i}
-          className="flex-1 rounded-t bg-gradient-to-t from-indigo-200 to-indigo-400"
-          style={{ height: `${h}%` }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function FauxReceipt() {
-  return (
-    <div className="mt-4 rounded-lg border border-dashed border-zinc-200 bg-zinc-50/50 p-3 opacity-70">
-      <div className="space-y-1.5">
-        <div className="flex justify-between text-[10px] text-zinc-400">
-          <span>hivePOS Receipt</span>
-          <span>#HBL-0001</span>
-        </div>
-        {[1, 2, 3].map((row) => (
-          <div key={row} className="flex justify-between text-[10px]">
-            <span className="text-zinc-500">Laundry Kiloan 5kg</span>
-            <span className="font-bold text-zinc-600">Rp 25.000</span>
-          </div>
-        ))}
-        <div className="flex justify-between border-t border-dashed border-zinc-200 pt-1.5 text-[10px] font-bold">
-          <span className="text-zinc-700">Total</span>
-          <span className="text-indigo-600">Rp 25.000</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+/**
+ * Asymmetric bento. Only the two visual-bearing features (chart + receipt)
+ * span 2 columns — that tiles 2 wide + 8 narrow into exactly 3 clean rows of 4
+ * on md (no empty cells). Rhythm: one dark cell (chart), one tinted cell
+ * (receipt), the rest white. Single accent, hairline borders, no gradients.
+ */
 export function FeatureBento() {
   return (
-    <section
-      id="fitur"
-      className="border-y border-zinc-200 bg-surface-muted py-14 sm:py-20 md:py-28"
-    >
-      <div className="mx-auto max-w-6xl px-6">
-        {/* Header */}
-        <ScrollReveal>
-          <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-16">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-1.5 shadow-sm">
-              <Zap className="h-4 w-4 text-indigo-600" />
-              <span className="text-sm font-bold">Fitur Lengkap</span>
-            </div>
-            <h2 className="mb-4 font-display text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl md:text-5xl">
-              Semua yang Anda Butuhkan untuk{" "}
-              <span className="text-indigo-600">
-                Skalakan Bisnis
-              </span>
-            </h2>
-            <p className="text-lg text-zinc-600">
-              Dari kasir harian sampai laporan multi-outlet. Semua included.
-            </p>
-          </div>
+    <section id="fitur" className="bg-white py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-5 sm:px-6">
+        <ScrollReveal className="max-w-2xl">
+          <h2 className="font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+            Semua yang laundry Anda butuhin. Nggak lebih.
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-slate-600">
+            Dari kasir harian sampai laporan multi-outlet. Semua sudah termasuk,
+            tanpa add-on berbayar.
+          </p>
         </ScrollReveal>
 
-        {/* Bento grid */}
-        <div className="grid auto-rows-fr gap-4 md:grid-cols-4">
+        <div className="mt-12 grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
           {SAAS_FEATURES.map((feature, idx) => {
             const Icon = feature.icon;
-            const delay = ((idx % 4) + 1) as 1 | 2 | 3 | 4;
+            const isWide = feature.visual === "chart" || feature.visual === "receipt";
+            const isDark = feature.visual === "chart";
+
             return (
               <ScrollReveal
                 key={feature.title}
-                delay={delay}
-                className={feature.span}
+                delay={((idx % 3) + 1) as 1 | 2 | 3}
+                className={isWide ? "sm:col-span-2" : ""}
               >
-                <article className="group flex h-full flex-col rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-900/5">
-                  {/* Icon */}
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-white text-indigo-600 transition-all duration-300 group-hover:from-indigo-600 group-hover:to-indigo-700 group-hover:text-white">
-                    <Icon className="h-6 w-6" />
-                  </div>
-
-                  <h3 className="mb-2 font-display text-lg font-bold text-zinc-900">
+                <article
+                  className={`flex h-full flex-col p-6 transition-colors ${
+                    isDark
+                      ? "rounded-xl bg-sky-600 text-white"
+                      : feature.visual === "receipt"
+                        ? "rounded-xl border border-slate-200 bg-slate-50"
+                        : "rounded-xl border border-slate-200 bg-white hover:border-slate-300"
+                  }`}
+                >
+                  <Icon
+                    className={`h-6 w-6 ${isDark ? "text-white" : "text-brand"}`}
+                    strokeWidth={1.75}
+                  />
+                  <h3
+                    className={`mt-4 font-display text-lg font-bold ${
+                      isDark ? "text-white" : "text-slate-900"
+                    }`}
+                  >
                     {feature.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-zinc-600">
+                  <p
+                    className={`mt-2 text-sm leading-relaxed ${
+                      isDark ? "text-sky-100" : "text-slate-600"
+                    }`}
+                  >
                     {feature.desc}
                   </p>
 
-                  {/* Decorative visual for spanning cards */}
-                  {feature.visual === "chart" && <MiniChart />}
-                  {feature.visual === "receipt" && <FauxReceipt />}
+                  {feature.visual === "chart" && (
+                    <div className="mt-5 flex h-16 items-end gap-1.5">
+                      {[40, 65, 45, 80, 55, 90, 70, 100].map((h, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 rounded-sm bg-white/80"
+                          style={{ height: `${h}%` }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {feature.visual === "receipt" && (
+                    <div className="mt-5 rounded-md border border-dashed border-slate-300 bg-white p-3">
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] text-slate-400">
+                          <span>Struk hivePOS</span>
+                          <span className="font-mono">#0001</span>
+                        </div>
+                        {["Kiloan 5kg", "Express 6 jam"].map((row) => (
+                          <div key={row} className="flex justify-between text-[11px]">
+                            <span className="text-slate-500">{row}</span>
+                            <span className="font-bold text-slate-700 tabular-nums">Rp 35.000</span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between border-t border-dashed border-slate-200 pt-1.5 text-[11px] font-bold">
+                          <span className="text-slate-700">Total</span>
+                          <span className="text-brand tabular-nums">Rp 70.000</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </article>
               </ScrollReveal>
             );

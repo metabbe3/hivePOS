@@ -33,6 +33,7 @@ export default function SuperAdminLoginPage() {
         email: values.email,
         password: values.password,
         scope: "super-admin", // gate — see lib/auth.ts authorize()
+        remember: values.remember !== false,
         redirect: false,
       });
 

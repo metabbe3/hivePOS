@@ -28,6 +28,10 @@ const FLAGS = [
   { key: "offlineOrderCreate", name: "Offline Order Create", category: "general" },
   { key: "printerSettings", name: "Printer Settings", category: "general" },
   { key: "orderPhotos", name: "Order Proof Photos", category: "operations" },
+  { key: "referralProgram", name: "Referral Program", category: "growth" },
+  { key: "customersImportExport", name: "Customer CSV Import/Export", category: "operations" },
+  { key: "onboardingWizard", name: "Onboarding Wizard", category: "growth" },
+  { key: "orderFlowV2", name: "Order Flow V2 (leaner steps)", category: "operations" },
 ] as const;
 
 async function main() {

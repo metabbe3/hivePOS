@@ -56,28 +56,40 @@ export const PRICING_TYPE_LABELS: Record<PricingType, string> = {
   FLAT: "pricingType.flat",
 };
 
+export type GarmentGroup = "tops" | "bottoms" | "underwear" | "bath" | "household";
+
 export interface GarmentCategory {
   id: string;
   labelKey: string;
+  group: GarmentGroup;
   keywords: string[];
 }
 
+/** Ordered groups — drives the section headers in the PER_KG garment picker. */
+export const GARMENT_GROUPS: { id: GarmentGroup; labelKey: string }[] = [
+  { id: "tops", labelKey: "garment.group.tops" },
+  { id: "bottoms", labelKey: "garment.group.bottoms" },
+  { id: "underwear", labelKey: "garment.group.underwear" },
+  { id: "bath", labelKey: "garment.group.bath" },
+  { id: "household", labelKey: "garment.group.household" },
+];
+
 export const DEFAULT_GARMENT_CATEGORIES: GarmentCategory[] = [
-  { id: "shorts", labelKey: "garment.shorts", keywords: ["celana pendek", "short pants"] },
-  { id: "pants", labelKey: "garment.pants", keywords: ["celana panjang", "trousers", "jeans"] },
-  { id: "shirts", labelKey: "garment.shirts", keywords: ["baju", "kaos", "kemeja", "shirt"] },
-  { id: "underwear", labelKey: "garment.underwear", keywords: ["cd", "celana dalam"] },
-  { id: "bra", labelKey: "garment.bra", keywords: ["bra"] },
-  { id: "skirt", labelKey: "garment.skirt", keywords: ["rok"] },
-  { id: "socks", labelKey: "garment.socks", keywords: ["kaos kaki"] },
-  { id: "towel", labelKey: "garment.towel", keywords: ["handuk"] },
-  { id: "fabric", labelKey: "garment.fabric", keywords: ["kain", "sarung", "sarong"] },
-  { id: "schoolUniform", labelKey: "garment.schoolUniform", keywords: ["seragam", "sekolah"] },
-  { id: "pillowCover", labelKey: "garment.pillowCover", keywords: ["sarung bantal", "guling", "sarung guling"] },
-  { id: "gloves", labelKey: "garment.gloves", keywords: ["sarung tangan"] },
-  { id: "prayerGarment", labelKey: "garment.prayerGarment", keywords: ["mukenah", "mukena"] },
-  { id: "scarf", labelKey: "garment.scarf", keywords: ["kerudung", "hijab", "veil"] },
-  { id: "others", labelKey: "garment.others", keywords: ["lain lain", "lainnya"] },
+  { id: "shirts", labelKey: "garment.shirts", group: "tops", keywords: ["baju", "kaos", "kemeja", "shirt"] },
+  { id: "shorts", labelKey: "garment.shorts", group: "bottoms", keywords: ["celana pendek", "short pants"] },
+  { id: "pants", labelKey: "garment.pants", group: "bottoms", keywords: ["celana panjang", "trousers", "jeans"] },
+  { id: "skirt", labelKey: "garment.skirt", group: "bottoms", keywords: ["rok"] },
+  { id: "underwear", labelKey: "garment.underwear", group: "underwear", keywords: ["cd", "celana dalam"] },
+  { id: "bra", labelKey: "garment.bra", group: "underwear", keywords: ["bra"] },
+  { id: "socks", labelKey: "garment.socks", group: "underwear", keywords: ["kaos kaki"] },
+  { id: "towel", labelKey: "garment.towel", group: "bath", keywords: ["handuk"] },
+  { id: "fabric", labelKey: "garment.fabric", group: "bath", keywords: ["kain", "sarung", "sarong"] },
+  { id: "prayerGarment", labelKey: "garment.prayerGarment", group: "bath", keywords: ["mukenah", "mukena"] },
+  { id: "scarf", labelKey: "garment.scarf", group: "bath", keywords: ["kerudung", "hijab", "veil"] },
+  { id: "schoolUniform", labelKey: "garment.schoolUniform", group: "household", keywords: ["seragam", "sekolah"] },
+  { id: "pillowCover", labelKey: "garment.pillowCover", group: "household", keywords: ["sarung bantal", "guling", "sarung guling"] },
+  { id: "gloves", labelKey: "garment.gloves", group: "household", keywords: ["sarung tangan"] },
+  { id: "others", labelKey: "garment.others", group: "household", keywords: ["lain lain", "lainnya"] },
 ];
 
 export const COMMISSION_TYPE_LABELS: Record<CommissionType, string> = {

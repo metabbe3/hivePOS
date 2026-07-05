@@ -1,6 +1,7 @@
 import type { BillingRepository, MidtransPort } from "../domain/repository.port";
 import type { WebhookResult } from "./dto";
 import { ValidationError, logger } from "@/modules/shared";
+import { maybeRewardReferral } from "@/lib/referrals";
 
 export class HandleWebhookService {
   constructor(
@@ -73,6 +74,11 @@ export class HandleWebhookService {
         payment.tenantId,
         payment.id,
       );
+
+      // Referral reward (best-effort): if this is the referred tenant's first
+      // paid payment, grant a free outlet-month to both sides. Never throws —
+      // the payment is already confirmed; the reward is a bonus.
+      await maybeRewardReferral(payment.tenantId);
 
       return { ok: true, status: "PAID" };
     }

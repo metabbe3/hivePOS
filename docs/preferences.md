@@ -72,6 +72,11 @@ Before claiming a task is complete, verify:
 - [ ] No `_unused` vars, no `// removed` dead code, no TODOs left behind
 - [ ] If touching `lib/auth.ts` jwt callback: feature flags resolve in all 3 login paths (credentials, Google OAuth, session refresh) + impersonation swap path
 - [ ] If touching the sidebar: both `hasFlag(item.flag)` AND `can(item.resource, item.action)` checks remain in the filter
+- [ ] **Ran `code-review` (or a reviewer subagent) on the diff and fixed findings** — every change is reviewed before "done" (see `docs/sop/qa-verification.md`)
+- [ ] **Browser/Playwright-verified the changed path end-to-end** — not just "it compiles"
+- [ ] **No nested `<form>` inside `<form>`** (inline sub-actions use `<div>` + `type="button"`)
+- [ ] **Schema changed → rebuilt both `app` AND `init-db` Docker images**
+- [ ] Checked `docs/lessons-learned.md` for a known gotcha that applies to this change
 
 ## 4. Git & commit conventions
 

@@ -47,6 +47,12 @@ export { Prisma }
  */
 export type SuperAdmin = Prisma.SuperAdminModel
 /**
+ * Model BlogPost
+ * SEO/long-tail blog posts — authored in the super-admin CMS (Markdown),
+ * served on /blog with ISR so publishing needs no rebuild. docs/specs/blog-cms.md.
+ */
+export type BlogPost = Prisma.BlogPostModel
+/**
  * Model AuditLog
  * Immutable audit trail of super-admin actions (suspensions, refunds, flag toggles, …).
  * One row per action. Never updated; only inserted + read.
@@ -79,6 +85,13 @@ export type Plan = Prisma.PlanModel
  * A business on the platform (e.g. "Laundry Berkah", "Salon Cantik")
  */
 export type Tenant = Prisma.TenantModel
+/**
+ * Model Referral
+ * Referral ledger. One record per referred tenant (referredId unique).
+ * PENDING (signed up via a ref code) → REWARDED on the referred tenant's first
+ * PAID payment, or REJECTED (self-referral) / EXPIRED (over cap).
+ */
+export type Referral = Prisma.ReferralModel
 /**
  * Model Subscription
  * Subscription linking a tenant to a plan

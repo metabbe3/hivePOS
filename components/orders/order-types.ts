@@ -56,6 +56,7 @@ export interface EditService {
   pricingType: "PER_KG" | "PER_ITEM";
   basePrice: number;
   isActive: boolean;
+  isDefaultSpeed: boolean;
   groupId: string | null;
   group: { id: string; name: string } | null;
 }

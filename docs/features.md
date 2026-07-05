@@ -69,6 +69,7 @@ Auth gate: `requireSuperAdminPanelSession()` (server component).
 | `/super-admin/tenants/[id]` | Tenant detail + approve/suspend/billing |
 | `/super-admin/plans` | Plan management (Growth/Pro) |
 | `/super-admin/promo-codes` | Promo code CRUD |
+| `/super-admin/referrals` | Referral ledger + void (spec: `docs/specs/referral-program.md`) |
 | `/super-admin/billing` | Platform billing overview, failed payments |
 | `/super-admin/users` | All platform users |
 

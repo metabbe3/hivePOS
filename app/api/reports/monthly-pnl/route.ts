@@ -31,7 +31,7 @@ export const GET = withErrorHandler(async (req) => {
   };
 
   // --- Month data ---
-  const [kgItems, itemItems, unpaidOrders, expensesByCategory, expenseDetails, dailyOrders] = await Promise.all([
+  const [kgItems, itemItems, unpaidOrders, expensesByCategory, expenseDetails, dailyOrders, cashPayments] = await Promise.all([
     // Per-KG income
     prisma.orderItem.groupBy({
       by: ["serviceId"],
@@ -81,12 +81,36 @@ export const GET = withErrorHandler(async (req) => {
       },
       orderBy: [{ receivedAt: "asc" }, { createdAt: "asc" }],
     }),
+    // Cash collected this month (by payment date) — cash-flow memo; includes
+    // late payments of prior months' piutang. NOT added to accrual income.
+    prisma.payment.findMany({
+      where: {
+        paidAt: { gte: monthStart, lte: monthEnd },
+        order: { branchId: { in: branchIds } },
+      },
+      // order date needed to break cash down by originating month
+      select: { amount: true, order: { select: { receivedAt: true, createdAt: true } } },
+    }),
   ]);
 
   const perKg = kgItems.reduce((sum, i) => sum + Number(i._sum.subtotal ?? 0), 0);
   const perItem = itemItems.reduce((sum, i) => sum + Number(i._sum.subtotal ?? 0), 0);
   const totalIncome = perKg + perItem;
   const unpaidBalance = unpaidOrders.reduce((sum, o) => sum + Number(o.totalAmount) - Number(o.paidAmount), 0);
+  const cashCollected = cashPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+  // Breakdown by originating order's month (receivedAt ?? createdAt — same basis
+  // as income) so "bulan ini" matches the income definition. Cash from prior
+  // months' orders = late piutang collections.
+  const currentMonthKey = `${year}-${String(month).padStart(2, "0")}`;
+  const cashByOrigin = new Map<string, number>();
+  for (const p of cashPayments) {
+    const d = p.order.receivedAt ?? p.order.createdAt;
+    const key = d.toISOString().slice(0, 7);
+    cashByOrigin.set(key, (cashByOrigin.get(key) ?? 0) + Number(p.amount));
+  }
+  const cashCollectedByMonth = Array.from(cashByOrigin.entries())
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([m, amount]) => ({ month: m, amount, isCurrent: m === currentMonthKey }));
 
   // Resolve expense category names
   const categoryIds = (expensesByCategory.map((e) => e.categoryId).filter(Boolean) as string[]);
@@ -220,6 +244,8 @@ export const GET = withErrorHandler(async (req) => {
     pnl: {
       income: { perKg, perItem, total: totalIncome },
       unpaidBalance,
+      cashCollected,
+      cashCollectedByMonth,
       expenses,
       totalExpenses,
       netProfit,

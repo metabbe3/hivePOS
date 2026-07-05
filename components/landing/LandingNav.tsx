@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { BrandMark } from "@/components/public/brand-logo";
@@ -14,41 +13,23 @@ import {
 } from "@/components/ui/sheet";
 import { SAAS_NAV_LINKS } from "@/lib/landing-data-saas";
 
+/**
+ * Solid sticky nav. No glassmorphism, no scroll listener (always bordered white),
+ * one line at md+, 64px tall. Single accent (brand) on the wordmark + primary CTA.
+ */
 export function LandingNav() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 10);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <nav
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "glass-card border-b border-zinc-200/60"
-          : "border-b border-transparent bg-transparent"
-      }`}
-    >
-      <div
-        className={`mx-auto flex items-center justify-between px-6 transition-all duration-300 ${
-          scrolled ? "h-16 max-w-6xl" : "h-20 max-w-6xl"
-        }`}
-      >
+    <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-6">
         {/* Logo */}
         <Link
           href="/"
-          className="group flex items-center gap-2 text-xl font-extrabold font-display tracking-tight text-zinc-900"
+          className="flex items-center gap-2 font-display text-xl font-extrabold tracking-tight text-slate-900"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-600/25 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
-            <BrandMark className="h-5 w-5" />
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
+            <BrandMark className="h-4 w-4" />
           </span>
-          <span>
-            hive<span className="text-indigo-600">POS</span>
-          </span>
+          hive<span className="text-brand">POS</span>
         </Link>
 
         {/* Desktop nav */}
@@ -57,25 +38,24 @@ export function LandingNav() {
             <a
               key={link.href}
               href={link.href}
-              className="group relative rounded-lg px-4 py-2 text-sm font-semibold text-zinc-600 transition-colors duration-200 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+              className="rounded-md px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             >
               {link.label}
-              <span className="absolute bottom-1 left-1/2 h-0.5 w-0 -translate-x-1/2 rounded-full bg-secondary transition-all duration-300 group-hover:w-[calc(100%-2rem)]" />
             </a>
           ))}
         </div>
 
         {/* CTAs */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Link
             href="/login"
-            className="hidden text-sm font-semibold text-zinc-600 transition-colors duration-200 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 rounded-lg px-3 py-2 sm:inline-block"
+            className="hidden rounded-md px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:inline-block"
           >
             Masuk
           </Link>
           <Link
             href="/register"
-            className="hidden rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/25 transition-all duration-200 hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-600/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 sm:inline-flex sm:items-center"
+            className="hidden rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 active:scale-[0.98] sm:inline-flex sm:items-center"
           >
             Daftar Bisnis
           </Link>
@@ -88,7 +68,7 @@ export function LandingNav() {
                   <button
                     type="button"
                     aria-label="Buka menu"
-                    className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-700 transition-colors hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   />
                 }
               >
@@ -96,11 +76,11 @@ export function LandingNav() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] bg-white pt-14 px-6">
                 <SheetHeader>
-                  <SheetTitle className="font-display text-xl font-extrabold flex items-center gap-2">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 text-white">
+                  <SheetTitle className="flex items-center gap-2 font-display text-xl font-extrabold">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
                       <BrandMark className="h-4 w-4" />
                     </span>
-                    hive<span className="text-indigo-600">POS</span>
+                    hive<span className="text-brand">POS</span>
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="mt-6 flex flex-col gap-1">
@@ -110,23 +90,23 @@ export function LandingNav() {
                       render={
                         <a
                           href={link.href}
-                          className="rounded-xl px-4 py-3.5 text-sm font-semibold text-zinc-700 transition-all hover:bg-indigo-50 hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                          className="rounded-lg px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                         />
                       }
                     >
                       {link.label}
                     </SheetClose>
                   ))}
-                  <div className="mt-6 flex flex-col gap-3">
+                  <div className="mt-4 flex flex-col gap-2">
                     <Link
                       href="/login"
-                      className="rounded-full border-2 border-zinc-200 py-3 text-center text-sm font-bold text-zinc-700 transition-colors hover:bg-zinc-50"
+                      className="rounded-full border border-slate-300 py-2.5 text-center text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
                     >
                       Masuk
                     </Link>
                     <Link
                       href="/register"
-                      className="rounded-full bg-indigo-600 py-3 text-center text-sm font-bold text-white shadow-lg shadow-indigo-600/25 transition-colors hover:bg-indigo-700"
+                      className="rounded-full bg-brand py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-brand-700"
                     >
                       Daftar Bisnis
                     </Link>

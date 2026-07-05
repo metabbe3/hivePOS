@@ -13,6 +13,7 @@ import { LandingFAQ } from "@/components/landing/LandingFAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { SAAS_FAQS } from "@/lib/landing-data-saas";
+import { BLOG_POST_CARDS } from "@/lib/blog-posts";
 
 export const metadata: Metadata = {
   title: "hivePOS — Kasir Laundry Online | Alternatif Moka POS untuk UMKM",
@@ -77,10 +78,10 @@ export default function LandingPage() {
         <HowItWorks />
         <PricingSection />
         {/* Internal SEO link — keyword-rich anchor to the comparison page */}
-        <div className="border-t border-zinc-200 bg-white py-5 text-center">
+        <div className="border-t border-slate-200 bg-white py-5 text-center">
           <Link
             href="/alternatif-moka-pos-laundry"
-            className="text-sm font-semibold text-indigo-600 hover:underline"
+            className="text-sm font-semibold text-brand hover:underline"
           >
             Sedang cari alternatif Moka POS untuk laundry? → Lihat perbandingan lengkap hivePOS vs Moka POS
           </Link>
@@ -88,6 +89,45 @@ export default function LandingPage() {
         <WebsiteSpotlight />
         <BetaPartnerCTA />
         <LandingFAQ />
+
+        {/* Artikel Terbaru — internal links from the homepage de-orphan the blog
+            so Google crawls it (otherwise the blog is reachable only via sitemap). */}
+        <section className="border-t border-slate-200 bg-white">
+          <div className="mx-auto max-w-6xl px-5 py-16 sm:px-6">
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <h2 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                  Artikel Terbaru
+                </h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  Tips &amp; panduan bisnis laundry dari tim hivePOS.
+                </p>
+              </div>
+              <Link
+                href="/blog"
+                className="hidden rounded-md text-sm font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:inline-block"
+              >
+                Lihat semua →
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {BLOG_POST_CARDS.slice(0, 6).map((post) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="block rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  <h3 className="font-semibold text-slate-900">{post.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-500 line-clamp-3">
+                    {post.description}
+                  </p>
+                  <span className="mt-3 inline-block text-sm font-medium text-brand">Baca →</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <FinalCTA />
       </div>
       <LandingFooter />

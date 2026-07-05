@@ -8,6 +8,7 @@ import type {
   BranchCoverageInfo,
   TenantLimits,
   PromoCodeRecord,
+  TenantPlan,
 } from "../domain/types";
 import type { OutletCoverageSummary, PromoValidationResult } from "@/lib/billing";
 
@@ -27,8 +28,20 @@ export function mockBillingRepo(
       .fn<(tenantId: string) => Promise<boolean>>()
       .mockResolvedValue(false),
     validatePromoCode: vi
-      .fn<(code: string, tenantId: string) => Promise<PromoValidationResult>>()
+      .fn<
+        (
+          code: string,
+          tenantId: string,
+          planTier?: "GROWTH" | "PRO",
+        ) => Promise<PromoValidationResult>
+      >()
       .mockResolvedValue({ valid: false }),
+    getTenantPlan: vi
+      .fn<(tenantId: string) => Promise<TenantPlan>>()
+      .mockResolvedValue("FREE"),
+    getTierUnitPrice: vi
+      .fn<(tier: "GROWTH" | "PRO") => Promise<number>>()
+      .mockImplementation(async (tier) => (tier === "PRO" ? 79000 : 49000)),
     redeemPromoCode: vi
       .fn<(promoCodeId: string, tenantId: string) => Promise<void>>()
       .mockResolvedValue(undefined),
@@ -176,6 +189,7 @@ export function testPromoCode(
     validFrom: null,
     validUntil: null,
     isActive: true,
+    applicablePlan: null,
     ...overrides,
   };
 }

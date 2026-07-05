@@ -52,12 +52,14 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   SuperAdmin: 'SuperAdmin',
+  BlogPost: 'BlogPost',
   AuditLog: 'AuditLog',
   ErrorLog: 'ErrorLog',
   SupportTicket: 'SupportTicket',
   TicketComment: 'TicketComment',
   Plan: 'Plan',
   Tenant: 'Tenant',
+  Referral: 'Referral',
   Subscription: 'Subscription',
   Branch: 'Branch',
   User: 'User',
@@ -112,6 +114,24 @@ export const SuperAdminScalarFieldEnum = {
 } as const
 
 export type SuperAdminScalarFieldEnum = (typeof SuperAdminScalarFieldEnum)[keyof typeof SuperAdminScalarFieldEnum]
+
+
+export const BlogPostScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  description: 'description',
+  keywords: 'keywords',
+  content: 'content',
+  coverImage: 'coverImage',
+  published: 'published',
+  publishedAt: 'publishedAt',
+  authorId: 'authorId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BlogPostScalarFieldEnum = (typeof BlogPostScalarFieldEnum)[keyof typeof BlogPostScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {
@@ -203,6 +223,7 @@ export const PlanScalarFieldEnum = {
   modules: 'modules',
   features: 'features',
   isActive: 'isActive',
+  tier: 'tier',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -223,15 +244,33 @@ export const TenantScalarFieldEnum = {
   settings: 'settings',
   isActive: 'isActive',
   approvedAt: 'approvedAt',
+  onboardingCompletedAt: 'onboardingCompletedAt',
+  isDemo: 'isDemo',
+  demoExpiresAt: 'demoExpiresAt',
   trialEndsAt: 'trialEndsAt',
   trialTier: 'trialTier',
   websiteEnabled: 'websiteEnabled',
   websitePublishedAt: 'websitePublishedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  referralCode: 'referralCode'
 } as const
 
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const ReferralScalarFieldEnum = {
+  id: 'id',
+  referrerId: 'referrerId',
+  referredId: 'referredId',
+  status: 'status',
+  rewardMonths: 'rewardMonths',
+  reason: 'reason',
+  createdAt: 'createdAt',
+  rewardedAt: 'rewardedAt'
+} as const
+
+export type ReferralScalarFieldEnum = (typeof ReferralScalarFieldEnum)[keyof typeof ReferralScalarFieldEnum]
 
 
 export const SubscriptionScalarFieldEnum = {
@@ -344,6 +383,7 @@ export const ServiceScalarFieldEnum = {
   commissionValue: 'commissionValue',
   module: 'module',
   isActive: 'isActive',
+  isDefaultSpeed: 'isDefaultSpeed',
   branchId: 'branchId',
   groupId: 'groupId',
   createdAt: 'createdAt',
@@ -553,6 +593,7 @@ export const PromoCodeScalarFieldEnum = {
   validFrom: 'validFrom',
   validUntil: 'validUntil',
   isActive: 'isActive',
+  applicablePlan: 'applicablePlan',
   createdAt: 'createdAt'
 } as const
 
@@ -671,6 +712,14 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -678,12 +727,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

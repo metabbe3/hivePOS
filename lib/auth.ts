@@ -45,6 +45,9 @@ const loginSchema = z.object({
   // ponytail: scope gates which user table authorize checks. "super-admin" → SuperAdmin table only.
   // absent → User table only, and super-admin emails are silently rejected so they're forced to /super-admin/login.
   scope: z.enum(["super-admin"]).optional(),
+  // remember-me: when false the jwt callback caps the session at 8h (else 30d).
+  // NextAuth form-encodes credentials, so this arrives as "true"/"false" string.
+  remember: z.any().optional(),
 });
 
 /**
@@ -96,7 +99,7 @@ export async function loadRoleContext(userId: string, legacyRole: string) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 }, // 30 days (remember-me default)
   secret: authSecret,
   // ponytail: Cloudflare Tunnel is non-Vercel — Auth.js v5 only auto-trusts
   // host on Vercel. Without this, every OAuth callback throws Configuration.
@@ -113,6 +116,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // ponytail: scope isn't a UI field but NextAuth drops undeclared keys.
         // Declaring it lets /super-admin/login pass scope:"super-admin" through to authorize.
         scope: { label: "Scope", type: "text" },
+        remember: { label: "Remember", type: "text" },
       },
       async authorize(credentials) {
         // ponytail: rate-limit by client IP — 10 credential attempts per minute.
@@ -129,7 +133,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        const { email, password, scope } = parsed.data;
+        const { email, password, scope, remember } = parsed.data;
+        const rememberBool = remember === true || remember === "true";
 
         // Super-admin branch: only entered when scope === "super-admin" (set by /super-admin/login).
         if (scope === "super-admin") {
@@ -150,6 +155,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 permissions: ["*"],
                 roleId: undefined,
                 roleName: "Super Admin",
+                remember: rememberBool,
               } as any;
             }
           }
@@ -204,6 +210,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           roleName: roleCtx.roleName,
           // ponytail: signIn callback reads this to redirect pending users to /login?error=pending-approval.
           tenantApprovedAt: user.tenant?.approvedAt ?? null,
+          onboardingCompletedAt: user.tenant?.onboardingCompletedAt?.toISOString() ?? null,
+          isDemo: user.tenant?.isDemo ?? false,
+          remember: rememberBool,
         } as any;
       },
     }),
@@ -314,6 +323,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.branchName = (user as any).branchName;
         token.tenantName = (user as any).tenantName;
         token.tenantSlug = (user as any).tenantSlug;
+        token.onboardingCompletedAt = (user as any).onboardingCompletedAt ?? null;
+        token.isDemo = (user as any).isDemo ?? false;
         const mods: string[] = (user as any).activeModules ?? ["laundry"];
         token.activeModules = mods;
         token.activeModule = mods[0] ?? "laundry";
@@ -326,6 +337,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (token.tenantId) {
           token.featureFlags = await resolveAllFlagsSafe(token.tenantId as string);
         }
+        // Remember-me: when unchecked, the expiry check below caps the session at 8h.
+        token.remember = (user as any).remember !== false;
+        token.sessionStartedAt = token.sessionStartedAt ?? Date.now();
       }
 
       // ─── Google OAuth: enrich from DB (user object only has Google data) ───
@@ -341,6 +355,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.branchName = dbUser.branch?.name ?? "";
           token.tenantName = dbUser.tenant.name;
           token.tenantSlug = dbUser.tenant.slug;
+          token.onboardingCompletedAt = dbUser.tenant.onboardingCompletedAt?.toISOString() ?? null;
+          token.isDemo = dbUser.tenant.isDemo;
           const mods: string[] = dbUser.tenant.activeModules ?? ["laundry"];
           token.activeModules = mods;
           token.activeModule = mods[0] ?? "laundry";
@@ -395,6 +411,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (token.tenantId) {
             token.featureFlags = await resolveAllFlagsSafe(token.tenantId as string);
           }
+        }
+
+        // ─── Onboarding refresh: after the owner finishes/skips the wizard, the
+        // /onboarding page calls update({ refreshOnboarding: true }) to pull the
+        // new timestamp into the JWT so /dashboard stops redirecting back. ───
+        if ((updateSession as any).refreshOnboarding === true && token.tenantId) {
+          const ob = await prisma.tenant.findUnique({
+            where: { id: token.tenantId as string },
+            select: { onboardingCompletedAt: true },
+          });
+          token.onboardingCompletedAt = ob?.onboardingCompletedAt?.toISOString() ?? null;
         }
 
         // ─── Impersonation: start by swapping token claims, stop by restoring. ───
@@ -461,6 +488,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.branchName = target.branch?.name ?? "";
             token.tenantName = target.tenant.name;
             token.tenantSlug = target.tenant.slug;
+            token.onboardingCompletedAt = target.tenant.onboardingCompletedAt?.toISOString() ?? null;
+            token.isDemo = target.tenant.isDemo;
             const mods: string[] = target.tenant.activeModules ?? ["laundry"];
             token.activeModules = mods;
             token.activeModule = mods[0] ?? "laundry";
@@ -474,6 +503,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       }
 
+      // Remember-me: when "remember" was unchecked, invalidate the session after 8h.
+      if (
+        token.remember === false &&
+        typeof token.sessionStartedAt === "number" &&
+        Date.now() - (token.sessionStartedAt as number) > 8 * 60 * 60 * 1000
+      ) {
+        return null as any;
+      }
       return token;
     },
     async session({ session, token }) {
@@ -492,6 +529,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (session.user as any).roleName = token.roleName;
         (session.user as any).sessionVersion = token.sessionVersion;
         (session.user as any).featureFlags = token.featureFlags;
+        (session.user as any).onboardingCompletedAt = token.onboardingCompletedAt;
+        (session.user as any).isDemo = token.isDemo;
         (session.user as any).impersonating = !!token.preImpersonation;
         if (token.preImpersonation) {
           (session.user as any).impersonatedEmail = (session.user as any).email;

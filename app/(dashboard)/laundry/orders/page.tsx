@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { flushSync } from "react-dom";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useRole } from "@/hooks/use-role";
+import { usePermissions } from "@/hooks/use-permissions";
 import { useTranslation } from "@/hooks/use-translation";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 import {
   Search, ChevronLeft, ChevronRight, Loader2,
   ArrowUpDown, MessageCircle, FileText, Trash2, Pencil,
   Clock, Package, CheckCircle2, Truck, List, Inbox,
   Banknote,
+  QrCode,
   type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
@@ -34,6 +39,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { EmptyState } from "@/components/shared/empty-state";
 import { apiFetch, ApiClientError } from "@/modules/shared";
+import { useUrlState } from "@/hooks/use-url-filters";
 
 interface Order {
   id: string;
@@ -60,7 +66,11 @@ interface OrderDetail extends Order {
 
 function getDateRange(from: string, to: string) {
   const today = new Date();
-  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  // Local-calendar YYYY-MM-DD (NOT toISOString, which shifts to UTC and leaks
+  // the previous day into "this month"/"today"). The server reads this as a
+  // WIB calendar day via wibDateBounds.
+  const fmt = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
   let dateFrom = "";
   switch (from) {
@@ -83,27 +93,50 @@ function getDateRange(from: string, to: string) {
 export default function OrdersPage() {
   const router = useRouter();
   const { isEmployee } = useRole();
+  const { can } = usePermissions();
   const { t } = useTranslation();
   const confirm = useConfirm();
   const whatsappTemplates = useWhatsappTemplates();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  // Filters are URL-backed (useUrlState) so they survive list→detail→back, refresh, + share.
+  const [search, setSearch] = useUrlState("search", "");
   const debouncedSearch = useDebounce(search, 300);
-  const [status, setStatus] = useState("ALL");
-  const [page, setPage] = useState(1);
+  const [status, setStatus] = useUrlState("status", "ALL");
+  const [pageStr, setPageStr] = useUrlState("page", "1");
+  const page = Math.max(1, parseInt(pageStr, 10) || 1);
   const [totalPages, setTotalPages] = useState(1);
   const [advancing, setAdvancing] = useState<string | null>(null);
 
   // Payment dialog
   const [payDialogOpen, setPayDialogOpen] = useState(false);
   const [payOrder, setPayOrder] = useState<Order | null>(null);
-  const [payForm, setPayForm] = useState({ amount: "", paymentMethod: "CASH" as "CASH" | "DEPOSIT" | "QRIS" | "TRANSFER", notes: "", paidAt: new Date().toISOString().slice(0, 10) });
+  const [payForm, setPayForm] = useState({ amount: "", paymentMethod: "QRIS" as "CASH" | "DEPOSIT" | "QRIS" | "TRANSFER", notes: "", paidAt: new Date().toISOString().slice(0, 10) });
+  const orderFlowV2 = useFeatureFlag("orderFlowV2");
+  const payFormRef = useRef<HTMLFormElement>(null);
+  // orderFlowV2: one-tap "paid exact, via QRIS, now" (amount is pre-filled with the
+  // remaining balance when the dialog opens — see openPayDialog).
+  const quickPay = () => {
+    const remaining = payOrder ? payOrder.totalAmount - payOrder.paidAmount : 0;
+    // flushSync commits the form state before submit so handlePayment reads the
+    // quick-pay values deterministically (no React-batching race on payment).
+    flushSync(() => {
+      setPayForm({
+        amount: String(remaining),
+        paymentMethod: "QRIS",
+        notes: "",
+        paidAt: new Date().toISOString().slice(0, 10),
+      });
+    });
+    payFormRef.current?.requestSubmit();
+  };
 
   // Filters
-  const [sortValue, setSortValue] = useState("createdAt_desc");
-  const [paymentFilter, setPaymentFilter] = useState("ALL");
-  const [dateRangeIdx, setDateRangeIdx] = useState(0);
+  const [sortValue, setSortValue] = useUrlState("sort", "receivedAt_desc");
+  const [paymentFilter, setPaymentFilter] = useUrlState("payment", "ALL");
+  const [rangeStr, setRangeStr] = useUrlState("range", "0");
+  const [customDateFrom, setCustomDateFrom] = useUrlState("from", "");
+  const [customDateTo, setCustomDateTo] = useUrlState("to", "");
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
 
   const NEXT_ACTION: Record<string, { label: string; status: string }> = {
@@ -113,8 +146,8 @@ export default function OrdersPage() {
   };
 
   const SORT_OPTIONS = [
-    { value: "createdAt_desc", label: t("orders.newestFirst") },
-    { value: "createdAt_asc", label: t("orders.oldestFirst") },
+    { value: "receivedAt_desc", label: t("orders.newestFirst") },
+    { value: "receivedAt_asc", label: t("orders.oldestFirst") },
     { value: "totalAmount_desc", label: t("orders.totalHighLow") },
     { value: "totalAmount_asc", label: t("orders.totalLowHigh") },
     { value: "customerName_asc", label: t("orders.customerAZ") },
@@ -129,8 +162,7 @@ export default function OrdersPage() {
     { label: t("dateRange.custom"), from: "custom", to: "custom" },
   ];
 
-  const [customDateFrom, setCustomDateFrom] = useState("");
-  const [customDateTo, setCustomDateTo] = useState("");
+  const dateRangeIdx = Math.max(0, Math.min(DATE_RANGES.length - 1, parseInt(rangeStr, 10) || 0));
 
   const [sortBy, sortOrder] = sortValue.split("_") as [string, string];
 
@@ -168,8 +200,8 @@ export default function OrdersPage() {
 
   // Reset page when filters change
   useEffect(() => {
-    setPage(1);
-  }, [status, debouncedSearch, sortValue, paymentFilter, dateRangeIdx]);
+    setPageStr("1");
+  }, [status, debouncedSearch, sortValue, paymentFilter, dateRangeIdx, setPageStr]);
 
   useEffect(() => {
     Promise.all([
@@ -268,7 +300,7 @@ export default function OrdersPage() {
     e.stopPropagation();
     const remaining = order.totalAmount - order.paidAmount;
     setPayOrder(order);
-    setPayForm({ amount: String(remaining), paymentMethod: "CASH", notes: "", paidAt: new Date().toISOString().slice(0, 10) });
+    setPayForm({ amount: String(remaining), paymentMethod: "QRIS", notes: "", paidAt: new Date().toISOString().slice(0, 10) });
     setPayDialogOpen(true);
   }
 
@@ -292,7 +324,7 @@ export default function OrdersPage() {
             <Banknote className="h-4 w-4" />
           </button>
         )}
-        {!isEmployee && order.status !== "DELIVERED" && (
+        {can("orders", "edit") && order.status !== "DELIVERED" && (
           <button
             type="button"
             aria-label={t("orders.editOrder")}
@@ -320,7 +352,7 @@ export default function OrdersPage() {
         >
           <FileText className="h-4 w-4" />
         </button>
-        {!isEmployee && (
+        {can("orders", "delete") && (
           <button
             type="button"
             aria-label="Delete"
@@ -467,7 +499,7 @@ export default function OrdersPage() {
               <button
                 key={i}
                 type="button"
-                onClick={() => setDateRangeIdx(i)}
+                onClick={() => setRangeStr(String(i))}
                 className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   dateRangeIdx === i
                     ? "bg-background text-foreground shadow-sm"
@@ -593,7 +625,7 @@ export default function OrdersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => setPageStr(String(Math.max(1, page - 1)))}
                 disabled={page <= 1}
                 className="rounded-lg"
               >
@@ -606,7 +638,7 @@ export default function OrdersPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => setPageStr(String(Math.min(totalPages, page + 1)))}
                 disabled={page >= totalPages}
                 className="rounded-lg"
               >
@@ -627,7 +659,24 @@ export default function OrdersPage() {
               <p className="text-sm text-muted-foreground">{payOrder.orderNumber} — {payOrder.customerName}</p>
             )}
           </DialogHeader>
-          <form onSubmit={handlePayment} className="space-y-4">
+          {orderFlowV2 && payOrder && payOrder.totalAmount - payOrder.paidAmount > 0 && (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    onClick={quickPay}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+                  />
+                }
+              >
+                <QrCode className="h-4 w-4" />
+                {t("orderDetails.paidQrisNow")}
+              </TooltipTrigger>
+              <TooltipContent>{t("orderDetails.quickPayHint")}</TooltipContent>
+            </Tooltip>
+          )}
+          <form ref={payFormRef} onSubmit={handlePayment} className="space-y-4">
             <div className="space-y-2">
               <Label>{t("orderDetails.amount")}</Label>
               <Input

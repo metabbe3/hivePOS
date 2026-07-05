@@ -39,6 +39,7 @@ export interface FieldDef {
   step?: number;
   pattern?: string;
   showPasswordToggle?: boolean; // only for type: "password"
+  autocomplete?: string;        // e.g. "email", "current-password" — enables password-manager / Face ID autofill
 
   // select options (static or async)
   options?: { label: string; value: string }[];

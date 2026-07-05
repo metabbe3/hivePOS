@@ -935,7 +935,7 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
 
       {/* Customer Quick-Add Modal */}
       <Dialog open={custModalOpen} onOpenChange={setCustModalOpen}>
-        <DialogContent className="sm:max-w-md rounded-xl">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-sky-600" />

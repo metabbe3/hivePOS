@@ -1,5 +1,5 @@
 import { NotFoundError } from "@/modules/shared";
-import { endOfDay } from "@/lib/dates";
+import { wibDateBounds } from "@/lib/dates";
 import type { OrderRepository, ListOrdersQuery } from "../domain/repository.port";
 import type { RequestContext } from "./context";
 import {
@@ -75,13 +75,9 @@ export class ListOrdersService {
     const sortBy = (input.sortBy ?? "createdAt") as ListOrdersQuery["sortBy"];
     const sortOrder = (input.sortOrder ?? "desc") as ListOrdersQuery["sortOrder"];
 
-    // Date range filter
-    let dateFrom: Date | undefined;
-    let dateTo: Date | undefined;
-    if (input.dateFrom) dateFrom = new Date(input.dateFrom);
-    if (input.dateTo) {
-      dateTo = endOfDay(new Date(input.dateTo));
-    }
+    // Date range filter — interpret YYYY-MM-DD as WIB (UTC+7) calendar days so
+    // "this month"/"today" match the Indonesian business day, not a UTC-shifted one.
+    const dateBounds = wibDateBounds({ from: input.dateFrom, to: input.dateTo });
 
     const query: ListOrdersQuery = {
       branchIds: ctx.branchIds,
@@ -89,7 +85,9 @@ export class ListOrdersService {
       ...(status ? { status } : {}),
       ...(paymentStatus ? { paymentStatus } : {}),
       ...(input.search ? { search: input.search } : {}),
-      ...(dateFrom || dateTo ? { dateFrom, dateTo } : {}),
+      ...(dateBounds.gte || dateBounds.lte
+        ? { dateFrom: dateBounds.gte, dateTo: dateBounds.lte }
+        : {}),
       sortBy,
       sortOrder,
       page,

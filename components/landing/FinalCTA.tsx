@@ -1,71 +1,48 @@
 import Link from "next/link";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
 import { ScrollReveal } from "./ScrollReveal";
 
+/**
+ * Solid brand-accent close. No animated mesh, no glass orbs, no dot grid.
+ * One primary CTA (register) + one WhatsApp secondary. The single accent moment.
+ */
 export function FinalCTA() {
   return (
-    <section className="relative overflow-hidden border-t border-zinc-200 bg-indigo-600 py-14 sm:py-20 md:py-28">
-      {/* Animated gradient mesh */}
-      <div
-        className="absolute inset-0 animate-gradient"
-        style={{
-          background:
-            "linear-gradient(120deg, #1d4ed8 0%, #2563eb 30%, #3b82f6 60%, #1d4ed8 100%)",
-        }}
-        aria-hidden="true"
-      />
-
-      {/* Dot grid overlay */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage:
-            "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-        aria-hidden="true"
-      />
-
-      {/* Floating glass orbs */}
-      <div
-        className="absolute -left-20 top-1/4 h-64 w-64 rounded-full bg-white/10 blur-3xl"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute -right-20 bottom-1/4 h-72 w-72 rounded-full bg-secondary/20 blur-3xl"
-        aria-hidden="true"
-      />
-
-      <div className="relative mx-auto max-w-4xl px-6 text-center">
+    <section className="bg-sky-700 py-20 md:py-28">
+      <div className="mx-auto max-w-4xl px-5 text-center sm:px-6">
         <ScrollReveal>
-          <h2 className="mb-6 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl md:text-6xl">
-            Buka Browser. Kasir Jalan.
+          <h2 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
+            Buka browser. Kasir jalan.
           </h2>
-        </ScrollReveal>
-
-        <ScrollReveal delay={1}>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-indigo-100">
-            Buka browser, langsung jalan. Gratis 1 outlet selamanya, tanpa kartu
-            kredit. Mulai hari ini, bukan bulan depan.
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-white/85">
+            Gratis 1 outlet selamanya, tanpa kartu kredit. Mulai hari ini, bukan
+            bulan depan.
           </p>
         </ScrollReveal>
 
-        <ScrollReveal delay={2}>
-          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <ScrollReveal delay={1}>
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="group flex w-full items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-lg font-bold text-indigo-600 shadow-2xl transition-all duration-200 hover:bg-indigo-50 hover:shadow-indigo-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-600 sm:w-auto sm:px-10"
+              className="group flex w-full items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-bold text-brand shadow-sm transition-all hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand active:scale-[0.98] sm:w-auto"
             >
               Daftar Sekarang
-              <ArrowRight className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-1" />
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/demo"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-8 py-3.5 text-base font-bold text-white transition-all hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand sm:w-auto"
+            >
+              <Sparkles className="h-4 w-4" />
+              Coba Demo
             </Link>
             <a
               href="https://wa.me/6285121309381?text=Halo%20saya%20tertarik%20dengan%20hivePOS"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-indigo-300 bg-white/10 px-8 py-4 text-lg font-bold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-600 sm:w-auto sm:px-10"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-8 py-3.5 text-base font-bold text-white transition-all hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand sm:w-auto"
             >
-              <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="h-4 w-4" />
               Chat WhatsApp
             </a>
           </div>

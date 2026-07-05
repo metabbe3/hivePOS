@@ -26,6 +26,10 @@ declare module "next-auth" {
       impersonatedEmail?: string;
       /** Resolved feature flags for this tenant (key → enabled). */
       featureFlags?: Record<string, boolean>;
+      /** ISO timestamp the owner finished/skipped onboarding; null until then. */
+      onboardingCompletedAt?: string | null;
+      /** True for sandbox demo tenants (isolated, auto-expiring). */
+      isDemo?: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -46,6 +50,10 @@ declare module "next-auth/jwt" {
     roleName?: string;
     /** Resolved feature flags for this tenant (key → enabled). */
     featureFlags?: Record<string, boolean>;
+    /** ISO timestamp the owner finished/skipped onboarding; null until then. */
+    onboardingCompletedAt?: string | null;
+    /** True for sandbox demo tenants (isolated, auto-expiring). */
+    isDemo?: boolean;
     /** When set, current token is an impersonation session. Restoring this object stops impersonation. */
     preImpersonation?: {
       sub: string;

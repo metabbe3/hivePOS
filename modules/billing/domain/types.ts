@@ -15,6 +15,7 @@ export type {
   BillCalculation,
   LimitType,
   LimitCheckResult,
+  TenantPlan,
 } from "@/lib/billing";
 
 export {
@@ -24,6 +25,8 @@ export {
   FREE_TIER,
   addMonths,
   calculateBill,
+  getTenantPlan,
+  getTierUnitPrice,
 } from "@/lib/billing";
 
 // ── Persistence-shaped types (no Prisma import) ────────────────────────
@@ -51,6 +54,7 @@ export interface PromoCodeRecord {
   validFrom: Date | null;
   validUntil: Date | null;
   isActive: boolean;
+  applicablePlan: string | null;
 }
 
 /** Branch info used by checkout validation. */

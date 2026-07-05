@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useRole } from "@/hooks/use-role";
 import { useTranslation } from "@/hooks/use-translation";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { toast } from "sonner";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Calendar, Activity, Wallet, Users } from "lucide-react";
+import { RefreshCw, Calendar, Activity, Wallet, Users, Sparkles } from "lucide-react";
 import { DashboardSkeleton } from "@/components/shared/loading";
+import { EmptyState } from "@/components/shared/empty-state";
 import { DateRangePicker } from "@/components/shared/date-range-picker";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
@@ -74,20 +76,31 @@ export default function DashboardPage() {
   const [dateFrom, setDateFrom] = useState(() => {
     const d = new Date();
     d.setDate(1);
-    return d.toISOString().slice(0, 10);
+    // Local-calendar date (NOT toISOString → no UTC shift). Matches WIB business day.
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   });
-  const [dateTo, setDateTo] = useState(() => new Date().toISOString().slice(0, 10));
+  const [dateTo, setDateTo] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
 
   const router = useRouter();
   const { isEmployee, isSuperAdmin, isLoading: roleLoading } = useRole();
   const { data: session } = useSession();
   const { t } = useTranslation();
+  const onboardingWizard = useFeatureFlag("onboardingWizard");
+  // OWNERs who haven't finished onboarding are nudged to /onboarding once.
+  const pendingOnboarding =
+    onboardingWizard &&
+    session?.user?.role === "OWNER" &&
+    !session?.user?.onboardingCompletedAt;
 
   useEffect(() => {
     if (roleLoading) return;
     if (isSuperAdmin) router.replace("/super-admin");
     else if (isEmployee) router.replace("/laundry/orders");
-  }, [isEmployee, isSuperAdmin, roleLoading, router]);
+    else if (pendingOnboarding) router.replace("/onboarding");
+  }, [isEmployee, isSuperAdmin, roleLoading, router, pendingOnboarding]);
 
   // ponytail: skip fetches until role resolves — super-admins/employees get
   // redirected by the effect above, and firing these with their null-tenantId
@@ -130,10 +143,14 @@ export default function DashboardPage() {
       .finally(() => setSpinning(false));
   }, [dateFrom, dateTo, granularity, t]);
 
-  if (roleLoading || isEmployee || isSuperAdmin) return null;
+  if (roleLoading || isEmployee || isSuperAdmin || pendingOnboarding) return null;
   if (!stats) return <DashboardSkeleton />;
 
   const userName = session?.user?.name || session?.user?.email?.split("@")[0] || "there";
+  // Brand-new tenant (no customers yet) → show a welcome panel instead of a wall
+  // of zero-stat cards. customerInsights.total is a customers-ever count, so this
+  // flips off the moment they add their first customer / ring their first order.
+  const isNewTenant = stats.customerInsights.total === 0;
 
   return (
     <TooltipProvider>
@@ -179,6 +196,19 @@ export default function DashboardPage() {
           />
         </div>
 
+        {isNewTenant ? (
+          <EmptyState
+            icon={Sparkles}
+            title={t("dashboard.welcomeTitle")}
+            description={t("dashboard.welcomeBody")}
+            actions={[
+              { label: t("dashboard.welcomeFirstOrder"), onClick: () => router.push("/laundry/orders/new") },
+              { label: t("dashboard.welcomeAddCustomer"), variant: "outline", onClick: () => router.push("/customers") },
+              { label: t("dashboard.welcomeSetup"), variant: "outline", onClick: () => router.push("/services") },
+            ]}
+          />
+        ) : (
+          <>
         {/* Always visible: alerts + hero metrics + quick actions */}
         <AlertSummary
           unpaidOrders={stats.unpaidOrders}
@@ -242,6 +272,8 @@ export default function DashboardPage() {
           <LowStockCard lowStock={stats.lowStock} />
           {heatmap && <HeatmapCard heatmap={heatmap} />}
         </CollapsibleSection>
+          </>
+        )}
       </div>
     </TooltipProvider>
   );

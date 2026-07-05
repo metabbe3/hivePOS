@@ -6,6 +6,46 @@ export const metadata: Metadata = {
   description:
     "Alternatif Moka POS untuk usaha laundry. hivePOS 3.4× lebih murah (Rp 49K vs Rp 169K), browser-native tanpa iPad, khusus laundry kiloan + WhatsApp order. Gratis 1 outlet selamanya.",
   alternates: { canonical: "/alternatif-moka-pos-laundry" },
+  openGraph: {
+    title: "Alternatif Moka POS Laundry Termurah | hivePOS Rp 49K/outlet",
+    description:
+      "Alternatif Moka POS untuk usaha laundry. hivePOS 3.4× lebih murah, browser-native tanpa iPad, khusus laundry kiloan + WhatsApp order.",
+    url: "https://hivepos.id/alternatif-moka-pos-laundry",
+    type: "article",
+  },
+};
+
+// Mirrors the visible <details> FAQ below so Google can earn rich results; keep
+// the answers in sync with the on-page text.
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "Apakah hivePOS bisa menggantikan Moka POS sepenuhnya?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Ya. hivePOS punya semua yang Moka POS tawarkan untuk laundry (kasir, struk, laporan, multi-outlet) PLUS fitur khusus laundry yang Moka tidak punya: kiloan pricing, WhatsApp order, pickup, garment breakdown, dan website laundry.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Susah tidak pindah dari Moka ke hivePOS?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Tidak. Kalau Moka Anda bisa export data (pelanggan, layanan, harga), kami bantu import. Kalau tidak, setup layanan + harga di hivePOS cuma butuh 2 menit. Pelanggan bisa diketik saat order pertama.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Apakah printer thermal saya bisa dipakai di hivePOS?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Ya. hivePOS mendukung printer thermal 58mm dan 80mm via Bluetooth, USB, dan WiFi. Di iPhone/iPad, gunakan WiFi atau Browser Print. Di Android/PC dengan Chrome/Edge, semua metode didukung.",
+      },
+    },
+  ],
 };
 
 export default function AlternatifMokaPage() {
@@ -26,6 +66,7 @@ export default function AlternatifMokaPage() {
 
   return (
     <div className="pub-scope min-h-screen bg-[var(--color-background)]">
+      <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
       <div className="mx-auto max-w-3xl px-6 py-12 sm:py-16">
         <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)] hover:underline mb-8">
           ← Kembali ke Beranda

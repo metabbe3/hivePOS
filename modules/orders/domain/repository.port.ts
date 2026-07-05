@@ -103,7 +103,7 @@ export interface ListOrdersQuery {
   search?: string;
   dateFrom?: Date;
   dateTo?: Date;
-  sortBy?: "createdAt" | "totalAmount" | "customerName";
+  sortBy?: "createdAt" | "receivedAt" | "totalAmount" | "customerName";
   sortOrder?: "asc" | "desc";
   page: number;
   limit: number;

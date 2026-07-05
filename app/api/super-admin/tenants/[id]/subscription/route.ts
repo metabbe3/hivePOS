@@ -8,6 +8,7 @@ import {
 } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { getTenantPlan, type TenantPlan } from "@/lib/billing";
 
 type Op = "extend_trial" | "cancel" | "change_plan" | "mark_paid";
 
@@ -106,6 +107,15 @@ export const PATCH = withErrorHandler(
         }
         if (!tenant.subscription) {
           throw new ConflictError("Tenant has no subscription record");
+        }
+        // Downgrade guard: a Pro tenant cannot be moved to a lower tier.
+        const currentTier = await getTenantPlan(id);
+        const targetTier: TenantPlan =
+          plan.tier ?? (plan.name === "Pro" ? "PRO" : plan.name === "Growth" ? "GROWTH" : "FREE");
+        if (currentTier === "PRO" && targetTier !== "PRO") {
+          throw new ValidationError(
+            "Tenant Pro tidak dapat diturunkan ke paket yang lebih rendah. Gunakan Extend Trial / Mark Paid saja.",
+          );
         }
         const prevPlanId = tenant.subscription.planId;
         await prisma.$transaction(async (tx) => {

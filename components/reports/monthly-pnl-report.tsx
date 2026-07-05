@@ -21,6 +21,8 @@ interface PnlData {
   pnl: {
     income: { perKg: number; perItem: number; total: number };
     unpaidBalance: number;
+    cashCollected: number;
+    cashCollectedByMonth: { month: string; amount: number; isCurrent: boolean }[];
     expenses: { category: string; amount: number }[];
     totalExpenses: number;
     netProfit: number;
@@ -160,6 +162,32 @@ export function MonthlyPnlReport() {
               </div>
             </div>
           )}
+
+          {/* KAS MASUK — cash actually received this month (cash-flow memo, NOT income) */}
+          <div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">
+                Kas Masuk Bulan Ini
+                <span className="ml-1 text-[11px] text-muted-foreground/70">(termasuk pelunasan piutang)</span>
+              </span>
+              <span className="font-medium text-emerald-600">{formatCurrency(pnl.cashCollected)}</span>
+            </div>
+            {pnl.cashCollectedByMonth.length > 0 && (
+              <div className="mt-1 space-y-0.5 pl-3">
+                {pnl.cashCollectedByMonth.map((c) => {
+                  const label = c.isCurrent
+                    ? "Bulan ini"
+                    : `${MONTH_NAMES[parseInt(c.month.slice(5, 7), 10) - 1]} ${c.month.slice(0, 4)}`;
+                  return (
+                    <div key={c.month} className="flex justify-between text-xs text-muted-foreground">
+                      <span>— {label}{!c.isCurrent && " (piutang)"}</span>
+                      <span className="tabular-nums">{formatCurrency(c.amount)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* PENGELUARAN */}
           <div>

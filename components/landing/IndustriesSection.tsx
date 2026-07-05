@@ -1,82 +1,49 @@
-import { Check, Layers } from "lucide-react";
+import { Check } from "lucide-react";
 import { ScrollReveal } from "./ScrollReveal";
 import { SAAS_INDUSTRIES } from "@/lib/landing-data-saas";
 
+/**
+ * Honest single-focus band. SAAS_INDUSTRIES has exactly ONE entry (Laundry),
+ * so a 3-up grid would ship empty cells. Instead: a full-width statement +
+ * 2-column checklist of the laundry module's real capabilities.
+ * On-brand: "fokus kami laundry" reads as anti-bloat, not as a gap.
+ */
 export function IndustriesSection() {
+  const laundry = SAAS_INDUSTRIES[0];
+
   return (
-    <section id="modul" className="bg-white py-14 sm:py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-6">
-        {/* Header */}
-        <ScrollReveal>
-          <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-16">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-1.5 shadow-sm">
-              <Layers className="h-4 w-4 text-indigo-600" />
-              <span className="text-sm font-bold">Modul Bisnis</span>
-            </div>
-            <h2 className="mb-4 font-display text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl md:text-5xl">
-              Dibuat Spesifik untuk{" "}
-              <span className="text-indigo-600">
-                Setiap Industri
-              </span>
+    <section id="modul" className="bg-sky-50 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-5 sm:px-6">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-16">
+          {/* Statement */}
+          <ScrollReveal className="md:col-span-5">
+            <h2 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl">
+              Fokus kami satu: laundry UMKM.
             </h2>
-            <p className="text-lg text-zinc-600">
-              Bukan POS generic. Setiap modul punya workflow dan pricing engine
-              yang dirancang khusus.
+            <p className="mt-5 max-w-md text-base leading-relaxed text-slate-600">
+              Bukan POS serbaguna yang jadi lintang. hivePOS cuma untuk laundry
+              kiloan dan satuan, dirancang untuk 1 sampai 5 outlet. Pas, tidak
+              berlebihan.
             </p>
-          </div>
-        </ScrollReveal>
+            <p className="mt-4 text-sm font-semibold text-brand">
+              {laundry.tagline}
+            </p>
+          </ScrollReveal>
 
-        {/* Cards */}
-        <div className="grid gap-5 sm:gap-6 md:grid-cols-3">
-          {SAAS_INDUSTRIES.map((industry, idx) => {
-            const Icon = industry.icon;
-            return (
-              <ScrollReveal key={industry.name} delay={(idx + 1) as 1 | 2 | 3}>
-                <article className="group h-full rounded-3xl border-2 border-zinc-100 bg-white p-6 transition-all duration-300 hover:-translate-y-2 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-900/5 sm:p-8">
-                  {/* Icon */}
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-white text-indigo-600 transition-all duration-300 group-hover:scale-105 group-hover:from-indigo-600 group-hover:to-indigo-700 group-hover:text-white">
-                    <Icon className="h-7 w-7" />
-                  </div>
-
-                  <div className="mb-3 flex items-center gap-2">
-                    <h3 className="font-display text-xl font-extrabold text-zinc-900 sm:text-2xl">
-                      {industry.name}
-                    </h3>
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                        industry.available
-                          ? "bg-secondary/15 text-secondary"
-                          : "bg-zinc-100 text-zinc-500"
-                      }`}
-                    >
-                      {industry.status}
-                    </span>
-                  </div>
-
-                  <p className="mb-6 text-sm font-medium text-zinc-500">
-                    {industry.tagline}
-                  </p>
-
-                  <ul className="space-y-2.5">
-                    {industry.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-start gap-2 text-sm text-zinc-700"
-                      >
-                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-50">
-                          <Check
-                            className="h-3 w-3 text-indigo-600"
-                            strokeWidth={3}
-                          />
-                        </span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              </ScrollReveal>
-            );
-          })}
+          {/* Checklist */}
+          <ScrollReveal delay={1} className="md:col-span-7">
+            <ul className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+              {laundry.features.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-start gap-3 border-t border-slate-200 pt-4 text-sm text-slate-700"
+                >
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" strokeWidth={2.5} />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </ScrollReveal>
         </div>
       </div>
     </section>

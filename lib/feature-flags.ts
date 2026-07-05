@@ -79,6 +79,13 @@ export const FLAG_KEYS = [
   "offlineOrderCreate",
   "printerSettings",
   "orderPhotos",
+  // Referral program (reward on first paid payment). Platform kill-switch —
+  // flip off globally if abused; per-tenant override for dogfooding/targeting.
+  "referralProgram",
+  // Friction reduction (see docs/specs/customer-csv-import.md & onboarding-wizard.md).
+  "customersImportExport",
+  "onboardingWizard",
+  "orderFlowV2",
 ] as const;
 
 export type FlagKey = (typeof FLAG_KEYS)[number];

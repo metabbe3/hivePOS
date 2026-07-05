@@ -140,7 +140,7 @@ export const SAAS_FEATURES: SaasFeature[] = [
   {
     icon: BarChart3,
     title: "Pantau dari HP",
-    desc: "Pendapatan, order hari ini, performa outlet — semua otomatis. Buka di HP, tablet, atau laptop.",
+    desc: "Pendapatan, order hari ini, performa outlet, semua otomatis. Buka di HP, tablet, atau laptop.",
     span: "md:col-span-2",
     visual: "chart",
   },
@@ -172,7 +172,7 @@ export const SAAS_FEATURES: SaasFeature[] = [
   {
     icon: Smartphone,
     title: "Jalan di Apa Aja",
-    desc: "HP Android, iPhone, tablet, laptop — hivePOS jalan di browser apapun. Tanpa install app.",
+    desc: "HP Android, iPhone, tablet, laptop. hivePOS jalan di browser apapun. Tanpa install app.",
     span: "",
   },
   {
@@ -196,7 +196,7 @@ export const SAAS_FEATURES: SaasFeature[] = [
   {
     icon: ImageIcon,
     title: "Bukti Foto Order",
-    desc: "Foto sebelum & sesudah cucian — bukti transparan untuk pelanggan, tampil di halaman tracking. Otomatis terhapus 7 hari. Fitur Pro.",
+    desc: "Foto sebelum & sesudah cucian, bukti transparan untuk pelanggan, tampil di halaman tracking. Otomatis terhapus 7 hari. Fitur Pro.",
     span: "",
   },
 ];
@@ -268,7 +268,7 @@ export const SAAS_PRICING: SaasPricingPlan[] = [
     name: "Pro",
     price: "Rp 79K",
     period: "/outlet/bulan",
-    desc: "Website + bukti foto — semua fitur",
+    desc: "Website + bukti foto, semua fitur",
     features: [
       "Semua fitur Growth",
       "Website laundry sendiri (slug.hivepos.id)",
@@ -302,7 +302,7 @@ export const SAAS_FAQS: SaasFaq[] = [
   },
   {
     q: "Bisakah pindah dari kasir lain?",
-    a: "Bisa, tapi jujur — kalau kasir lama Anda bisa export Excel (pelanggan, layanan, harga), kami bantu import. Kalau tidak bisa export atau formatnya beda, Anda input manual lewat hivePOS. Setup layanan + harga cuma butuh 2 menit, dan pelanggan bisa diketik saat order pertama. Tidak perlu pindah semua data sekaligus.",
+    a: "Bisa, tapi jujur, kalau kasir lama Anda bisa export Excel (pelanggan, layanan, harga), kami bantu import. Kalau tidak bisa export atau formatnya beda, Anda input manual lewat hivePOS. Setup layanan + harga cuma butuh 2 menit, dan pelanggan bisa diketik saat order pertama. Tidak perlu pindah semua data sekaligus.",
   },
   {
     q: "Apakah mendukung printer thermal?",
@@ -314,11 +314,11 @@ export const SAAS_FAQS: SaasFaq[] = [
   },
   {
     q: "Apakah bisa simpan foto bukti cucian?",
-    a: "Ya, di paket Pro. Foto sebelum & sesudah cucian jadi bukti transparan — pelanggan bisa lihat langsung di halaman tracking mereka. Foto disimpan 7 hari lalu dihapus otomatis supaya penyimpanan tetap ringan dan privasi pelanggan terjaga.",
+    a: "Ya, di paket Pro. Foto sebelum & sesudah cucian jadi bukti transparan, pelanggan bisa lihat langsung di halaman tracking mereka. Foto disimpan 7 hari lalu dihapus otomatis supaya penyimpanan tetap ringan dan privasi pelanggan terjaga.",
   },
   {
     q: "Apakah cocok untuk laundry kecil?",
-    a: "Cocok banget. hivePOS dirancang untuk UMKM laundry — mulai dari 1 outlet dengan 1-2 staff sampai 5+ cabang. Tidak overengineered untuk laundry kecil, tidak underpowered untuk yang tumbuh.",
+    a: "Cocok banget. hivePOS dirancang untuk UMKM laundry, mulai dari 1 outlet dengan 1-2 staff sampai 5+ cabang. Tidak overengineered untuk laundry kecil, tidak underpowered untuk yang tumbuh.",
   },
 ];
 
@@ -327,6 +327,7 @@ export const SAAS_NAV_LINKS = [
   { href: "#modul", label: "Modul" },
   { href: "#harga", label: "Harga" },
   { href: "#faq", label: "FAQ" },
+  { href: "/blog", label: "Blog" },
 ] as const;
 
 export const SAAS_TRUST_BADGES = [
@@ -354,7 +355,7 @@ export const WEBSITE_FEATURES: WebsiteFeature[] = [
   // SEO Lokal
   { group: "SEO Lokal", icon: Search,
     title: "Schema.org LocalBusiness",
-    desc: "Google membaca jam buka, alamat, rating, harga — langsung." },
+    desc: "Google membaca jam buka, alamat, rating, harga, langsung." },
   { group: "SEO Lokal", icon: MapPin,
     title: "Google Maps integration",
     desc: "Peta interaktif + schema latitude/longitude untuk local search." },
@@ -365,7 +366,7 @@ export const WEBSITE_FEATURES: WebsiteFeature[] = [
   // Tracking & Pembayaran
   { group: "Tracking & Pembayaran", icon: Package,
     title: "Tracking pesanan online",
-    desc: "Pelanggan cek status pesanan via nomor order — self-service." },
+    desc: "Pelanggan cek status pesanan via nomor order, self-service." },
   { group: "Tracking & Pembayaran", icon: MessageCircle,
     title: "Tombol WhatsApp order",
     desc: "Deep link ke WhatsApp dengan template pesanan otomatis." },

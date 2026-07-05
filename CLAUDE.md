@@ -22,6 +22,8 @@ npm test               # vitest
 npx playwright test    # e2e
 ```
 
+> **Feature work? Spec first** — write/update `docs/specs/<feature>.md` (from `_TEMPLATE.md`, with Given/When/Then acceptance criteria) **before** the code. See Non-negotiable #11.
+
 ## Stack at a glance
 
 | Tech | Version | Purpose |
@@ -45,12 +47,15 @@ These rules exist because breaking them has caused real bugs. Verify each before
 
 1. **Every tenant-scoped query filters by `tenantId` from the session.** Never trust client-supplied `tenantId` — always use `ctx.tenantId` from the permission guard. Inside `prisma.$transaction`, pass it explicitly to every `create`.
 2. **Every super-admin mutation writes an `auditLog` row** in the same `prisma.$transaction`. Action namespaced `<domain>.<verb>` (e.g. `tenant.suspend`, `billing.refund`).
-3. **Every feature ships behind a flag.** Default `enabled: true`. Add to `FLAG_KEYS` + `prisma/seed-flags.ts` + seed the DB.
+3. **Every feature ships behind a flag.** Default `enabled: true`. Add to `FLAG_KEYS` + `prisma/seed-flags.ts` + seed the DB — and a spec (rule #11) if it's a new feature.
 4. **Every user-facing string goes through `t("key")`** with entries in **both** `en` and `id` in `lib/i18n.ts`. No interpolation — use manual `.replace("{name}", value)`.
 5. **Every new RBAC check needs the resource declared** in `lib/permissions/definitions.ts` (`RESOURCES` + `RESOURCE_ACTIONS` + `RESOURCE_LABELS`).
 6. **Mark deliberate shortcuts** with `// ponytail: <ceiling> — <upgrade path>`. These regenerate `PONYTAIL-DEBT.md`.
 7. **Sidebar filter rule**: both `hasFlag(item.flag) AND can(item.resource, item.action)` must remain. Removing either breaks DRY gating.
 8. **If touching `lib/auth.ts` jwt callback**: feature flags must resolve in all paths — credentials login, Google OAuth, session refresh, impersonation swap.
+9. **Every change passes the QA gate** (`docs/sop/qa-verification.md`): root-cause → minimal fix → `tsc` → `build` → `test` → a **dedicated review** (run `code-review` / a reviewer subagent on the diff, fix the findings) → manual/browser verify on the changed path. No "done" with a known failure. **For a feature, the spec's acceptance criteria (rule #11) ARE the QA checklist.**
+10. **Schema change ⇒ rebuild BOTH Docker images** (`docker compose build app init-db`). A stale `init-db` re-runs `prisma db push` with the old schema and drops new columns/tables. Known gotchas are catalogued in `docs/lessons-learned.md`.
+11. **Spec-first for features.** Before writing code for a new feature or a material behavior change, create (or update) `docs/specs/<feature>.md` from `docs/specs/_TEMPLATE.md` — including **Given/When/Then acceptance criteria** (these become the QA pass/fail) and a **relations-to-other-functions** map. Code follows the spec; update the spec when scope changes (living doc). **No spec, no feature code.** Exempt: bug fixes (use `systematic-debugging`), typos, pure refactors, config/doc changes that add no new behavior. Think of it as mandatory plan-mode for features — testable criteria upfront = fewer bugs.
 
 ## Brand voice & positioning
 
@@ -98,8 +103,11 @@ These rules exist because breaking them has caused real bugs. Verify each before
 | `docs/sop/rbac.md` | Adding a new RBAC resource or changing permissions. |
 | `docs/sop/data.md` | Editing Prisma schema, running seeds, writing tests. |
 | `docs/sop/super-admin.md` | Building anything in the `/super-admin` panel. |
+| `docs/sop/qa-verification.md` | Before claiming anything "done" — the mandatory QA gate + bug-prevention checklist. |
+| `docs/lessons-learned.md` | Real bugs shipped before + root cause + prevention rule (avoid repeating them). |
 | `PONYTAIL-DEBT.md` | You want to see the current shortcut ledger. Don't duplicate — regenerate with the grep command in `docs/preferences.md`. |
 | `DYNAMIC_FORMS.md` | You're working with dynamic form schemas. |
+| `docs/specs/` | Shipping or changing a feature — read/write its PRD + acceptance criteria + relations map. Start from `docs/specs/_TEMPLATE.md`; e.g. `docs/specs/referral-program.md`. |
 
 ## Common file map (most-edited)
 

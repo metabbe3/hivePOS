@@ -1,7 +1,7 @@
 import { withErrorHandler, apiSuccess } from "@/modules/shared";
 import { prisma } from "@/lib/prisma";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
-import { endOfDay } from "@/lib/dates";
+import { endOfDay, wibDateBounds } from "@/lib/dates";
 
 export const GET = withErrorHandler(async (req) => {
   const ctx = await requireWithBranchOrThrow("dashboard", "read");
@@ -12,13 +12,8 @@ export const GET = withErrorHandler(async (req) => {
   const toStr = searchParams.get("to");
   const granularity = searchParams.get("granularity") || "daily";
 
-  const dateFilter: { gte?: Date; lte?: Date } = {};
-  if (fromStr) dateFilter.gte = new Date(fromStr);
-  if (toStr) {
-    const to = endOfDay(new Date(toStr));
-    dateFilter.lte = to;
-  }
-  const hasDateFilter = Object.keys(dateFilter).length > 0;
+  const dateFilter = wibDateBounds({ from: fromStr, to: toStr });
+  const hasDateFilter = !!(dateFilter.gte || dateFilter.lte);
 
   const where = hasDateFilter
     ? { branchId: { in: branchIds }, module: moduleFilter, OR: [{ receivedAt: dateFilter }, { receivedAt: null, createdAt: dateFilter }] }

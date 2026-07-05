@@ -136,6 +136,16 @@ export function CustomerPicker() {
     }
   }
 
+  // Enter submits the inline create. The create UI is a <div>, not a nested
+  // <form> — nesting it inside the outer order <form> is invalid HTML and
+  // previously let the submit bubble up to handleSubmit, wiping the cart.
+  function handleCustKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      void handleCreateCustomer();
+    }
+  }
+
   // ── Selected state: a confident customer card ──
   if (selectedCustomer) {
     return (
@@ -274,7 +284,7 @@ export function CustomerPicker() {
             )}
           </div>
         ) : (
-          <form onSubmit={handleCreateCustomer} className="animate-in fade-in-0 slide-in-from-bottom-2 space-y-3 rounded-xl border border-border/40 bg-muted/20 p-3">
+          <div className="animate-in fade-in-0 slide-in-from-bottom-2 space-y-3 rounded-xl border border-border/40 bg-muted/20 p-3">
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
                 <UserPlus className="h-4 w-4 text-primary" />
@@ -301,6 +311,7 @@ export function CustomerPicker() {
                   placeholder={t("newOrder.namePlaceholder")}
                   value={custForm.name}
                   onChange={(e) => setCustForm({ ...custForm, name: e.target.value })}
+                  onKeyDown={handleCustKeyDown}
                   className="bg-background"
                   autoFocus
                 />
@@ -313,18 +324,20 @@ export function CustomerPicker() {
                   placeholder={t("newOrder.phonePlaceholder")}
                   value={custForm.phone}
                   onChange={(e) => setCustForm({ ...custForm, phone: e.target.value })}
+                  onKeyDown={handleCustKeyDown}
                   className="bg-background"
                 />
               </div>
             </div>
             <Button
-              type="submit"
+              type="button"
+              onClick={() => void handleCreateCustomer()}
               className="w-full bg-gradient-to-r from-brand-600 to-brand-700 font-semibold text-white shadow-md shadow-brand-600/15 transition-all hover:brightness-105"
               disabled={!custForm.name.trim() || savingCustomer}
             >
               {savingCustomer ? t("common.saving") : t("newOrder.createAndSelect")}
             </Button>
-          </form>
+          </div>
         )}
       </CardContent>
     </Card>

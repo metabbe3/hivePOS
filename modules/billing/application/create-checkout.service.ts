@@ -1,12 +1,7 @@
 import type { BillingRepository, MidtransPort } from "../domain/repository.port";
 import type { RequestContext } from "./context";
 import type { CheckoutInput, CheckoutResult } from "./dto";
-import {
-  PRICE_PER_OUTLET,
-  PRO_PRICE_PER_OUTLET,
-  calculateBill,
-  type PromoCodeRecord,
-} from "../domain/types";
+import { calculateBill, type PromoCodeRecord } from "../domain/types";
 import { ValidationError, NotFoundError, logger } from "@/modules/shared";
 
 export class CreateCheckoutService {
@@ -26,9 +21,16 @@ export class CreateCheckoutService {
       );
     }
 
-    // ponytail: pick unitPrice from tier. Defaults to GROWTH (49K) for back-compat —
-    // existing billing UI is unchanged unless it explicitly passes planTier: "PRO".
-    const unitPrice = input.planTier === "PRO" ? PRO_PRICE_PER_OUTLET : PRICE_PER_OUTLET;
+    // Downgrade guard: a Pro tenant can only upgrade/extend — never downgrade.
+    // Resolve the effective tier from their current plan, ignoring a Growth
+    // request if they're already Pro.
+    const currentPlan = await this.repo.getTenantPlan(tenantId);
+    const requestedTier: "GROWTH" | "PRO" = input.planTier === "PRO" ? "PRO" : "GROWTH";
+    const effectiveTier: "GROWTH" | "PRO" =
+      currentPlan === "PRO" ? "PRO" : requestedTier;
+    // Plan-driven pricing: read the configured per-outlet price for this tier
+    // (editable on the super-admin Plans page); falls back to constants.
+    const unitPrice = await this.repo.getTierUnitPrice(effectiveTier);
 
     // ── Validate promo (if provided) ──
     let promoCodeId: string | undefined;
@@ -38,6 +40,7 @@ export class CreateCheckoutService {
       const promoResult = await this.repo.validatePromoCode(
         input.promoCode,
         tenantId,
+        effectiveTier,
       );
       if (!promoResult.valid || !promoResult.promoCode) {
         throw new ValidationError(promoResult.error ?? "Kode promo tidak ditemukan.");

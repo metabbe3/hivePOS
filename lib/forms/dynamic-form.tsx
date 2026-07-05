@@ -58,6 +58,8 @@ function useAsyncOptions(field: FieldDef) {
 // ─── Password Input with Toggle ──────────────────────────────
 function PasswordInput({
   id,
+  name,
+  autocomplete,
   value,
   onChange,
   placeholder,
@@ -66,6 +68,8 @@ function PasswordInput({
   touchTargets,
 }: {
   id: string;
+  name?: string;
+  autocomplete?: string;
   value: unknown;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -78,6 +82,8 @@ function PasswordInput({
     <div className="relative">
       <Input
         id={id}
+        name={name}
+        autoComplete={autocomplete}
         type={visible ? "text" : "password"}
         value={(value as string) ?? ""}
         onChange={(e) => onChange(e.target.value)}
@@ -108,6 +114,7 @@ function FieldRenderer({
   disabled,
   touchTargets,
   placeholder,
+  label,
 }: {
   field: FieldDef;
   value: unknown;
@@ -117,6 +124,7 @@ function FieldRenderer({
   disabled: boolean;
   touchTargets?: boolean;
   placeholder?: string;
+  label?: string;
 }) {
   const { options, loading } = useAsyncOptions(field);
   const dataSizeAttr = touchTargets ? "touch" : undefined;
@@ -136,6 +144,8 @@ function FieldRenderer({
     return (
       <PasswordInput
         id={inputId}
+        name={field.name}
+        autocomplete={field.autocomplete}
         value={value}
         onChange={(v) => onChange(v)}
         placeholder={placeholder}
@@ -206,6 +216,11 @@ function FieldRenderer({
             onCheckedChange={(v) => onChange(Boolean(v))}
             disabled={disabled}
           />
+          {label && (
+            <Label htmlFor={inputId} className="text-sm font-medium cursor-pointer">
+              {label}
+            </Label>
+          )}
         </div>
       );
 
@@ -271,6 +286,8 @@ function FieldRenderer({
       return (
         <Input
           id={inputId}
+          name={field.name}
+          autoComplete={field.autocomplete}
           type={field.type === "tel" ? "tel" : field.type === "email" ? "email" : field.type === "password" ? "password" : "text"}
           value={String(value ?? "")}
           onChange={(e) => onChange(e.target.value)}
@@ -556,6 +573,7 @@ export function DynamicForm({
                 disabled={disabled || submitting}
                 touchTargets={touchTargets}
                 placeholder={placeholder}
+                label={label}
               />
               {hint && !errors[field.name] && (
                 <p className="text-xs text-muted-foreground">{hint}</p>

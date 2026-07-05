@@ -12,6 +12,7 @@ import {
   Sparkles,
   HandCoins,
   AlertTriangle,
+  Clock,
   Download,
   Loader2,
   FileSpreadsheet,
@@ -43,11 +44,11 @@ const OrdersReport = dyn(() => import("@/components/reports/orders-report").then
 const CustomersReport = dyn(() => import("@/components/reports/customers-report").then(m => ({ default: m.CustomersReport })));
 const ServicesReport = dyn(() => import("@/components/reports/services-report").then(m => ({ default: m.ServicesReport })));
 const CommissionReport = dyn(() => import("@/components/reports/commission-report").then(m => ({ default: m.CommissionReport })));
-const OutstandingReport = dyn(() => import("@/components/reports/outstanding-report").then(m => ({ default: m.OutstandingReport })));
 const ExpensesReport = dyn(() => import("@/components/reports/expenses-report").then(m => ({ default: m.ExpensesReport })));
 const ProfitReport = dyn(() => import("@/components/reports/profit-report").then(m => ({ default: m.ProfitReport })));
 const InventoryReport = dyn(() => import("@/components/reports/inventory-report").then(m => ({ default: m.InventoryReport })));
 const MonthlyPnlReport = dyn(() => import("@/components/reports/monthly-pnl-report").then(m => ({ default: m.MonthlyPnlReport })));
+const PiutangTrackerReport = dyn(() => import("@/components/reports/piutang-tracker-report").then(m => ({ default: m.PiutangTrackerReport })));
 
 interface TabItem {
   value: string;
@@ -76,7 +77,7 @@ export default function ReportingPage() {
     { value: "customers", label: t("reporting.customers"), icon: Users },
     { value: "services", label: t("reporting.services"), icon: Sparkles },
     { value: "commission", label: t("reporting.commission"), icon: HandCoins },
-    { value: "outstanding", label: t("reporting.outstanding"), icon: AlertTriangle },
+    { value: "piutang", label: "Piutang", icon: Clock },
     { value: "monthlyPnl", label: "Laporan Bulanan", icon: FileSpreadsheet },
   ];
 
@@ -91,6 +92,12 @@ export default function ReportingPage() {
       setExporting(false);
     }
   }
+
+  // Piutang & Laporan Bulanan ignore the shared from/to range (Piutang lists all
+  // outstanding; Laporan Bulanan has its own month nav + its own export), so the
+  // date filter AND the Export All button (which exports from/to-range reports)
+  // are irrelevant there — hide the whole Filter+Export bar on those two tabs.
+  const showFilterBar = activeTab !== "piutang" && activeTab !== "monthlyPnl";
 
   return (
     <div className="space-y-6">
@@ -125,26 +132,28 @@ export default function ReportingPage() {
         </div>
       </div>
 
-      {/* Filter + Export */}
-      <div className="bg-muted/30 border border-border/60 rounded-xl p-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <DateRangePicker from={from} to={to} onFromChange={setFrom} onToChange={setTo} />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportAll}
-            disabled={exporting}
-            className="w-full sm:w-auto shrink-0"
-          >
-            {exporting ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Download className="size-4" />
-            )}
-            {exporting ? t("common.saving") : t("reporting.exportAll")}
-          </Button>
+      {/* Filter + Export — hidden on tabs that ignore the from/to range */}
+      {showFilterBar && (
+        <div className="bg-muted/30 border border-border/60 rounded-xl p-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <DateRangePicker from={from} to={to} onFromChange={setFrom} onToChange={setTo} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportAll}
+              disabled={exporting}
+              className="w-full sm:w-auto shrink-0"
+            >
+              {exporting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}
+              {exporting ? t("common.saving") : t("reporting.exportAll")}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsContent value="revenue">
@@ -171,11 +180,11 @@ export default function ReportingPage() {
         <TabsContent value="commission">
           <CommissionReport from={from} to={to} />
         </TabsContent>
-        <TabsContent value="outstanding">
-          <OutstandingReport from={from} to={to} />
-        </TabsContent>
         <TabsContent value="monthlyPnl">
           <MonthlyPnlReport />
+        </TabsContent>
+        <TabsContent value="piutang">
+          <PiutangTrackerReport />
         </TabsContent>
       </Tabs>
     </div>

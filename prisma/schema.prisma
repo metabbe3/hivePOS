@@ -27,11 +27,34 @@ model SuperAdmin {
   sessionVersion Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  blogPosts      BlogPost[]
 }
 
 enum SuperAdminRole {
   SUPER_ADMIN
   SUPPORT
+}
+
+/// SEO/long-tail blog posts — authored in the super-admin CMS (Markdown),
+/// served on /blog with ISR so publishing needs no rebuild. docs/specs/blog-cms.md.
+model BlogPost {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  title       String
+  description String
+  keywords    String?
+  content     String    // Markdown source — rendered to HTML via lib/blog/render.ts
+  coverImage  String?   // external URL
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  authorId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author      SuperAdmin @relation(fields: [authorId], references: [id])
+
+  @@index([published, publishedAt])
 }
 
 /// Immutable audit trail of super-admin actions (suspensions, refunds, flag toggles, …).
@@ -174,10 +197,19 @@ model Plan {
   modules       String[] @default([]) // ["laundry", "salon", "cleaning", "fnb"]
   features      Json?    // feature flags: { customBranding: true, api: false, ... }
   isActive      Boolean  @default(true)
+  tier          PlanTier?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   subscriptions Subscription[]
+}
+
+/// Maps a Plan to a billing tier. Drives plan-driven unit pricing
+/// (getTierUnitPrice) + the downgrade guard. Null = infer from name (back-compat).
+enum PlanTier {
+  FREE
+  GROWTH
+  PRO
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -205,6 +237,12 @@ model Tenant {
   /// Normal signups are auto-approved now (trial granted at registration), so the
   /// manual /approve endpoint is only for edge cases a super-admin re-pends.
   approvedAt    DateTime?
+  /// Null until the owner finishes/skips the onboarding wizard. Gates the
+  /// /dashboard → /onboarding redirect for OWNER sessions (see lib/auth.ts).
+  onboardingCompletedAt DateTime?
+  /// Sandbox demo tenant — isolated, pre-seeded, auto-expiring (see lib/demo/sandbox.ts).
+  isDemo        Boolean  @default(false)
+  demoExpiresAt DateTime?
   trialEndsAt   DateTime?
   /// Which tier a tenant trials during trialEndsAt: "GROWTH" | "PRO" | null.
   /// Consulted by lib/billing.ts getTenantPlan while trialEndsAt > now; once it
@@ -226,9 +264,33 @@ model Tenant {
   pickupRequests PickupRequest[]
   featureFlags  TenantFeatureFlag[]
   orderPhotos   OrderPhoto[]
+  /// Unique shareable referral code, e.g. "K8X2PQ9A". /register?ref=CODE.
+  referralCode  String?  @unique
+  /// Referrals this tenant has given (as referrer) + received (as referred).
+  referralsGiven    Referral[] @relation("ReferralsGiven")
+  referralsReceived Referral[] @relation("ReferralReferredBy")
 
   @@index([slug])
   @@index([ownerEmail])
+}
+
+/// Referral ledger. One record per referred tenant (referredId unique).
+/// PENDING (signed up via a ref code) → REWARDED on the referred tenant's first
+/// PAID payment, or REJECTED (self-referral) / EXPIRED (over cap).
+model Referral {
+  id           String   @id @default(uuid())
+  referrerId   String   // Tenant who shared the code
+  referredId   String   @unique // new Tenant — one referrer per tenant
+  status       String   @default("PENDING") // PENDING | REWARDED | REJECTED | EXPIRED
+  rewardMonths Int      @default(1)
+  reason       String?  // e.g. "self_referral" | "over_cap"
+  createdAt    DateTime @default(now())
+  rewardedAt   DateTime?
+
+  referrer Tenant @relation("ReferralsGiven",    fields: [referrerId], references: [id], onDelete: Cascade)
+  referred Tenant @relation("ReferralReferredBy", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId, status])
 }
 
 /// Subscription linking a tenant to a plan
@@ -433,6 +495,8 @@ model Service {
   commissionValue Decimal        @default(0) @db.Decimal(12, 2)
   module          BusinessModule @default(LAUNDRY)
   isActive        Boolean        @default(true)
+  /// Owner-chosen default within a speed-variant group (see lib/service-transformer.ts).
+  isDefaultSpeed  Boolean        @default(false)
   branchId        String
   groupId         String?
   createdAt       DateTime       @default(now())
@@ -806,6 +870,7 @@ model PromoCode {
   validFrom       DateTime?
   validUntil      DateTime?
   isActive        Boolean   @default(true)
+  applicablePlan  String?   // "GROWTH" | "PRO"; null = applies to any plan tier
   createdAt       DateTime  @default(now())
 
   redemptions PromoRedemption[]

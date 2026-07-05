@@ -12,6 +12,7 @@ export interface ServiceRecord {
   commissionValue: number;
   module: BusinessModule;
   isActive: boolean;
+  isDefaultSpeed: boolean;
   branchId: string;
   groupId: string | null;
   createdAt: Date;
@@ -61,6 +62,7 @@ export interface CreateServiceData {
   groupId?: string | null;
   module: BusinessModule;
   branchId: string;
+  isDefaultSpeed?: boolean;
 }
 
 export interface UpdateServiceData {
@@ -72,6 +74,7 @@ export interface UpdateServiceData {
   commissionValue?: number;
   isActive?: boolean;
   groupId?: string | null;
+  isDefaultSpeed?: boolean;
 }
 
 export interface CreateGroupData {

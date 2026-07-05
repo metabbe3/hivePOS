@@ -10,6 +10,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { BackButton } from "@/components/shared/back-button";
 import { usePermissionGuard } from "@/hooks/use-permission-guard";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useTranslation } from "@/hooks/use-translation";
@@ -155,6 +156,7 @@ export default function CustomerDetailPage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
+      <BackButton />
       <CustomerDetailHeader
         customer={customer}
         stats={stats}

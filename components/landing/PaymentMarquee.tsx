@@ -1,24 +1,21 @@
 import { SAAS_PAYMENT_METHODS } from "@/lib/landing-data-saas";
 
+/**
+ * Clean static row of supported payment methods — no marquee, no pill cards,
+ * no shadows. Plain wordmarks in muted slate. One accent, editorial.
+ */
 export function PaymentMarquee() {
-  // Duplicate for seamless loop
-  const items = [...SAAS_PAYMENT_METHODS, ...SAAS_PAYMENT_METHODS];
-
   return (
-    <section className="border-b border-zinc-200 bg-white py-8">
-      <div className="mx-auto max-w-6xl px-6">
-        <p className="mb-5 text-center text-xs font-bold uppercase tracking-wider text-zinc-400">
-          Mendukung Pembayaran Lokal
+    <section className="border-b border-slate-200 bg-white py-10">
+      <div className="mx-auto max-w-6xl px-5 sm:px-6">
+        <p className="text-center text-xs font-semibold uppercase tracking-wide text-slate-400">
+          Pembayaran lokal didukung
         </p>
-      </div>
-
-      {/* Marquee track */}
-      <div className="marquee-mask marquee-pause overflow-hidden">
-        <div className="flex w-max animate-marquee items-center gap-4 pr-4">
-          {items.map((method, i) => (
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          {SAAS_PAYMENT_METHODS.map((method) => (
             <span
-              key={`${method}-${i}`}
-              className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-6 py-2.5 font-display text-base font-bold text-zinc-500 shadow-sm"
+              key={method}
+              className="font-display text-base font-bold text-slate-400"
             >
               {method}
             </span>

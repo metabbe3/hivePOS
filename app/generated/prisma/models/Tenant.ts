@@ -35,12 +35,16 @@ export type TenantMinAggregateOutputType = {
   customDomain: string | null
   isActive: boolean | null
   approvedAt: Date | null
+  onboardingCompletedAt: Date | null
+  isDemo: boolean | null
+  demoExpiresAt: Date | null
   trialEndsAt: Date | null
   trialTier: string | null
   websiteEnabled: boolean | null
   websitePublishedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  referralCode: string | null
 }
 
 export type TenantMaxAggregateOutputType = {
@@ -54,12 +58,16 @@ export type TenantMaxAggregateOutputType = {
   customDomain: string | null
   isActive: boolean | null
   approvedAt: Date | null
+  onboardingCompletedAt: Date | null
+  isDemo: boolean | null
+  demoExpiresAt: Date | null
   trialEndsAt: Date | null
   trialTier: string | null
   websiteEnabled: boolean | null
   websitePublishedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  referralCode: string | null
 }
 
 export type TenantCountAggregateOutputType = {
@@ -75,12 +83,16 @@ export type TenantCountAggregateOutputType = {
   settings: number
   isActive: number
   approvedAt: number
+  onboardingCompletedAt: number
+  isDemo: number
+  demoExpiresAt: number
   trialEndsAt: number
   trialTier: number
   websiteEnabled: number
   websitePublishedAt: number
   createdAt: number
   updatedAt: number
+  referralCode: number
   _all: number
 }
 
@@ -96,12 +108,16 @@ export type TenantMinAggregateInputType = {
   customDomain?: true
   isActive?: true
   approvedAt?: true
+  onboardingCompletedAt?: true
+  isDemo?: true
+  demoExpiresAt?: true
   trialEndsAt?: true
   trialTier?: true
   websiteEnabled?: true
   websitePublishedAt?: true
   createdAt?: true
   updatedAt?: true
+  referralCode?: true
 }
 
 export type TenantMaxAggregateInputType = {
@@ -115,12 +131,16 @@ export type TenantMaxAggregateInputType = {
   customDomain?: true
   isActive?: true
   approvedAt?: true
+  onboardingCompletedAt?: true
+  isDemo?: true
+  demoExpiresAt?: true
   trialEndsAt?: true
   trialTier?: true
   websiteEnabled?: true
   websitePublishedAt?: true
   createdAt?: true
   updatedAt?: true
+  referralCode?: true
 }
 
 export type TenantCountAggregateInputType = {
@@ -136,12 +156,16 @@ export type TenantCountAggregateInputType = {
   settings?: true
   isActive?: true
   approvedAt?: true
+  onboardingCompletedAt?: true
+  isDemo?: true
+  demoExpiresAt?: true
   trialEndsAt?: true
   trialTier?: true
   websiteEnabled?: true
   websitePublishedAt?: true
   createdAt?: true
   updatedAt?: true
+  referralCode?: true
   _all?: true
 }
 
@@ -230,12 +254,16 @@ export type TenantGroupByOutputType = {
   settings: runtime.JsonValue | null
   isActive: boolean
   approvedAt: Date | null
+  onboardingCompletedAt: Date | null
+  isDemo: boolean
+  demoExpiresAt: Date | null
   trialEndsAt: Date | null
   trialTier: string | null
   websiteEnabled: boolean
   websitePublishedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  referralCode: string | null
   _count: TenantCountAggregateOutputType | null
   _min: TenantMinAggregateOutputType | null
   _max: TenantMaxAggregateOutputType | null
@@ -272,12 +300,16 @@ export type TenantWhereInput = {
   settings?: Prisma.JsonNullableFilter<"Tenant">
   isActive?: Prisma.BoolFilter<"Tenant"> | boolean
   approvedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
+  onboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
+  isDemo?: Prisma.BoolFilter<"Tenant"> | boolean
+  demoExpiresAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   trialEndsAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   trialTier?: Prisma.StringNullableFilter<"Tenant"> | string | null
   websiteEnabled?: Prisma.BoolFilter<"Tenant"> | boolean
   websitePublishedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
+  referralCode?: Prisma.StringNullableFilter<"Tenant"> | string | null
   branches?: Prisma.BranchListRelationFilter
   users?: Prisma.UserListRelationFilter
   roles?: Prisma.RoleListRelationFilter
@@ -287,6 +319,8 @@ export type TenantWhereInput = {
   pickupRequests?: Prisma.PickupRequestListRelationFilter
   featureFlags?: Prisma.TenantFeatureFlagListRelationFilter
   orderPhotos?: Prisma.OrderPhotoListRelationFilter
+  referralsGiven?: Prisma.ReferralListRelationFilter
+  referralsReceived?: Prisma.ReferralListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -302,12 +336,16 @@ export type TenantOrderByWithRelationInput = {
   settings?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  onboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isDemo?: Prisma.SortOrder
+  demoExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   trialTier?: Prisma.SortOrderInput | Prisma.SortOrder
   websiteEnabled?: Prisma.SortOrder
   websitePublishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  referralCode?: Prisma.SortOrderInput | Prisma.SortOrder
   branches?: Prisma.BranchOrderByRelationAggregateInput
   users?: Prisma.UserOrderByRelationAggregateInput
   roles?: Prisma.RoleOrderByRelationAggregateInput
@@ -317,12 +355,15 @@ export type TenantOrderByWithRelationInput = {
   pickupRequests?: Prisma.PickupRequestOrderByRelationAggregateInput
   featureFlags?: Prisma.TenantFeatureFlagOrderByRelationAggregateInput
   orderPhotos?: Prisma.OrderPhotoOrderByRelationAggregateInput
+  referralsGiven?: Prisma.ReferralOrderByRelationAggregateInput
+  referralsReceived?: Prisma.ReferralOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   slug?: string
   customDomain?: string
+  referralCode?: string
   AND?: Prisma.TenantWhereInput | Prisma.TenantWhereInput[]
   OR?: Prisma.TenantWhereInput[]
   NOT?: Prisma.TenantWhereInput | Prisma.TenantWhereInput[]
@@ -335,6 +376,9 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   settings?: Prisma.JsonNullableFilter<"Tenant">
   isActive?: Prisma.BoolFilter<"Tenant"> | boolean
   approvedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
+  onboardingCompletedAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
+  isDemo?: Prisma.BoolFilter<"Tenant"> | boolean
+  demoExpiresAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   trialEndsAt?: Prisma.DateTimeNullableFilter<"Tenant"> | Date | string | null
   trialTier?: Prisma.StringNullableFilter<"Tenant"> | string | null
   websiteEnabled?: Prisma.BoolFilter<"Tenant"> | boolean
@@ -350,7 +394,9 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   pickupRequests?: Prisma.PickupRequestListRelationFilter
   featureFlags?: Prisma.TenantFeatureFlagListRelationFilter
   orderPhotos?: Prisma.OrderPhotoListRelationFilter
-}, "id" | "slug" | "customDomain">
+  referralsGiven?: Prisma.ReferralListRelationFilter
+  referralsReceived?: Prisma.ReferralListRelationFilter
+}, "id" | "slug" | "customDomain" | "referralCode">
 
 export type TenantOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -365,12 +411,16 @@ export type TenantOrderByWithAggregationInput = {
   settings?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  onboardingCompletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  isDemo?: Prisma.SortOrder
+  demoExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   trialTier?: Prisma.SortOrderInput | Prisma.SortOrder
   websiteEnabled?: Prisma.SortOrder
   websitePublishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  referralCode?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TenantCountOrderByAggregateInput
   _max?: Prisma.TenantMaxOrderByAggregateInput
   _min?: Prisma.TenantMinOrderByAggregateInput
@@ -392,12 +442,16 @@ export type TenantScalarWhereWithAggregatesInput = {
   settings?: Prisma.JsonNullableWithAggregatesFilter<"Tenant">
   isActive?: Prisma.BoolWithAggregatesFilter<"Tenant"> | boolean
   approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
+  onboardingCompletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
+  isDemo?: Prisma.BoolWithAggregatesFilter<"Tenant"> | boolean
+  demoExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
   trialEndsAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
   trialTier?: Prisma.StringNullableWithAggregatesFilter<"Tenant"> | string | null
   websiteEnabled?: Prisma.BoolWithAggregatesFilter<"Tenant"> | boolean
   websitePublishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Tenant"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
+  referralCode?: Prisma.StringNullableWithAggregatesFilter<"Tenant"> | string | null
 }
 
 export type TenantCreateInput = {
@@ -413,12 +467,16 @@ export type TenantCreateInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
@@ -428,6 +486,8 @@ export type TenantCreateInput = {
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -443,12 +503,16 @@ export type TenantUncheckedCreateInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
@@ -458,6 +522,8 @@ export type TenantUncheckedCreateInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUpdateInput = {
@@ -473,12 +539,16 @@ export type TenantUpdateInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
@@ -488,6 +558,8 @@ export type TenantUpdateInput = {
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -503,12 +575,16 @@ export type TenantUncheckedUpdateInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -518,6 +594,8 @@ export type TenantUncheckedUpdateInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -533,12 +611,16 @@ export type TenantCreateManyInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
 }
 
 export type TenantUpdateManyMutationInput = {
@@ -554,12 +636,16 @@ export type TenantUpdateManyMutationInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TenantUncheckedUpdateManyInput = {
@@ -575,12 +661,16 @@ export type TenantUncheckedUpdateManyInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TenantCountOrderByAggregateInput = {
@@ -596,12 +686,16 @@ export type TenantCountOrderByAggregateInput = {
   settings?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
+  onboardingCompletedAt?: Prisma.SortOrder
+  isDemo?: Prisma.SortOrder
+  demoExpiresAt?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrder
   trialTier?: Prisma.SortOrder
   websiteEnabled?: Prisma.SortOrder
   websitePublishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  referralCode?: Prisma.SortOrder
 }
 
 export type TenantMaxOrderByAggregateInput = {
@@ -615,12 +709,16 @@ export type TenantMaxOrderByAggregateInput = {
   customDomain?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
+  onboardingCompletedAt?: Prisma.SortOrder
+  isDemo?: Prisma.SortOrder
+  demoExpiresAt?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrder
   trialTier?: Prisma.SortOrder
   websiteEnabled?: Prisma.SortOrder
   websitePublishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  referralCode?: Prisma.SortOrder
 }
 
 export type TenantMinOrderByAggregateInput = {
@@ -634,12 +732,16 @@ export type TenantMinOrderByAggregateInput = {
   customDomain?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
+  onboardingCompletedAt?: Prisma.SortOrder
+  isDemo?: Prisma.SortOrder
+  demoExpiresAt?: Prisma.SortOrder
   trialEndsAt?: Prisma.SortOrder
   trialTier?: Prisma.SortOrder
   websiteEnabled?: Prisma.SortOrder
   websitePublishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  referralCode?: Prisma.SortOrder
 }
 
 export type TenantScalarRelationFilter = {
@@ -654,6 +756,34 @@ export type TenantCreateactiveModulesInput = {
 export type TenantUpdateactiveModulesInput = {
   set?: string[]
   push?: string | string[]
+}
+
+export type TenantCreateNestedOneWithoutReferralsGivenInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReferralsGivenInput, Prisma.TenantUncheckedCreateWithoutReferralsGivenInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReferralsGivenInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantCreateNestedOneWithoutReferralsReceivedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReferralsReceivedInput, Prisma.TenantUncheckedCreateWithoutReferralsReceivedInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReferralsReceivedInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutReferralsGivenNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReferralsGivenInput, Prisma.TenantUncheckedCreateWithoutReferralsGivenInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReferralsGivenInput
+  upsert?: Prisma.TenantUpsertWithoutReferralsGivenInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutReferralsGivenInput, Prisma.TenantUpdateWithoutReferralsGivenInput>, Prisma.TenantUncheckedUpdateWithoutReferralsGivenInput>
+}
+
+export type TenantUpdateOneRequiredWithoutReferralsReceivedNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReferralsReceivedInput, Prisma.TenantUncheckedCreateWithoutReferralsReceivedInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReferralsReceivedInput
+  upsert?: Prisma.TenantUpsertWithoutReferralsReceivedInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutReferralsReceivedInput, Prisma.TenantUpdateWithoutReferralsReceivedInput>, Prisma.TenantUncheckedUpdateWithoutReferralsReceivedInput>
 }
 
 export type TenantCreateNestedOneWithoutSubscriptionInput = {
@@ -782,6 +912,318 @@ export type TenantUpdateOneRequiredWithoutFeatureFlagsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutFeatureFlagsInput, Prisma.TenantUpdateWithoutFeatureFlagsInput>, Prisma.TenantUncheckedUpdateWithoutFeatureFlagsInput>
 }
 
+export type TenantCreateWithoutReferralsGivenInput = {
+  id?: string
+  name: string
+  slug: string
+  ownerEmail: string
+  ownerName?: string | null
+  ownerPhone?: string | null
+  logoUrl?: string | null
+  customDomain?: string | null
+  activeModules?: Prisma.TenantCreateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: boolean
+  approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
+  trialEndsAt?: Date | string | null
+  trialTier?: string | null
+  websiteEnabled?: boolean
+  websitePublishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  referralCode?: string | null
+  branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
+  users?: Prisma.UserCreateNestedManyWithoutTenantInput
+  roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutTenantInput
+  promoRedemptions?: Prisma.PromoRedemptionCreateNestedManyWithoutTenantInput
+  saaSPayments?: Prisma.SaaSPaymentCreateNestedManyWithoutTenantInput
+  pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
+  featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
+  orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
+}
+
+export type TenantUncheckedCreateWithoutReferralsGivenInput = {
+  id?: string
+  name: string
+  slug: string
+  ownerEmail: string
+  ownerName?: string | null
+  ownerPhone?: string | null
+  logoUrl?: string | null
+  customDomain?: string | null
+  activeModules?: Prisma.TenantCreateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: boolean
+  approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
+  trialEndsAt?: Date | string | null
+  trialTier?: string | null
+  websiteEnabled?: boolean
+  websitePublishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  referralCode?: string | null
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTenantInput
+  promoRedemptions?: Prisma.PromoRedemptionUncheckedCreateNestedManyWithoutTenantInput
+  saaSPayments?: Prisma.SaaSPaymentUncheckedCreateNestedManyWithoutTenantInput
+  pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
+  featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
+  orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
+}
+
+export type TenantCreateOrConnectWithoutReferralsGivenInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReferralsGivenInput, Prisma.TenantUncheckedCreateWithoutReferralsGivenInput>
+}
+
+export type TenantCreateWithoutReferralsReceivedInput = {
+  id?: string
+  name: string
+  slug: string
+  ownerEmail: string
+  ownerName?: string | null
+  ownerPhone?: string | null
+  logoUrl?: string | null
+  customDomain?: string | null
+  activeModules?: Prisma.TenantCreateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: boolean
+  approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
+  trialEndsAt?: Date | string | null
+  trialTier?: string | null
+  websiteEnabled?: boolean
+  websitePublishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  referralCode?: string | null
+  branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
+  users?: Prisma.UserCreateNestedManyWithoutTenantInput
+  roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutTenantInput
+  promoRedemptions?: Prisma.PromoRedemptionCreateNestedManyWithoutTenantInput
+  saaSPayments?: Prisma.SaaSPaymentCreateNestedManyWithoutTenantInput
+  pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
+  featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
+  orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+}
+
+export type TenantUncheckedCreateWithoutReferralsReceivedInput = {
+  id?: string
+  name: string
+  slug: string
+  ownerEmail: string
+  ownerName?: string | null
+  ownerPhone?: string | null
+  logoUrl?: string | null
+  customDomain?: string | null
+  activeModules?: Prisma.TenantCreateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: boolean
+  approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
+  trialEndsAt?: Date | string | null
+  trialTier?: string | null
+  websiteEnabled?: boolean
+  websitePublishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  referralCode?: string | null
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
+  roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTenantInput
+  promoRedemptions?: Prisma.PromoRedemptionUncheckedCreateNestedManyWithoutTenantInput
+  saaSPayments?: Prisma.SaaSPaymentUncheckedCreateNestedManyWithoutTenantInput
+  pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
+  featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
+  orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+}
+
+export type TenantCreateOrConnectWithoutReferralsReceivedInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReferralsReceivedInput, Prisma.TenantUncheckedCreateWithoutReferralsReceivedInput>
+}
+
+export type TenantUpsertWithoutReferralsGivenInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutReferralsGivenInput, Prisma.TenantUncheckedUpdateWithoutReferralsGivenInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReferralsGivenInput, Prisma.TenantUncheckedCreateWithoutReferralsGivenInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutReferralsGivenInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutReferralsGivenInput, Prisma.TenantUncheckedUpdateWithoutReferralsGivenInput>
+}
+
+export type TenantUpdateWithoutReferralsGivenInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeModules?: Prisma.TenantUpdateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
+  users?: Prisma.UserUpdateManyWithoutTenantNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutTenantNestedInput
+  promoRedemptions?: Prisma.PromoRedemptionUpdateManyWithoutTenantNestedInput
+  saaSPayments?: Prisma.SaaSPaymentUpdateManyWithoutTenantNestedInput
+  pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
+  featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
+  orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutReferralsGivenInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeModules?: Prisma.TenantUpdateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+  promoRedemptions?: Prisma.PromoRedemptionUncheckedUpdateManyWithoutTenantNestedInput
+  saaSPayments?: Prisma.SaaSPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
+  featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
+  orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
+}
+
+export type TenantUpsertWithoutReferralsReceivedInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutReferralsReceivedInput, Prisma.TenantUncheckedUpdateWithoutReferralsReceivedInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReferralsReceivedInput, Prisma.TenantUncheckedCreateWithoutReferralsReceivedInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutReferralsReceivedInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutReferralsReceivedInput, Prisma.TenantUncheckedUpdateWithoutReferralsReceivedInput>
+}
+
+export type TenantUpdateWithoutReferralsReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeModules?: Prisma.TenantUpdateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
+  users?: Prisma.UserUpdateManyWithoutTenantNestedInput
+  roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutTenantNestedInput
+  promoRedemptions?: Prisma.PromoRedemptionUpdateManyWithoutTenantNestedInput
+  saaSPayments?: Prisma.SaaSPaymentUpdateManyWithoutTenantNestedInput
+  pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
+  featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
+  orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutReferralsReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerEmail?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customDomain?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activeModules?: Prisma.TenantUpdateactiveModulesInput | string[]
+  settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
+  users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
+  roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTenantNestedInput
+  promoRedemptions?: Prisma.PromoRedemptionUncheckedUpdateManyWithoutTenantNestedInput
+  saaSPayments?: Prisma.SaaSPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
+  featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
+  orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+}
+
 export type TenantCreateWithoutSubscriptionInput = {
   id?: string
   name: string
@@ -795,12 +1237,16 @@ export type TenantCreateWithoutSubscriptionInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
@@ -809,6 +1255,8 @@ export type TenantCreateWithoutSubscriptionInput = {
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutSubscriptionInput = {
@@ -824,12 +1272,16 @@ export type TenantUncheckedCreateWithoutSubscriptionInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
@@ -838,6 +1290,8 @@ export type TenantUncheckedCreateWithoutSubscriptionInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutSubscriptionInput = {
@@ -869,12 +1323,16 @@ export type TenantUpdateWithoutSubscriptionInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
@@ -883,6 +1341,8 @@ export type TenantUpdateWithoutSubscriptionInput = {
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSubscriptionInput = {
@@ -898,12 +1358,16 @@ export type TenantUncheckedUpdateWithoutSubscriptionInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -912,6 +1376,8 @@ export type TenantUncheckedUpdateWithoutSubscriptionInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutBranchesInput = {
@@ -927,12 +1393,16 @@ export type TenantCreateWithoutBranchesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTenantInput
@@ -941,6 +1411,8 @@ export type TenantCreateWithoutBranchesInput = {
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutBranchesInput = {
@@ -956,12 +1428,16 @@ export type TenantUncheckedCreateWithoutBranchesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -970,6 +1446,8 @@ export type TenantUncheckedCreateWithoutBranchesInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutBranchesInput = {
@@ -1001,12 +1479,16 @@ export type TenantUpdateWithoutBranchesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTenantNestedInput
@@ -1015,6 +1497,8 @@ export type TenantUpdateWithoutBranchesInput = {
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutBranchesInput = {
@@ -1030,12 +1514,16 @@ export type TenantUncheckedUpdateWithoutBranchesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -1044,6 +1532,8 @@ export type TenantUncheckedUpdateWithoutBranchesInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutUsersInput = {
@@ -1059,12 +1549,16 @@ export type TenantCreateWithoutUsersInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTenantInput
@@ -1073,6 +1567,8 @@ export type TenantCreateWithoutUsersInput = {
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutUsersInput = {
@@ -1088,12 +1584,16 @@ export type TenantUncheckedCreateWithoutUsersInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -1102,6 +1602,8 @@ export type TenantUncheckedCreateWithoutUsersInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutUsersInput = {
@@ -1133,12 +1635,16 @@ export type TenantUpdateWithoutUsersInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTenantNestedInput
@@ -1147,6 +1653,8 @@ export type TenantUpdateWithoutUsersInput = {
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutUsersInput = {
@@ -1162,12 +1670,16 @@ export type TenantUncheckedUpdateWithoutUsersInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -1176,6 +1688,8 @@ export type TenantUncheckedUpdateWithoutUsersInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutRolesInput = {
@@ -1191,12 +1705,16 @@ export type TenantCreateWithoutRolesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutTenantInput
@@ -1205,6 +1723,8 @@ export type TenantCreateWithoutRolesInput = {
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutRolesInput = {
@@ -1220,12 +1740,16 @@ export type TenantUncheckedCreateWithoutRolesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutTenantInput
@@ -1234,6 +1758,8 @@ export type TenantUncheckedCreateWithoutRolesInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutRolesInput = {
@@ -1265,12 +1791,16 @@ export type TenantUpdateWithoutRolesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutTenantNestedInput
@@ -1279,6 +1809,8 @@ export type TenantUpdateWithoutRolesInput = {
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutRolesInput = {
@@ -1294,12 +1826,16 @@ export type TenantUncheckedUpdateWithoutRolesInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutTenantNestedInput
@@ -1308,6 +1844,8 @@ export type TenantUncheckedUpdateWithoutRolesInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutOrderPhotosInput = {
@@ -1323,12 +1861,16 @@ export type TenantCreateWithoutOrderPhotosInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
@@ -1337,6 +1879,8 @@ export type TenantCreateWithoutOrderPhotosInput = {
   saaSPayments?: Prisma.SaaSPaymentCreateNestedManyWithoutTenantInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutOrderPhotosInput = {
@@ -1352,12 +1896,16 @@ export type TenantUncheckedCreateWithoutOrderPhotosInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1366,6 +1914,8 @@ export type TenantUncheckedCreateWithoutOrderPhotosInput = {
   saaSPayments?: Prisma.SaaSPaymentUncheckedCreateNestedManyWithoutTenantInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutOrderPhotosInput = {
@@ -1397,12 +1947,16 @@ export type TenantUpdateWithoutOrderPhotosInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
@@ -1411,6 +1965,8 @@ export type TenantUpdateWithoutOrderPhotosInput = {
   saaSPayments?: Prisma.SaaSPaymentUpdateManyWithoutTenantNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderPhotosInput = {
@@ -1426,12 +1982,16 @@ export type TenantUncheckedUpdateWithoutOrderPhotosInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1440,6 +2000,8 @@ export type TenantUncheckedUpdateWithoutOrderPhotosInput = {
   saaSPayments?: Prisma.SaaSPaymentUncheckedUpdateManyWithoutTenantNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutPickupRequestsInput = {
@@ -1455,12 +2017,16 @@ export type TenantCreateWithoutPickupRequestsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
@@ -1469,6 +2035,8 @@ export type TenantCreateWithoutPickupRequestsInput = {
   saaSPayments?: Prisma.SaaSPaymentCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutPickupRequestsInput = {
@@ -1484,12 +2052,16 @@ export type TenantUncheckedCreateWithoutPickupRequestsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1498,6 +2070,8 @@ export type TenantUncheckedCreateWithoutPickupRequestsInput = {
   saaSPayments?: Prisma.SaaSPaymentUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutPickupRequestsInput = {
@@ -1529,12 +2103,16 @@ export type TenantUpdateWithoutPickupRequestsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
@@ -1543,6 +2121,8 @@ export type TenantUpdateWithoutPickupRequestsInput = {
   saaSPayments?: Prisma.SaaSPaymentUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutPickupRequestsInput = {
@@ -1558,12 +2138,16 @@ export type TenantUncheckedUpdateWithoutPickupRequestsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1572,6 +2156,8 @@ export type TenantUncheckedUpdateWithoutPickupRequestsInput = {
   saaSPayments?: Prisma.SaaSPaymentUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutPromoRedemptionsInput = {
@@ -1587,12 +2173,16 @@ export type TenantCreateWithoutPromoRedemptionsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
@@ -1601,6 +2191,8 @@ export type TenantCreateWithoutPromoRedemptionsInput = {
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutPromoRedemptionsInput = {
@@ -1616,12 +2208,16 @@ export type TenantUncheckedCreateWithoutPromoRedemptionsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1630,6 +2226,8 @@ export type TenantUncheckedCreateWithoutPromoRedemptionsInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutPromoRedemptionsInput = {
@@ -1661,12 +2259,16 @@ export type TenantUpdateWithoutPromoRedemptionsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
@@ -1675,6 +2277,8 @@ export type TenantUpdateWithoutPromoRedemptionsInput = {
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutPromoRedemptionsInput = {
@@ -1690,12 +2294,16 @@ export type TenantUncheckedUpdateWithoutPromoRedemptionsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1704,6 +2312,8 @@ export type TenantUncheckedUpdateWithoutPromoRedemptionsInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutSaaSPaymentsInput = {
@@ -1719,12 +2329,16 @@ export type TenantCreateWithoutSaaSPaymentsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
@@ -1733,6 +2347,8 @@ export type TenantCreateWithoutSaaSPaymentsInput = {
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutSaaSPaymentsInput = {
@@ -1748,12 +2364,16 @@ export type TenantUncheckedCreateWithoutSaaSPaymentsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1762,6 +2382,8 @@ export type TenantUncheckedCreateWithoutSaaSPaymentsInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutSaaSPaymentsInput = {
@@ -1793,12 +2415,16 @@ export type TenantUpdateWithoutSaaSPaymentsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
@@ -1807,6 +2433,8 @@ export type TenantUpdateWithoutSaaSPaymentsInput = {
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSaaSPaymentsInput = {
@@ -1822,12 +2450,16 @@ export type TenantUncheckedUpdateWithoutSaaSPaymentsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1836,6 +2468,8 @@ export type TenantUncheckedUpdateWithoutSaaSPaymentsInput = {
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   featureFlags?: Prisma.TenantFeatureFlagUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantCreateWithoutFeatureFlagsInput = {
@@ -1851,12 +2485,16 @@ export type TenantCreateWithoutFeatureFlagsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchCreateNestedManyWithoutTenantInput
   users?: Prisma.UserCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleCreateNestedManyWithoutTenantInput
@@ -1865,6 +2503,8 @@ export type TenantCreateWithoutFeatureFlagsInput = {
   saaSPayments?: Prisma.SaaSPaymentCreateNestedManyWithoutTenantInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralCreateNestedManyWithoutReferredInput
 }
 
 export type TenantUncheckedCreateWithoutFeatureFlagsInput = {
@@ -1880,12 +2520,16 @@ export type TenantUncheckedCreateWithoutFeatureFlagsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
   approvedAt?: Date | string | null
+  onboardingCompletedAt?: Date | string | null
+  isDemo?: boolean
+  demoExpiresAt?: Date | string | null
   trialEndsAt?: Date | string | null
   trialTier?: string | null
   websiteEnabled?: boolean
   websitePublishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  referralCode?: string | null
   branches?: Prisma.BranchUncheckedCreateNestedManyWithoutTenantInput
   users?: Prisma.UserUncheckedCreateNestedManyWithoutTenantInput
   roles?: Prisma.RoleUncheckedCreateNestedManyWithoutTenantInput
@@ -1894,6 +2538,8 @@ export type TenantUncheckedCreateWithoutFeatureFlagsInput = {
   saaSPayments?: Prisma.SaaSPaymentUncheckedCreateNestedManyWithoutTenantInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutTenantInput
   orderPhotos?: Prisma.OrderPhotoUncheckedCreateNestedManyWithoutTenantInput
+  referralsGiven?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferrerInput
+  referralsReceived?: Prisma.ReferralUncheckedCreateNestedManyWithoutReferredInput
 }
 
 export type TenantCreateOrConnectWithoutFeatureFlagsInput = {
@@ -1925,12 +2571,16 @@ export type TenantUpdateWithoutFeatureFlagsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUpdateManyWithoutTenantNestedInput
@@ -1939,6 +2589,8 @@ export type TenantUpdateWithoutFeatureFlagsInput = {
   saaSPayments?: Prisma.SaaSPaymentUpdateManyWithoutTenantNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUpdateManyWithoutReferredNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutFeatureFlagsInput = {
@@ -1954,12 +2606,16 @@ export type TenantUncheckedUpdateWithoutFeatureFlagsInput = {
   settings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  onboardingCompletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  demoExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialEndsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   trialTier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   websiteEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   websitePublishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referralCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branches?: Prisma.BranchUncheckedUpdateManyWithoutTenantNestedInput
   users?: Prisma.UserUncheckedUpdateManyWithoutTenantNestedInput
   roles?: Prisma.RoleUncheckedUpdateManyWithoutTenantNestedInput
@@ -1968,6 +2624,8 @@ export type TenantUncheckedUpdateWithoutFeatureFlagsInput = {
   saaSPayments?: Prisma.SaaSPaymentUncheckedUpdateManyWithoutTenantNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutTenantNestedInput
   orderPhotos?: Prisma.OrderPhotoUncheckedUpdateManyWithoutTenantNestedInput
+  referralsGiven?: Prisma.ReferralUncheckedUpdateManyWithoutReferrerNestedInput
+  referralsReceived?: Prisma.ReferralUncheckedUpdateManyWithoutReferredNestedInput
 }
 
 
@@ -1984,6 +2642,8 @@ export type TenantCountOutputType = {
   pickupRequests: number
   featureFlags: number
   orderPhotos: number
+  referralsGiven: number
+  referralsReceived: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1995,6 +2655,8 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   pickupRequests?: boolean | TenantCountOutputTypeCountPickupRequestsArgs
   featureFlags?: boolean | TenantCountOutputTypeCountFeatureFlagsArgs
   orderPhotos?: boolean | TenantCountOutputTypeCountOrderPhotosArgs
+  referralsGiven?: boolean | TenantCountOutputTypeCountReferralsGivenArgs
+  referralsReceived?: boolean | TenantCountOutputTypeCountReferralsReceivedArgs
 }
 
 /**
@@ -2063,6 +2725,20 @@ export type TenantCountOutputTypeCountOrderPhotosArgs<ExtArgs extends runtime.Ty
   where?: Prisma.OrderPhotoWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountReferralsGivenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReferralWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountReferralsReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReferralWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2077,12 +2753,16 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   settings?: boolean
   isActive?: boolean
   approvedAt?: boolean
+  onboardingCompletedAt?: boolean
+  isDemo?: boolean
+  demoExpiresAt?: boolean
   trialEndsAt?: boolean
   trialTier?: boolean
   websiteEnabled?: boolean
   websitePublishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  referralCode?: boolean
   branches?: boolean | Prisma.Tenant$branchesArgs<ExtArgs>
   users?: boolean | Prisma.Tenant$usersArgs<ExtArgs>
   roles?: boolean | Prisma.Tenant$rolesArgs<ExtArgs>
@@ -2092,6 +2772,8 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   pickupRequests?: boolean | Prisma.Tenant$pickupRequestsArgs<ExtArgs>
   featureFlags?: boolean | Prisma.Tenant$featureFlagsArgs<ExtArgs>
   orderPhotos?: boolean | Prisma.Tenant$orderPhotosArgs<ExtArgs>
+  referralsGiven?: boolean | Prisma.Tenant$referralsGivenArgs<ExtArgs>
+  referralsReceived?: boolean | Prisma.Tenant$referralsReceivedArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -2108,12 +2790,16 @@ export type TenantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   settings?: boolean
   isActive?: boolean
   approvedAt?: boolean
+  onboardingCompletedAt?: boolean
+  isDemo?: boolean
+  demoExpiresAt?: boolean
   trialEndsAt?: boolean
   trialTier?: boolean
   websiteEnabled?: boolean
   websitePublishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  referralCode?: boolean
 }, ExtArgs["result"]["tenant"]>
 
 export type TenantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2129,12 +2815,16 @@ export type TenantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   settings?: boolean
   isActive?: boolean
   approvedAt?: boolean
+  onboardingCompletedAt?: boolean
+  isDemo?: boolean
+  demoExpiresAt?: boolean
   trialEndsAt?: boolean
   trialTier?: boolean
   websiteEnabled?: boolean
   websitePublishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  referralCode?: boolean
 }, ExtArgs["result"]["tenant"]>
 
 export type TenantSelectScalar = {
@@ -2150,15 +2840,19 @@ export type TenantSelectScalar = {
   settings?: boolean
   isActive?: boolean
   approvedAt?: boolean
+  onboardingCompletedAt?: boolean
+  isDemo?: boolean
+  demoExpiresAt?: boolean
   trialEndsAt?: boolean
   trialTier?: boolean
   websiteEnabled?: boolean
   websitePublishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  referralCode?: boolean
 }
 
-export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "ownerEmail" | "ownerName" | "ownerPhone" | "logoUrl" | "customDomain" | "activeModules" | "settings" | "isActive" | "approvedAt" | "trialEndsAt" | "trialTier" | "websiteEnabled" | "websitePublishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["tenant"]>
+export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "ownerEmail" | "ownerName" | "ownerPhone" | "logoUrl" | "customDomain" | "activeModules" | "settings" | "isActive" | "approvedAt" | "onboardingCompletedAt" | "isDemo" | "demoExpiresAt" | "trialEndsAt" | "trialTier" | "websiteEnabled" | "websitePublishedAt" | "createdAt" | "updatedAt" | "referralCode", ExtArgs["result"]["tenant"]>
 export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   branches?: boolean | Prisma.Tenant$branchesArgs<ExtArgs>
   users?: boolean | Prisma.Tenant$usersArgs<ExtArgs>
@@ -2169,6 +2863,8 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   pickupRequests?: boolean | Prisma.Tenant$pickupRequestsArgs<ExtArgs>
   featureFlags?: boolean | Prisma.Tenant$featureFlagsArgs<ExtArgs>
   orderPhotos?: boolean | Prisma.Tenant$orderPhotosArgs<ExtArgs>
+  referralsGiven?: boolean | Prisma.Tenant$referralsGivenArgs<ExtArgs>
+  referralsReceived?: boolean | Prisma.Tenant$referralsReceivedArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2186,6 +2882,11 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     pickupRequests: Prisma.$PickupRequestPayload<ExtArgs>[]
     featureFlags: Prisma.$TenantFeatureFlagPayload<ExtArgs>[]
     orderPhotos: Prisma.$OrderPhotoPayload<ExtArgs>[]
+    /**
+     * Referrals this tenant has given (as referrer) + received (as referred).
+     */
+    referralsGiven: Prisma.$ReferralPayload<ExtArgs>[]
+    referralsReceived: Prisma.$ReferralPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2215,6 +2916,16 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
      * manual /approve endpoint is only for edge cases a super-admin re-pends.
      */
     approvedAt: Date | null
+    /**
+     * Null until the owner finishes/skips the onboarding wizard. Gates the
+     * /dashboard → /onboarding redirect for OWNER sessions (see lib/auth.ts).
+     */
+    onboardingCompletedAt: Date | null
+    /**
+     * Sandbox demo tenant — isolated, pre-seeded, auto-expiring (see lib/demo/sandbox.ts).
+     */
+    isDemo: boolean
+    demoExpiresAt: Date | null
     trialEndsAt: Date | null
     /**
      * Which tier a tenant trials during trialEndsAt: "GROWTH" | "PRO" | null.
@@ -2232,6 +2943,10 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     websitePublishedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    /**
+     * Unique shareable referral code, e.g. "K8X2PQ9A". /register?ref=CODE.
+     */
+    referralCode: string | null
   }, ExtArgs["result"]["tenant"]>
   composites: {}
 }
@@ -2635,6 +3350,8 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   pickupRequests<T extends Prisma.Tenant$pickupRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$pickupRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PickupRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   featureFlags<T extends Prisma.Tenant$featureFlagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$featureFlagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantFeatureFlagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderPhotos<T extends Prisma.Tenant$orderPhotosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$orderPhotosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPhotoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  referralsGiven<T extends Prisma.Tenant$referralsGivenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$referralsGivenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  referralsReceived<T extends Prisma.Tenant$referralsReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$referralsReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReferralPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2676,12 +3393,16 @@ export interface TenantFieldRefs {
   readonly settings: Prisma.FieldRef<"Tenant", 'Json'>
   readonly isActive: Prisma.FieldRef<"Tenant", 'Boolean'>
   readonly approvedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
+  readonly onboardingCompletedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
+  readonly isDemo: Prisma.FieldRef<"Tenant", 'Boolean'>
+  readonly demoExpiresAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly trialEndsAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly trialTier: Prisma.FieldRef<"Tenant", 'String'>
   readonly websiteEnabled: Prisma.FieldRef<"Tenant", 'Boolean'>
   readonly websitePublishedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Tenant", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Tenant", 'DateTime'>
+  readonly referralCode: Prisma.FieldRef<"Tenant", 'String'>
 }
     
 
@@ -3283,6 +4004,54 @@ export type Tenant$orderPhotosArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.OrderPhotoScalarFieldEnum | Prisma.OrderPhotoScalarFieldEnum[]
+}
+
+/**
+ * Tenant.referralsGiven
+ */
+export type Tenant$referralsGivenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Referral
+   */
+  select?: Prisma.ReferralSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Referral
+   */
+  omit?: Prisma.ReferralOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReferralInclude<ExtArgs> | null
+  where?: Prisma.ReferralWhereInput
+  orderBy?: Prisma.ReferralOrderByWithRelationInput | Prisma.ReferralOrderByWithRelationInput[]
+  cursor?: Prisma.ReferralWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReferralScalarFieldEnum | Prisma.ReferralScalarFieldEnum[]
+}
+
+/**
+ * Tenant.referralsReceived
+ */
+export type Tenant$referralsReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Referral
+   */
+  select?: Prisma.ReferralSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Referral
+   */
+  omit?: Prisma.ReferralOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReferralInclude<ExtArgs> | null
+  where?: Prisma.ReferralWhereInput
+  orderBy?: Prisma.ReferralOrderByWithRelationInput | Prisma.ReferralOrderByWithRelationInput[]
+  cursor?: Prisma.ReferralWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReferralScalarFieldEnum | Prisma.ReferralScalarFieldEnum[]
 }
 
 /**

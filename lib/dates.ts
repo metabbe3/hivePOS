@@ -32,3 +32,24 @@ export function parseDateRange(input: {
   if (input.to) result.to = endOfDay(new Date(input.to));
   return result;
 }
+
+/**
+ * Interpret a `YYYY-MM-DD` string pair as **WIB (UTC+7) calendar days** and
+ * return UTC-instant bounds for a Prisma `gte`/`lte` filter.
+ *
+ * Why this exists: `new Date("2026-07-01")` parses a date-only string as
+ * **UTC midnight** (ECMAScript spec), not local/WIB. Combined with `endOfDay`
+ * (which uses local hours), date-range filters drifted ~7h, so "this month" /
+ * "today" matched the wrong calendar day. The explicit `+07:00` offset makes
+ * the bounds correct regardless of the server's system timezone or container
+ * tzdata — Indonesia-only app, WIB is the only timezone that matters.
+ */
+export function wibDateBounds(input: {
+  from?: string | null;
+  to?: string | null;
+}): { gte?: Date; lte?: Date } {
+  const out: { gte?: Date; lte?: Date } = {};
+  if (input.from) out.gte = new Date(`${input.from}T00:00:00.000+07:00`);
+  if (input.to) out.lte = new Date(`${input.to}T23:59:59.999+07:00`);
+  return out;
+}

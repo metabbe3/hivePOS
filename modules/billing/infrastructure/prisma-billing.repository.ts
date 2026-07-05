@@ -6,6 +6,8 @@ import {
   validatePromoCode,
   redeemPromoCode,
   markPaymentPaidAndRecompute,
+  getTenantPlan,
+  getTierUnitPrice,
 } from "@/lib/billing";
 import type { BillingRepository } from "../domain/repository.port";
 import type {
@@ -18,6 +20,7 @@ import type {
   SubscriptionInfo,
   BranchCoverageInfo,
   TenantLimits,
+  TenantPlan,
 } from "../domain/types";
 
 function mapPayment(p: {
@@ -70,12 +73,21 @@ export class PrismaBillingRepository implements BillingRepository {
   async validatePromoCode(
     code: string,
     tenantId: string,
+    planTier?: "GROWTH" | "PRO",
   ): Promise<PromoValidationResult> {
-    return validatePromoCode(code, tenantId);
+    return validatePromoCode(code, tenantId, planTier);
   }
 
   async redeemPromoCode(promoCodeId: string, tenantId: string): Promise<void> {
     return redeemPromoCode(promoCodeId, tenantId);
+  }
+
+  async getTenantPlan(tenantId: string): Promise<TenantPlan> {
+    return getTenantPlan(tenantId);
+  }
+
+  async getTierUnitPrice(tier: "GROWTH" | "PRO"): Promise<number> {
+    return getTierUnitPrice(tier);
   }
 
   // ── Payment lifecycle ──

@@ -63,10 +63,10 @@ type NavItem = {
 const MODULE_NAV: Record<string, NavItem[]> = {
   laundry: [
     { titleKey: "nav.orders", href: "/laundry/orders", icon: ShoppingCart, color: "text-sky-600", resource: "orders", action: "read", flag: "orders" },
-    { titleKey: "nav.pickup", href: "/laundry/pickup-requests", icon: Truck, color: "text-orange-600", resource: "pickupRequests", action: "read", badge: <PickupBadge />, flag: "pickupRequests" },
+    { titleKey: "nav.pickup", href: "/laundry/pickup-requests", icon: Truck, color: "text-indigo-600", resource: "pickupRequests", action: "read", badge: <PickupBadge />, flag: "pickupRequests" },
     { titleKey: "nav.services", href: "/laundry/services", icon: Sparkles, color: "text-emerald-600", resource: "services", action: "read", flag: "services" },
     { titleKey: "nav.inventory", href: "/laundry/inventory", icon: Package, color: "text-teal-600", resource: "inventory", action: "read", flag: "inventory" },
-    { titleKey: "nav.expenses", href: "/laundry/expenses", icon: Receipt, color: "text-rose-600", resource: "expenses", action: "read", flag: "expenses" },
+    { titleKey: "nav.expenses", href: "/laundry/expenses", icon: Receipt, color: "text-indigo-600", resource: "expenses", action: "read", flag: "expenses" },
   ],
   fnb: [
     { titleKey: "nav.orders", href: "/laundry/orders", icon: ShoppingCart, color: "text-sky-600", resource: "orders", action: "read", flag: "orders" },
@@ -80,8 +80,8 @@ const MODULE_NAV: Record<string, NavItem[]> = {
 
 // Shared sections — cross-module
 const SHARED_NAV: NavItem[] = [
-  { titleKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, color: "text-amber-600", resource: "dashboard", action: "read", flag: "dashboard" },
-  { titleKey: "nav.customers", href: "/customers", icon: Users, color: "text-amber-600", resource: "customers", action: "read", flag: "customers" },
+  { titleKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, color: "text-indigo-600", resource: "dashboard", action: "read", flag: "dashboard" },
+  { titleKey: "nav.customers", href: "/customers", icon: Users, color: "text-indigo-600", resource: "customers", action: "read", flag: "customers" },
   { titleKey: "nav.reporting", href: "/reporting", icon: BarChart3, color: "text-violet-600", resource: "reports", action: "read", flag: "reports" },
   // ponytail: printer settings is device-level (localStorage) so it stays visible
   // even in "Semua Outlet" mode. Gated by orders:read → kasir, manager, owner.
@@ -89,7 +89,7 @@ const SHARED_NAV: NavItem[] = [
 ];
 
 const ADMIN_NAV: NavItem[] = [
-  { titleKey: "nav.branches", href: "/branches", icon: Building2, color: "text-orange-600", resource: "branches", action: "read", flag: "branches" },
+  { titleKey: "nav.branches", href: "/branches", icon: Building2, color: "text-indigo-600", resource: "branches", action: "read", flag: "branches" },
   { titleKey: "nav.users", href: "/users", icon: UserCog, color: "text-purple-600", resource: "users", action: "read", flag: "users" },
   { titleKey: "nav.roles", href: "/roles", icon: ShieldCheck, color: "text-indigo-600", resource: "roles", action: "read", flag: "roles" },
   { titleKey: "nav.billing", href: "/billing", icon: CreditCard, color: "text-green-600", resource: "billing", action: "read", flag: "billing" },
@@ -100,7 +100,7 @@ const ADMIN_NAV: NavItem[] = [
 // Help/Bantuan — always visible to every logged-in user. Ponytail: no RBAC
 // resource, so it lives outside SHARED_NAV's permission filter.
 const HELP_NAV: NavItem[] = [
-  { titleKey: "nav.help", href: "/tickets", icon: LifeBuoy, color: "text-rose-600", resource: "dashboard", action: "read", flag: "tickets" },
+  { titleKey: "nav.help", href: "/tickets", icon: LifeBuoy, color: "text-indigo-600", resource: "dashboard", action: "read", flag: "tickets" },
 ];
 
 // Module metadata for switcher. Label resolved at render time via t().
@@ -259,7 +259,7 @@ export function AppSidebar() {
         {visibleHelp.length > 0 && (
           <SidebarGroup>
             <SidebarGroupContent>
-              <NavList items={visibleHelp} accentColor="bg-rose-500" />
+              <NavList items={visibleHelp} accentColor="bg-indigo-500" />
             </SidebarGroupContent>
           </SidebarGroup>
         )}

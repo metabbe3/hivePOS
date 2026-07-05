@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePermissionGuard } from "@/hooks/use-permission-guard";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/use-translation";
-import { Pencil, Trash2, Weight, Package, FolderOpen, ChevronDown, ChevronRight, Layers, Clock, Zap, Timer, Sparkles } from "lucide-react";
+import { Pencil, Trash2, Weight, Package, FolderOpen, ChevronDown, ChevronRight, Layers, Clock, Zap, Timer, Sparkles, Star } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { PageLoading } from "@/components/shared/loading";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatCurrency } from "@/lib/format";
 import { PRICING_TYPE_LABELS, SERVICE_CATEGORIES } from "@/lib/constants";
 import { transformServices, getBaseItemCategories, filterBaseItems } from "@/lib/service-transformer";
@@ -35,6 +36,7 @@ interface Service {
   commissionType: "NONE" | "FLAT" | "PERCENTAGE";
   commissionValue: number;
   isActive: boolean;
+  isDefaultSpeed: boolean;
   groupId: string | null;
   group: { id: string; name: string } | null;
 }
@@ -178,6 +180,21 @@ export default function ServicesPage() {
     }
   }
 
+  async function setDefaultSpeed(targetId: string, previousDefaultId: string | null) {
+    // Client-side two-PATCH switch (see docs/specs/service-default-speed.md):
+    // clear the previous default in this speed-group, then set the target.
+    try {
+      if (previousDefaultId && previousDefaultId !== targetId) {
+        await apiFetch(`/api/services/${previousDefaultId}`, { method: "PATCH", body: { isDefaultSpeed: false } });
+      }
+      await apiFetch(`/api/services/${targetId}`, { method: "PATCH", body: { isDefaultSpeed: true } });
+      toast.success(t("services.defaultSet"));
+      loadData();
+    } catch (err) {
+      toast.error(err instanceof ApiClientError ? err.message : t("services.failedUpdate"));
+    }
+  }
+
   async function handleBatchSubmit(e: React.FormEvent) {
     e.preventDefault();
     const speeds: { key: "reguler" | "express24" | "express7"; suffix: string }[] = [
@@ -208,6 +225,7 @@ export default function ServicesPage() {
               commissionType: batchForm.commissionType,
               commissionValue,
               groupId: batchForm.groupId || undefined,
+              isDefaultSpeed: key === "reguler",
             },
           });
           created++;
@@ -393,8 +411,31 @@ export default function ServicesPage() {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-sm font-bold">{formatCurrency(variant.basePrice)}</span>
+                            {variantCount > 1 && variant.isDefault && (
+                              <Badge variant="secondary" className="gap-1 text-[10px] bg-amber-100 text-amber-700 hover:bg-amber-100">
+                                <Star className="h-3 w-3 fill-current" />
+                                {t("services.defaultLabel")}
+                              </Badge>
+                            )}
                             {svc && (
                               <div className="flex gap-0.5">
+                                {variantCount > 1 && !variant.isDefault && (
+                                  <Tooltip>
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-7 w-7"
+                                          onClick={(e) => { e.stopPropagation(); setDefaultSpeed(variant.serviceId, item.variants.find((v) => v.isDefault)?.serviceId ?? null); }}
+                                        />
+                                      }
+                                    >
+                                      <Star className="h-3 w-3" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>{t("services.setDefaultHint")}</TooltipContent>
+                                  </Tooltip>
+                                )}
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); openEdit(svc); }}>
                                   <Pencil className="h-3 w-3" />
                                 </Button>

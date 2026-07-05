@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   ArrowLeft,
   ChevronRight,
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageLoading } from "@/components/shared/loading";
 import { useTranslation } from "@/hooks/use-translation";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { formatCurrency } from "@/lib/format";
 import { OrderPhotoSection } from "@/components/orders/order-photo-section";
 import { NewOrderProvider, useNewOrder } from "./new-order-context";
@@ -230,6 +232,21 @@ function SuccessScreen({
   const router = useRouter();
   const { t } = useTranslation();
   const { total, resetForNewOrder } = useNewOrder();
+  const orderFlowV2 = useFeatureFlag("orderFlowV2");
+
+  // orderFlowV2: press "n" to start the next order without leaving the keyboard.
+  useEffect(() => {
+    if (!orderFlowV2) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "n" && e.key !== "N") return;
+      const el = document.activeElement as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el?.isContentEditable) return;
+      resetForNewOrder();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [orderFlowV2, resetForNewOrder]);
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
@@ -263,17 +280,20 @@ function SuccessScreen({
       {/* Actions */}
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button
-          onClick={() => router.push(`/laundry/orders/${orderId}`)}
+          onClick={() => resetForNewOrder()}
           className="flex-1 bg-gradient-to-r from-brand-600 to-brand-700 font-semibold text-white shadow-md shadow-brand-600/15 transition-all hover:brightness-105"
         >
-          {t("newOrder.viewDetail")}
+          {t("newOrder.newAgain")}
+          {orderFlowV2 && (
+            <kbd className="ml-2 rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-mono leading-none">N</kbd>
+          )}
         </Button>
         <Button
           variant="outline"
-          onClick={() => resetForNewOrder()}
+          onClick={() => router.push(`/laundry/orders/${orderId}`)}
           className="flex-1"
         >
-          {t("newOrder.newAgain")}
+          {t("newOrder.viewDetail")}
         </Button>
       </div>
     </div>

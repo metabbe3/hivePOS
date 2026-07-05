@@ -90,6 +90,7 @@ export interface ValidatePromoInput {
   code: string;
   branchIds?: string[];
   months?: number;
+  planTier?: "GROWTH" | "PRO";
 }
 
 export interface ValidatePromoResult {

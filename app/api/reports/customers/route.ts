@@ -3,7 +3,7 @@ import { UNPAID_PAYMENT_STATUSES } from "@/lib/constants";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
 import { buildDateFilter } from "@/lib/format";
-import { endOfDay } from "@/lib/dates";
+import { wibDateBounds } from "@/lib/dates";
 
 export const GET = withErrorHandler(async (req) => {
   const ctx = await requireWithBranchOrThrow("reports", "read");
@@ -15,13 +15,11 @@ export const GET = withErrorHandler(async (req) => {
 
   const { where } = buildDateFilter(fromStr, toStr);
 
-  // Customer model doesn't have receivedAt — use createdAt directly
+  // Customer model doesn't have receivedAt — use createdAt directly (WIB bounds)
+  const customerBounds = wibDateBounds({ from: fromStr, to: toStr });
   const customerDateFilter: Record<string, unknown> = {};
-  if (fromStr) customerDateFilter.createdAt = { gte: new Date(fromStr) };
-  if (toStr) {
-    const to = endOfDay(new Date(toStr));
-    customerDateFilter.createdAt = { ...(customerDateFilter.createdAt as object), lte: to };
-  }
+  if (customerBounds.gte) customerDateFilter.createdAt = { gte: customerBounds.gte };
+  if (customerBounds.lte) customerDateFilter.createdAt = { ...(customerDateFilter.createdAt as object), lte: customerBounds.lte };
   const customerWhere = Object.keys(customerDateFilter).length > 0 ? customerDateFilter : {};
 
   const fromDate = fromStr ? new Date(fromStr) : new Date(0);

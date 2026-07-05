@@ -13,6 +13,7 @@ import { apiFetch, ApiClientError } from "@/modules/shared";
 import { formatCurrency } from "@/lib/format";
 import { renderWhatsAppTemplate } from "@/lib/whatsapp-templates";
 import { useWhatsappTemplates } from "@/hooks/use-whatsapp-templates";
+import { BackButton } from "@/components/shared/back-button";
 import type { OrderDetail, PayFormState } from "@/components/orders/order-types";
 import { OrderDetailHeader } from "@/components/orders/order-detail-header";
 import { OrderStatusTimeline } from "@/components/orders/order-status-timeline";
@@ -43,7 +44,7 @@ export default function OrderDetailPage({
   const [payDialogOpen, setPayDialogOpen] = useState(false);
   const [payForm, setPayForm] = useState<PayFormState>({
     amount: "",
-    paymentMethod: "CASH",
+    paymentMethod: "QRIS",
     notes: "",
     paidAt: new Date().toISOString().slice(0, 10),
   });
@@ -107,7 +108,7 @@ export default function OrderDetailPage({
       setPayDialogOpen(false);
       setPayForm({
         amount: "",
-        paymentMethod: "CASH",
+        paymentMethod: "QRIS",
         notes: "",
         paidAt: new Date().toISOString().slice(0, 10),
       });
@@ -246,6 +247,7 @@ export default function OrderDetailPage({
   // ===== View mode =====
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      <BackButton />
       <OrderDetailHeader
         order={order}
         isEmployee={isEmployee}

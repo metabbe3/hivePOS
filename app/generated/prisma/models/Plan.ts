@@ -52,6 +52,7 @@ export type PlanMinAggregateOutputType = {
   priceMonthly: runtime.Decimal | null
   priceYearly: runtime.Decimal | null
   isActive: boolean | null
+  tier: $Enums.PlanTier | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +67,7 @@ export type PlanMaxAggregateOutputType = {
   priceMonthly: runtime.Decimal | null
   priceYearly: runtime.Decimal | null
   isActive: boolean | null
+  tier: $Enums.PlanTier | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -82,6 +84,7 @@ export type PlanCountAggregateOutputType = {
   modules: number
   features: number
   isActive: number
+  tier: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -114,6 +117,7 @@ export type PlanMinAggregateInputType = {
   priceMonthly?: true
   priceYearly?: true
   isActive?: true
+  tier?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -128,6 +132,7 @@ export type PlanMaxAggregateInputType = {
   priceMonthly?: true
   priceYearly?: true
   isActive?: true
+  tier?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -144,6 +149,7 @@ export type PlanCountAggregateInputType = {
   modules?: true
   features?: true
   isActive?: true
+  tier?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -247,6 +253,7 @@ export type PlanGroupByOutputType = {
   modules: string[]
   features: runtime.JsonValue | null
   isActive: boolean
+  tier: $Enums.PlanTier | null
   createdAt: Date
   updatedAt: Date
   _count: PlanCountAggregateOutputType | null
@@ -286,6 +293,7 @@ export type PlanWhereInput = {
   modules?: Prisma.StringNullableListFilter<"Plan">
   features?: Prisma.JsonNullableFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
+  tier?: Prisma.EnumPlanTierNullableFilter<"Plan"> | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   subscriptions?: Prisma.SubscriptionListRelationFilter
@@ -303,6 +311,7 @@ export type PlanOrderByWithRelationInput = {
   modules?: Prisma.SortOrder
   features?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tier?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   subscriptions?: Prisma.SubscriptionOrderByRelationAggregateInput
@@ -323,6 +332,7 @@ export type PlanWhereUniqueInput = Prisma.AtLeast<{
   modules?: Prisma.StringNullableListFilter<"Plan">
   features?: Prisma.JsonNullableFilter<"Plan">
   isActive?: Prisma.BoolFilter<"Plan"> | boolean
+  tier?: Prisma.EnumPlanTierNullableFilter<"Plan"> | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Plan"> | Date | string
   subscriptions?: Prisma.SubscriptionListRelationFilter
@@ -340,6 +350,7 @@ export type PlanOrderByWithAggregationInput = {
   modules?: Prisma.SortOrder
   features?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tier?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PlanCountOrderByAggregateInput
@@ -364,6 +375,7 @@ export type PlanScalarWhereWithAggregatesInput = {
   modules?: Prisma.StringNullableListFilter<"Plan">
   features?: Prisma.JsonNullableWithAggregatesFilter<"Plan">
   isActive?: Prisma.BoolWithAggregatesFilter<"Plan"> | boolean
+  tier?: Prisma.EnumPlanTierNullableWithAggregatesFilter<"Plan"> | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Plan"> | Date | string
 }
@@ -380,6 +392,7 @@ export type PlanCreateInput = {
   modules?: Prisma.PlanCreatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  tier?: $Enums.PlanTier | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutPlanInput
@@ -397,6 +410,7 @@ export type PlanUncheckedCreateInput = {
   modules?: Prisma.PlanCreatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  tier?: $Enums.PlanTier | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutPlanInput
@@ -414,6 +428,7 @@ export type PlanUpdateInput = {
   modules?: Prisma.PlanUpdatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tier?: Prisma.NullableEnumPlanTierFieldUpdateOperationsInput | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.SubscriptionUpdateManyWithoutPlanNestedInput
@@ -431,6 +446,7 @@ export type PlanUncheckedUpdateInput = {
   modules?: Prisma.PlanUpdatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tier?: Prisma.NullableEnumPlanTierFieldUpdateOperationsInput | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutPlanNestedInput
@@ -448,6 +464,7 @@ export type PlanCreateManyInput = {
   modules?: Prisma.PlanCreatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  tier?: $Enums.PlanTier | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -464,6 +481,7 @@ export type PlanUpdateManyMutationInput = {
   modules?: Prisma.PlanUpdatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tier?: Prisma.NullableEnumPlanTierFieldUpdateOperationsInput | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -480,6 +498,7 @@ export type PlanUncheckedUpdateManyInput = {
   modules?: Prisma.PlanUpdatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tier?: Prisma.NullableEnumPlanTierFieldUpdateOperationsInput | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -504,6 +523,7 @@ export type PlanCountOrderByAggregateInput = {
   modules?: Prisma.SortOrder
   features?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tier?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -526,6 +546,7 @@ export type PlanMaxOrderByAggregateInput = {
   priceMonthly?: Prisma.SortOrder
   priceYearly?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tier?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -540,6 +561,7 @@ export type PlanMinOrderByAggregateInput = {
   priceMonthly?: Prisma.SortOrder
   priceYearly?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  tier?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -574,6 +596,10 @@ export type PlanUpdatemodulesInput = {
   push?: string | string[]
 }
 
+export type NullableEnumPlanTierFieldUpdateOperationsInput = {
+  set?: $Enums.PlanTier | null
+}
+
 export type PlanCreateNestedOneWithoutSubscriptionsInput = {
   create?: Prisma.XOR<Prisma.PlanCreateWithoutSubscriptionsInput, Prisma.PlanUncheckedCreateWithoutSubscriptionsInput>
   connectOrCreate?: Prisma.PlanCreateOrConnectWithoutSubscriptionsInput
@@ -600,6 +626,7 @@ export type PlanCreateWithoutSubscriptionsInput = {
   modules?: Prisma.PlanCreatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  tier?: $Enums.PlanTier | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -616,6 +643,7 @@ export type PlanUncheckedCreateWithoutSubscriptionsInput = {
   modules?: Prisma.PlanCreatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: boolean
+  tier?: $Enums.PlanTier | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -648,6 +676,7 @@ export type PlanUpdateWithoutSubscriptionsInput = {
   modules?: Prisma.PlanUpdatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tier?: Prisma.NullableEnumPlanTierFieldUpdateOperationsInput | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -664,6 +693,7 @@ export type PlanUncheckedUpdateWithoutSubscriptionsInput = {
   modules?: Prisma.PlanUpdatemodulesInput | string[]
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tier?: Prisma.NullableEnumPlanTierFieldUpdateOperationsInput | $Enums.PlanTier | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -711,6 +741,7 @@ export type PlanSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   modules?: boolean
   features?: boolean
   isActive?: boolean
+  tier?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
@@ -729,6 +760,7 @@ export type PlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   modules?: boolean
   features?: boolean
   isActive?: boolean
+  tier?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -745,6 +777,7 @@ export type PlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   modules?: boolean
   features?: boolean
   isActive?: boolean
+  tier?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["plan"]>
@@ -761,11 +794,12 @@ export type PlanSelectScalar = {
   modules?: boolean
   features?: boolean
   isActive?: boolean
+  tier?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maxOutlets" | "maxUsers" | "maxOrders" | "priceMonthly" | "priceYearly" | "modules" | "features" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
+export type PlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maxOutlets" | "maxUsers" | "maxOrders" | "priceMonthly" | "priceYearly" | "modules" | "features" | "isActive" | "tier" | "createdAt" | "updatedAt", ExtArgs["result"]["plan"]>
 export type PlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subscriptions?: boolean | Prisma.Plan$subscriptionsArgs<ExtArgs>
   _count?: boolean | Prisma.PlanCountOutputTypeDefaultArgs<ExtArgs>
@@ -790,6 +824,7 @@ export type $PlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     modules: string[]
     features: runtime.JsonValue | null
     isActive: boolean
+    tier: $Enums.PlanTier | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["plan"]>
@@ -1227,6 +1262,7 @@ export interface PlanFieldRefs {
   readonly modules: Prisma.FieldRef<"Plan", 'String[]'>
   readonly features: Prisma.FieldRef<"Plan", 'Json'>
   readonly isActive: Prisma.FieldRef<"Plan", 'Boolean'>
+  readonly tier: Prisma.FieldRef<"Plan", 'PlanTier'>
   readonly createdAt: Prisma.FieldRef<"Plan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Plan", 'DateTime'>
 }

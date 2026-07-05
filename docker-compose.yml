@@ -78,6 +78,11 @@ services:
       PHOTO_UPLOAD_DIR: /app/data/uploads
       # Shared secret that authorizes the daily /api/internal/photo-cleanup cron.
       CRON_SECRET: ${CRON_SECRET:-}
+      # Super-admin AI assistant (local Ollama / LM Studio Ollama-compat). Off by default —
+      # flip SUPERADMIN_AI_ENABLED=true in .env once LLM_API_URL points at your box.
+      LLM_API_URL: ${LLM_API_URL:-http://192.168.2.1:11434}
+      LLM_MODEL: ${LLM_MODEL:-qwen3:8b}
+      SUPERADMIN_AI_ENABLED: ${SUPERADMIN_AI_ENABLED:-false}
     volumes:
       - ./data/uploads:/app/data/uploads
     depends_on:

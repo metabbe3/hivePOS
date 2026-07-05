@@ -14,6 +14,12 @@ export const POST = withErrorHandler(async (req) => {
       code: body?.code as string,
       branchIds: Array.isArray(body?.branchIds) ? body.branchIds : undefined,
       months: body?.months ? Number(body.months) : undefined,
+      planTier:
+        body?.planTier === "PRO"
+          ? "PRO"
+          : body?.planTier === "GROWTH"
+            ? "GROWTH"
+            : undefined,
     },
     ctx,
   );

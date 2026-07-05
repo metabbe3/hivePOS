@@ -48,6 +48,7 @@ export type ServiceMinAggregateOutputType = {
   commissionValue: runtime.Decimal | null
   module: $Enums.BusinessModule | null
   isActive: boolean | null
+  isDefaultSpeed: boolean | null
   branchId: string | null
   groupId: string | null
   createdAt: Date | null
@@ -64,6 +65,7 @@ export type ServiceMaxAggregateOutputType = {
   commissionValue: runtime.Decimal | null
   module: $Enums.BusinessModule | null
   isActive: boolean | null
+  isDefaultSpeed: boolean | null
   branchId: string | null
   groupId: string | null
   createdAt: Date | null
@@ -80,6 +82,7 @@ export type ServiceCountAggregateOutputType = {
   commissionValue: number
   module: number
   isActive: number
+  isDefaultSpeed: number
   branchId: number
   groupId: number
   createdAt: number
@@ -108,6 +111,7 @@ export type ServiceMinAggregateInputType = {
   commissionValue?: true
   module?: true
   isActive?: true
+  isDefaultSpeed?: true
   branchId?: true
   groupId?: true
   createdAt?: true
@@ -124,6 +128,7 @@ export type ServiceMaxAggregateInputType = {
   commissionValue?: true
   module?: true
   isActive?: true
+  isDefaultSpeed?: true
   branchId?: true
   groupId?: true
   createdAt?: true
@@ -140,6 +145,7 @@ export type ServiceCountAggregateInputType = {
   commissionValue?: true
   module?: true
   isActive?: true
+  isDefaultSpeed?: true
   branchId?: true
   groupId?: true
   createdAt?: true
@@ -243,6 +249,7 @@ export type ServiceGroupByOutputType = {
   commissionValue: runtime.Decimal
   module: $Enums.BusinessModule
   isActive: boolean
+  isDefaultSpeed: boolean
   branchId: string
   groupId: string | null
   createdAt: Date
@@ -282,6 +289,7 @@ export type ServiceWhereInput = {
   commissionValue?: Prisma.DecimalFilter<"Service"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFilter<"Service"> | $Enums.BusinessModule
   isActive?: Prisma.BoolFilter<"Service"> | boolean
+  isDefaultSpeed?: Prisma.BoolFilter<"Service"> | boolean
   branchId?: Prisma.StringFilter<"Service"> | string
   groupId?: Prisma.StringNullableFilter<"Service"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Service"> | Date | string
@@ -301,6 +309,7 @@ export type ServiceOrderByWithRelationInput = {
   commissionValue?: Prisma.SortOrder
   module?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDefaultSpeed?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -324,6 +333,7 @@ export type ServiceWhereUniqueInput = Prisma.AtLeast<{
   commissionValue?: Prisma.DecimalFilter<"Service"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFilter<"Service"> | $Enums.BusinessModule
   isActive?: Prisma.BoolFilter<"Service"> | boolean
+  isDefaultSpeed?: Prisma.BoolFilter<"Service"> | boolean
   branchId?: Prisma.StringFilter<"Service"> | string
   groupId?: Prisma.StringNullableFilter<"Service"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Service"> | Date | string
@@ -343,6 +353,7 @@ export type ServiceOrderByWithAggregationInput = {
   commissionValue?: Prisma.SortOrder
   module?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDefaultSpeed?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -367,6 +378,7 @@ export type ServiceScalarWhereWithAggregatesInput = {
   commissionValue?: Prisma.DecimalWithAggregatesFilter<"Service"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleWithAggregatesFilter<"Service"> | $Enums.BusinessModule
   isActive?: Prisma.BoolWithAggregatesFilter<"Service"> | boolean
+  isDefaultSpeed?: Prisma.BoolWithAggregatesFilter<"Service"> | boolean
   branchId?: Prisma.StringWithAggregatesFilter<"Service"> | string
   groupId?: Prisma.StringNullableWithAggregatesFilter<"Service"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Service"> | Date | string
@@ -383,6 +395,7 @@ export type ServiceCreateInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   branch: Prisma.BranchCreateNestedOneWithoutServicesInput
@@ -400,6 +413,7 @@ export type ServiceUncheckedCreateInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId: string
   groupId?: string | null
   createdAt?: Date | string
@@ -417,6 +431,7 @@ export type ServiceUpdateInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   branch?: Prisma.BranchUpdateOneRequiredWithoutServicesNestedInput
@@ -434,6 +449,7 @@ export type ServiceUncheckedUpdateInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -451,6 +467,7 @@ export type ServiceCreateManyInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId: string
   groupId?: string | null
   createdAt?: Date | string
@@ -467,6 +484,7 @@ export type ServiceUpdateManyMutationInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -481,6 +499,7 @@ export type ServiceUncheckedUpdateManyInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -512,6 +531,7 @@ export type ServiceCountOrderByAggregateInput = {
   commissionValue?: Prisma.SortOrder
   module?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDefaultSpeed?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -533,6 +553,7 @@ export type ServiceMaxOrderByAggregateInput = {
   commissionValue?: Prisma.SortOrder
   module?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDefaultSpeed?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -549,6 +570,7 @@ export type ServiceMinOrderByAggregateInput = {
   commissionValue?: Prisma.SortOrder
   module?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDefaultSpeed?: Prisma.SortOrder
   branchId?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -685,6 +707,7 @@ export type ServiceCreateWithoutBranchInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   group?: Prisma.ServiceGroupCreateNestedOneWithoutServicesInput
@@ -701,6 +724,7 @@ export type ServiceUncheckedCreateWithoutBranchInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   groupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -746,6 +770,7 @@ export type ServiceScalarWhereInput = {
   commissionValue?: Prisma.DecimalFilter<"Service"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFilter<"Service"> | $Enums.BusinessModule
   isActive?: Prisma.BoolFilter<"Service"> | boolean
+  isDefaultSpeed?: Prisma.BoolFilter<"Service"> | boolean
   branchId?: Prisma.StringFilter<"Service"> | string
   groupId?: Prisma.StringNullableFilter<"Service"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Service"> | Date | string
@@ -762,6 +787,7 @@ export type ServiceCreateWithoutGroupInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   branch: Prisma.BranchCreateNestedOneWithoutServicesInput
@@ -778,6 +804,7 @@ export type ServiceUncheckedCreateWithoutGroupInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -820,6 +847,7 @@ export type ServiceCreateWithoutOrderItemsInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   branch: Prisma.BranchCreateNestedOneWithoutServicesInput
@@ -836,6 +864,7 @@ export type ServiceUncheckedCreateWithoutOrderItemsInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId: string
   groupId?: string | null
   createdAt?: Date | string
@@ -868,6 +897,7 @@ export type ServiceUpdateWithoutOrderItemsInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   branch?: Prisma.BranchUpdateOneRequiredWithoutServicesNestedInput
@@ -884,6 +914,7 @@ export type ServiceUncheckedUpdateWithoutOrderItemsInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -900,6 +931,7 @@ export type ServiceCreateManyBranchInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   groupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -915,6 +947,7 @@ export type ServiceUpdateWithoutBranchInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   group?: Prisma.ServiceGroupUpdateOneWithoutServicesNestedInput
@@ -931,6 +964,7 @@ export type ServiceUncheckedUpdateWithoutBranchInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -947,6 +981,7 @@ export type ServiceUncheckedUpdateManyWithoutBranchInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -962,6 +997,7 @@ export type ServiceCreateManyGroupInput = {
   commissionValue?: runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: $Enums.BusinessModule
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -977,6 +1013,7 @@ export type ServiceUpdateWithoutGroupInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   branch?: Prisma.BranchUpdateOneRequiredWithoutServicesNestedInput
@@ -993,6 +1030,7 @@ export type ServiceUncheckedUpdateWithoutGroupInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1009,6 +1047,7 @@ export type ServiceUncheckedUpdateManyWithoutGroupInput = {
   commissionValue?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   module?: Prisma.EnumBusinessModuleFieldUpdateOperationsInput | $Enums.BusinessModule
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefaultSpeed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   branchId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1055,6 +1094,7 @@ export type ServiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   commissionValue?: boolean
   module?: boolean
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId?: boolean
   groupId?: boolean
   createdAt?: boolean
@@ -1075,6 +1115,7 @@ export type ServiceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   commissionValue?: boolean
   module?: boolean
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId?: boolean
   groupId?: boolean
   createdAt?: boolean
@@ -1093,6 +1134,7 @@ export type ServiceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   commissionValue?: boolean
   module?: boolean
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId?: boolean
   groupId?: boolean
   createdAt?: boolean
@@ -1111,13 +1153,14 @@ export type ServiceSelectScalar = {
   commissionValue?: boolean
   module?: boolean
   isActive?: boolean
+  isDefaultSpeed?: boolean
   branchId?: boolean
   groupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ServiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "pricingType" | "basePrice" | "commissionType" | "commissionValue" | "module" | "isActive" | "branchId" | "groupId" | "createdAt" | "updatedAt", ExtArgs["result"]["service"]>
+export type ServiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "pricingType" | "basePrice" | "commissionType" | "commissionValue" | "module" | "isActive" | "isDefaultSpeed" | "branchId" | "groupId" | "createdAt" | "updatedAt", ExtArgs["result"]["service"]>
 export type ServiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   branch?: boolean | Prisma.BranchDefaultArgs<ExtArgs>
   group?: boolean | Prisma.Service$groupArgs<ExtArgs>
@@ -1150,6 +1193,10 @@ export type $ServicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     commissionValue: runtime.Decimal
     module: $Enums.BusinessModule
     isActive: boolean
+    /**
+     * Owner-chosen default within a speed-variant group (see lib/service-transformer.ts).
+     */
+    isDefaultSpeed: boolean
     branchId: string
     groupId: string | null
     createdAt: Date
@@ -1589,6 +1636,7 @@ export interface ServiceFieldRefs {
   readonly commissionValue: Prisma.FieldRef<"Service", 'Decimal'>
   readonly module: Prisma.FieldRef<"Service", 'BusinessModule'>
   readonly isActive: Prisma.FieldRef<"Service", 'Boolean'>
+  readonly isDefaultSpeed: Prisma.FieldRef<"Service", 'Boolean'>
   readonly branchId: Prisma.FieldRef<"Service", 'String'>
   readonly groupId: Prisma.FieldRef<"Service", 'String'>
   readonly createdAt: Prisma.FieldRef<"Service", 'DateTime'>

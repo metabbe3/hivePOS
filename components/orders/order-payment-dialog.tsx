@@ -1,6 +1,9 @@
 "use client";
 
-import { Wallet } from "lucide-react";
+import { useRef } from "react";
+import { flushSync } from "react-dom";
+import { Wallet, QrCode } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
 import { useTranslation } from "@/hooks/use-translation";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import type { OrderDetail, PayFormState } from "./order-types";
 
 interface Props {
@@ -41,7 +45,26 @@ export function OrderPaymentDialog({
   onSubmit,
 }: Props) {
   const { t } = useTranslation();
+  const orderFlowV2 = useFeatureFlag("orderFlowV2");
+  const formRef = useRef<HTMLFormElement>(null);
   const remaining = order.totalAmount - order.paidAmount;
+
+  // orderFlowV2: one-tap "paid exact, via QRIS, now" for the common pickup-payment case.
+  const quickPay = () => {
+    // flushSync forces the parent's form state to commit before we submit, so
+    // handlePayment reads the quick-pay values deterministically (no race with
+    // React batching on a payment path).
+    flushSync(() => {
+      onFormChange({
+        ...form,
+        amount: String(remaining),
+        paymentMethod: "QRIS",
+        notes: "",
+        paidAt: new Date().toISOString().slice(0, 10),
+      });
+    });
+    formRef.current?.requestSubmit();
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -49,7 +72,24 @@ export function OrderPaymentDialog({
         <DialogHeader>
           <DialogTitle>{t("orderDetails.recordPayment")}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        {orderFlowV2 && remaining > 0 && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={quickPay}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+                />
+              }
+            >
+              <QrCode className="h-4 w-4" />
+              {t("orderDetails.paidQrisNow")}
+            </TooltipTrigger>
+            <TooltipContent>{t("orderDetails.quickPayHint")}</TooltipContent>
+          </Tooltip>
+        )}
+        <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label>{t("orderDetails.amount")}</Label>
             <Input

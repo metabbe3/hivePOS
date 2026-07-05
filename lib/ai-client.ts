@@ -10,6 +10,11 @@ interface ChatOptions {
   messages: ChatMessage[];
   stream?: boolean;
   temperature?: number;
+  // ponytail: forcing `format:"json"` (Ollama) makes the analyzer's JSON plan
+  // reliable on a local model; timeout caps flaky-LAN-box hangs. Both optional +
+  // backward-compatible — tenant path ignores them.
+  format?: "json";
+  timeoutMs?: number;
 }
 
 /**
@@ -17,7 +22,7 @@ interface ChatOptions {
  * Returns the assistant message content string.
  */
 export async function chatCompletion(options: ChatOptions): Promise<string> {
-  const { messages, temperature = 0.7 } = options;
+  const { messages, temperature = 0.7, format, timeoutMs = 60000 } = options;
 
   const response = await fetch(`${LLM_API_URL}/api/chat`, {
     method: "POST",
@@ -26,8 +31,10 @@ export async function chatCompletion(options: ChatOptions): Promise<string> {
       model: LLM_MODEL,
       messages,
       stream: false,
+      ...(format ? { format } : {}),
       options: { temperature },
     }),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   if (!response.ok) {
@@ -44,7 +51,7 @@ export async function chatCompletion(options: ChatOptions): Promise<string> {
  * Returns the raw Response for streaming to the client.
  */
 export async function chatCompletionStream(options: ChatOptions) {
-  const { messages, temperature = 0.7 } = options;
+  const { messages, temperature = 0.7, format, timeoutMs = 120000 } = options;
 
   const response = await fetch(`${LLM_API_URL}/api/chat`, {
     method: "POST",
@@ -53,8 +60,10 @@ export async function chatCompletionStream(options: ChatOptions) {
       model: LLM_MODEL,
       messages,
       stream: true,
+      ...(format ? { format } : {}),
       options: { temperature },
     }),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   if (!response.ok) {

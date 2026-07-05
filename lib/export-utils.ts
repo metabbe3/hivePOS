@@ -40,9 +40,15 @@ export async function exportAllToXlsx(from: string, to: string, t: (key: string)
     "revenue", "orders", "expenses", "profit", "customers", "services", "outstanding",
   ] as const;
 
+  // Report routes return the { success, data } envelope (apiSuccess). Unwrap
+  // .data here so responses[i] is the payload itself (or null on failure) —
+  // otherwise rev.dailyTrend etc. are undefined and .map() throws.
   const responses = await Promise.all(
     endpoints.map((ep) =>
-      fetch(`/api/reports/${ep}?from=${from}&to=${to}`).then((r) => r.json()).catch(() => null)
+      fetch(`/api/reports/${ep}?from=${from}&to=${to}`)
+        .then((r) => r.json())
+        .then((j: { success?: boolean; data?: unknown }) => (j?.success ? j.data : null))
+        .catch(() => null)
     )
   );
 

@@ -9,12 +9,14 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/SuperAdmin'
+export type * from './models/BlogPost'
 export type * from './models/AuditLog'
 export type * from './models/ErrorLog'
 export type * from './models/SupportTicket'
 export type * from './models/TicketComment'
 export type * from './models/Plan'
 export type * from './models/Tenant'
+export type * from './models/Referral'
 export type * from './models/Subscription'
 export type * from './models/Branch'
 export type * from './models/User'

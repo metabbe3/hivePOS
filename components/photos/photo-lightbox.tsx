@@ -72,7 +72,7 @@ export function PhotoLightbox({
     <Dialog open={open} onOpenChange={(o) => !o && onIndexChange(null)}>
       <DialogContent
         showCloseButton={false}
-        className="max-w-3xl gap-0 bg-zinc-950/95 p-0 ring-white/10 sm:max-w-3xl"
+        className="max-w-[calc(100%-2rem)] gap-0 bg-zinc-950/95 p-0 ring-white/10 sm:max-w-3xl"
       >
         <DialogTitle className="sr-only">{kindLabel}</DialogTitle>
 

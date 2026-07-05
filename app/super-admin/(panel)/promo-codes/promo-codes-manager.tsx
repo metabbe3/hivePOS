@@ -9,6 +9,7 @@ import {
   Gift,
   Percent,
   DollarSign,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,44 +18,53 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 
+type PromoType = "FREE_MONTH" | "DISCOUNT_PERCENT" | "DISCOUNT_FIXED";
+type ApplicablePlan = "" | "GROWTH" | "PRO";
+
 interface PromoCode {
   id: string;
   code: string;
   description: string | null;
-  type: "FREE_MONTH" | "DISCOUNT_PERCENT" | "DISCOUNT_FIXED";
+  type: PromoType;
   value: number;
   maxRedemptions: number | null;
   redemptionCount: number;
   validFrom: string | null;
   validUntil: string | null;
   isActive: boolean;
+  applicablePlan: string | null;
   createdAt: string;
 }
 
-const TYPE_META: Record<
-  PromoCode["type"],
-  { label: string; icon: typeof Gift; prefix: string; suffix: string }
-> = {
+const TYPE_META: Record<PromoType, { label: string; icon: typeof Gift; prefix: string; suffix: string }> = {
   FREE_MONTH: { label: "Free Month", icon: Gift, prefix: "", suffix: " bln" },
   DISCOUNT_PERCENT: { label: "Percent Off", icon: Percent, prefix: "", suffix: "%" },
   DISCOUNT_FIXED: { label: "Fixed Off", icon: DollarSign, prefix: "Rp ", suffix: "" },
+};
+
+const PLAN_LABEL: Record<string, string> = {
+  PRO: "Pro only",
+  GROWTH: "Growth only",
+};
+
+const EMPTY_FORM = {
+  code: "",
+  description: "",
+  type: "FREE_MONTH" as PromoType,
+  value: "",
+  maxRedemptions: "",
+  validUntil: "",
+  applicablePlan: "" as ApplicablePlan,
 };
 
 export function PromoCodesManager() {
   const [codes, setCodes] = useState<PromoCode[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Create form state
   const [showForm, setShowForm] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState({
-    code: "",
-    description: "",
-    type: "FREE_MONTH" as PromoCode["type"],
-    value: "",
-    maxRedemptions: "",
-    validUntil: "",
-  });
+  const [editing, setEditing] = useState<PromoCode | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ ...EMPTY_FORM });
 
   const fetchCodes = useCallback(() => {
     setLoading(true);
@@ -72,50 +82,85 @@ export function PromoCodesManager() {
     fetchCodes();
   }, [fetchCodes]);
 
-  async function handleCreate(e: React.FormEvent) {
+  function openCreate() {
+    setEditing(null);
+    setForm({ ...EMPTY_FORM });
+    setShowForm(true);
+  }
+
+  function openEdit(c: PromoCode) {
+    setEditing(c);
+    setForm({
+      code: c.code,
+      description: c.description ?? "",
+      type: c.type,
+      value: String(c.value),
+      maxRedemptions: c.maxRedemptions === null ? "" : String(c.maxRedemptions),
+      validUntil: c.validUntil ? c.validUntil.slice(0, 10) : "",
+      applicablePlan: (c.applicablePlan ?? "") as ApplicablePlan,
+    });
+    setShowForm(true);
+  }
+
+  function closeForm() {
+    setShowForm(false);
+    setEditing(null);
+    setForm({ ...EMPTY_FORM });
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const code = form.code.trim().toUpperCase();
-    if (!code) {
-      toast.error("Kode wajib diisi.");
-      return;
-    }
-
     const value = Number(form.value);
+    if (!editing) {
+      const code = form.code.trim().toUpperCase();
+      if (!code) {
+        toast.error("Kode wajib diisi.");
+        return;
+      }
+    }
     if (!Number.isFinite(value) || value <= 0) {
       toast.error("Nilai harus lebih dari 0.");
       return;
     }
 
-    setCreating(true);
+    setSaving(true);
     try {
-      const { data } = await apiFetch<{ promoCode: PromoCode }>("/api/super-admin/promo-codes", {
-        method: "POST",
-        body: {
-          code,
-          description: form.description.trim() || undefined,
-          type: form.type,
-          value,
-          maxRedemptions: form.maxRedemptions === "" ? null : Number(form.maxRedemptions),
-          validUntil: form.validUntil || undefined,
-        },
-      });
-
-      toast.success(`Promo ${data.promoCode.code} berhasil dibuat!`);
-      setForm({
-        code: "",
-        description: "",
-        type: "FREE_MONTH",
-        value: "",
-        maxRedemptions: "",
-        validUntil: "",
-      });
-      setShowForm(false);
+      if (editing) {
+        await apiFetch("/api/super-admin/promo-codes", {
+          method: "PUT",
+          body: {
+            id: editing.id,
+            description: form.description.trim() || null,
+            type: form.type,
+            value,
+            maxRedemptions: form.maxRedemptions === "" ? null : Number(form.maxRedemptions),
+            validUntil: form.validUntil || null,
+            applicablePlan: form.applicablePlan || null,
+          },
+        });
+        toast.success(`${editing.code} berhasil diperbarui.`);
+      } else {
+        const { data } = await apiFetch<{ promoCode: PromoCode }>("/api/super-admin/promo-codes", {
+          method: "POST",
+          body: {
+            code: form.code.trim().toUpperCase(),
+            description: form.description.trim() || undefined,
+            type: form.type,
+            value,
+            maxRedemptions: form.maxRedemptions === "" ? null : Number(form.maxRedemptions),
+            validUntil: form.validUntil || undefined,
+            applicablePlan: form.applicablePlan || null,
+          },
+        });
+        toast.success(`Promo ${data.promoCode.code} berhasil dibuat!`);
+      }
+      closeForm();
       fetchCodes();
     } catch (err) {
       toast.error(err instanceof ApiClientError ? err.message : "Terjadi kesalahan.");
     } finally {
-      setCreating(false);
+      setSaving(false);
     }
   }
 
@@ -125,7 +170,6 @@ export function PromoCodesManager() {
         method: "PATCH",
         body: { id: code.id, isActive: !code.isActive },
       });
-
       toast.success(`${code.code} ${data.promoCode.isActive ? "diaktifkan" : "dinonaktifkan"}.`);
       fetchCodes();
     } catch (err) {
@@ -146,7 +190,7 @@ export function PromoCodesManager() {
       {/* Create button / form */}
       {!showForm ? (
         <Button
-          onClick={() => setShowForm(true)}
+          onClick={openCreate}
           className="bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15"
         >
           <Plus className="mr-2 h-4 w-4" />
@@ -154,10 +198,12 @@ export function PromoCodesManager() {
         </Button>
       ) : (
         <form
-          onSubmit={handleCreate}
+          onSubmit={handleSubmit}
           className="rounded-xl bg-card ring-1 ring-foreground/10 shadow-sm p-6 space-y-4"
         >
-          <h2 className="text-lg font-bold">Promo Code Baru</h2>
+          <h2 className="text-lg font-bold">
+            {editing ? `Edit ${editing.code}` : "Promo Code Baru"}
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -167,7 +213,8 @@ export function PromoCodesManager() {
                 onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
                 placeholder="FREEMONTH"
                 className="font-mono uppercase"
-                required
+                disabled={!!editing}
+                required={!editing}
               />
             </div>
 
@@ -175,7 +222,7 @@ export function PromoCodesManager() {
               <Label className="text-xs uppercase tracking-wide text-muted-foreground">Type</Label>
               <select
                 value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value as PromoCode["type"] })}
+                onChange={(e) => setForm({ ...form, type: e.target.value as PromoType })}
                 className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="FREE_MONTH">Free Month(s)</option>
@@ -195,6 +242,21 @@ export function PromoCodesManager() {
                 placeholder={form.type === "FREE_MONTH" ? "1" : form.type === "DISCOUNT_PERCENT" ? "50" : "25000"}
                 required
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                Berlaku untuk paket
+              </Label>
+              <select
+                value={form.applicablePlan}
+                onChange={(e) => setForm({ ...form, applicablePlan: e.target.value as ApplicablePlan })}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">Semua paket (Growth & Pro)</option>
+                <option value="GROWTH">Growth only</option>
+                <option value="PRO">Pro only</option>
+              </select>
             </div>
 
             <div className="space-y-1.5">
@@ -233,31 +295,17 @@ export function PromoCodesManager() {
           <div className="flex gap-2 pt-2">
             <Button
               type="submit"
-              disabled={creating}
+              disabled={saving}
               className="bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15"
             >
-              {creating ? (
+              {saving ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Plus className="mr-2 h-4 w-4" />
               )}
-              Buat
+              {editing ? "Simpan" : "Buat"}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setShowForm(false);
-                setForm({
-                  code: "",
-                  description: "",
-                  type: "FREE_MONTH",
-                  value: "",
-                  maxRedemptions: "",
-                  validUntil: "",
-                });
-              }}
-            >
+            <Button type="button" variant="outline" onClick={closeForm}>
               Batal
             </Button>
           </div>
@@ -279,6 +327,7 @@ export function PromoCodesManager() {
                   <th className="px-4 py-3 font-semibold text-muted-foreground">Code</th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">Type</th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">Value</th>
+                  <th className="px-4 py-3 font-semibold text-muted-foreground">Paket</th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">Redemptions</th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">Valid Until</th>
                   <th className="px-4 py-3 font-semibold text-muted-foreground">Status</th>
@@ -309,6 +358,13 @@ export function PromoCodesManager() {
                         {meta.suffix}
                       </td>
                       <td className="px-4 py-3">
+                        {c.applicablePlan ? (
+                          <Badge variant="secondary">{PLAN_LABEL[c.applicablePlan] ?? c.applicablePlan}</Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Semua paket</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
                         <span className="font-medium">{c.redemptionCount}</span>
                         {c.maxRedemptions !== null && (
                           <span className="text-muted-foreground"> / {c.maxRedemptions}</span>
@@ -323,14 +379,16 @@ export function PromoCodesManager() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleToggle(c)}
-                        >
-                          <Power className="mr-1.5 h-3.5 w-3.5" />
-                          {c.isActive ? "Nonaktifkan" : "Aktifkan"}
-                        </Button>
+                        <div className="inline-flex gap-1.5">
+                          <Button size="sm" variant="outline" onClick={() => openEdit(c)}>
+                            <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                            Edit
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleToggle(c)}>
+                            <Power className="mr-1.5 h-3.5 w-3.5" />
+                            {c.isActive ? "Nonaktifkan" : "Aktifkan"}
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );

@@ -33,6 +33,7 @@ function LoginContent() {
       const result = await signIn("credentials", {
         email: values.email,
         password: values.password,
+        remember: values.remember !== false,
         redirect: false,
       });
 

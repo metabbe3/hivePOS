@@ -23,6 +23,8 @@ function RegisterForm() {
   const isGoogleFlow = !!googleId;
   // ?plan=growth|pro picks which tier to trial. Default: PRO (full features 14 days).
   const trialTier = searchParams.get("plan") === "growth" ? "GROWTH" : "PRO";
+  // ?ref=CODE — referral code (optional). Reward unlocks on first paid payment.
+  const referralCode = searchParams.get("ref") ?? "";
 
   // Override the agreeTerms field with a render that has a clickable T&C link.
   const registerSchemaWithLink = useMemo(
@@ -64,12 +66,30 @@ function RegisterForm() {
     try {
       await apiFetch("/api/register", {
         method: "POST",
-        body: { ...values, trialTier, ...(googleId ? { googleId } : {}) },
+        body: {
+          ...values,
+          trialTier,
+          ...(referralCode ? { referralCode } : {}),
+          ...(googleId ? { googleId } : {}),
+        },
       });
 
-      // Account is auto-active (no admin approval). Redirect to login so the user
-      // signs in with the credentials they just set. Auto-signin skipped to keep
-      // the password + Google flows on one path (ponytail).
+      // Credentials sign-up: auto sign-in so the user skips the manual /login
+      // step (one fewer screen on day one). Google-OAuth sign-up can't auto-sign
+      // in — it needs this register-completion step first — so it falls through.
+      if (!isGoogleFlow) {
+        const res = await signIn("credentials", {
+          email: String(values.email),
+          password: String(values.password ?? ""),
+          redirect: false,
+        });
+        if (!res?.error) {
+          toast.success("Pendaftaran berhasil! Mengarahkan ke dashboard…");
+          router.push("/dashboard");
+          return;
+        }
+        // Auto sign-in failed (rare) — fall back to manual login below.
+      }
       toast.success("Pendaftaran berhasil! Akun langsung aktif — silakan masuk.");
       router.push("/login");
     } catch (err) {

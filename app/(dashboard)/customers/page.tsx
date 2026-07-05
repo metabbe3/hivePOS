@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Search, ArrowUpDown, Inbox, UserPlus, Pencil, X } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { Search, ArrowUpDown, Inbox, UserPlus, Pencil, X, Upload } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageLoading } from "@/components/shared/loading";
@@ -19,14 +19,17 @@ import { useRole } from "@/hooks/use-role";
 import { useGuardedPage } from "@/hooks/use-guarded-page";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useTranslation } from "@/hooks/use-translation";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useUrlState } from "@/hooks/use-url-filters";
 import { DynamicForm } from "@/lib/forms";
 import { customerSchema } from "@/lib/forms/schemas";
 import { CustomerList } from "@/components/customers/customer-list";
 import { ConfirmDeleteDialog } from "@/components/customers/confirm-delete-dialog";
+import { ImportCustomersDialog } from "@/components/customers/import-customers-dialog";
 import type { CustomerListItem } from "@/components/customers/types";
 
-export default function CustomersPage() {
+function CustomersContent() {
   const { isEmployee } = useRole();
   const { shouldRender } = useGuardedPage("customers", "read", "/laundry/orders");
   const { can } = usePermissions();
@@ -34,6 +37,8 @@ export default function CustomersPage() {
 
   const canEdit = can("customers", "edit");
   const canDelete = can("customers", "delete");
+  const canCreate = can("customers", "create");
+  const importEnabled = useFeatureFlag("customersImportExport");
 
   const SORT_OPTIONS = [
     { value: "createdAt", label: t("customers.sortNewest") },
@@ -45,14 +50,15 @@ export default function CustomersPage() {
 
   const [customers, setCustomers] = useState<CustomerListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState("desc");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useUrlState("search", "");
+  const [sortBy, setSortBy] = useUrlState("sortBy", "createdAt");
+  const [sortOrder, setSortOrder] = useUrlState("sortOrder", "desc");
+  const [statusFilter, setStatusFilter] = useUrlState("status", "");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CustomerListItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CustomerListItem | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   // ponytail: 300ms debounce — parity with laundry/orders page. Without this,
   // typing "john" fires 4 requests (j, jo, joh, john) instead of 1.
@@ -172,11 +178,18 @@ export default function CustomersPage() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
           title={sortOrder === "asc" ? t("customers.ascending") : t("customers.descending")}
         >
           <ArrowUpDown className={`h-4 w-4 transition-transform ${sortOrder === "desc" ? "rotate-180" : ""}`} />
         </Button>
+
+        {canCreate && importEnabled && (
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+            <Upload className="mr-1 h-4 w-4" />
+            {t("customers.import")}
+          </Button>
+        )}
       </div>
 
       {customers.length === 0 ? (
@@ -245,6 +258,22 @@ export default function CustomersPage() {
           refresh();
         }}
       />
+
+      {canCreate && importEnabled && (
+        <ImportCustomersDialog
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          onImported={refresh}
+        />
+      )}
     </div>
+  );
+}
+
+export default function CustomersPage() {
+  return (
+    <Suspense>
+      <CustomersContent />
+    </Suspense>
   );
 }

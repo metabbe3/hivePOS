@@ -19,6 +19,7 @@ export function testService(overrides: Partial<ServiceWithGroup> = {}): ServiceW
     commissionValue: 0,
     module: "LAUNDRY",
     isActive: true,
+    isDefaultSpeed: false,
     branchId: "branch-1",
     groupId: null,
     createdAt: new Date("2025-01-01"),

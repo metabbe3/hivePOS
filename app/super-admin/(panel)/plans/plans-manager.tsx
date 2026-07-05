@@ -31,6 +31,7 @@ interface Plan {
   priceYearly: number;
   modules: string[];
   features: any;
+  tier: string | null;
   isActive: boolean;
   subscriptionCount: number;
   createdAt: string;
@@ -47,6 +48,8 @@ const EMPTY_FORM = {
   priceMonthly: "0",
   priceYearly: "0",
   modules: [] as string[],
+  tier: "" as "" | "FREE" | "GROWTH" | "PRO",
+  website: false,
 };
 
 export function PlansManager() {
@@ -83,6 +86,8 @@ export function PlansManager() {
       priceMonthly: String(p.priceMonthly),
       priceYearly: String(p.priceYearly),
       modules: p.modules,
+      tier: (p.tier ?? "") as "" | "FREE" | "GROWTH" | "PRO",
+      website: !!p.features?.website,
     });
     setShowForm(true);
   }
@@ -118,6 +123,8 @@ export function PlansManager() {
         priceMonthly: Number(form.priceMonthly),
         priceYearly: Number(form.priceYearly),
         modules: form.modules,
+        tier: form.tier || undefined,
+        features: { ...(editing?.features ?? {}), website: form.website },
       };
 
       if (editing) {
@@ -258,6 +265,33 @@ export function PlansManager() {
                 })}
               </div>
             </FormField>
+
+            <FormField label="Tier (billing)">
+              <select
+                value={form.tier}
+                onChange={(e) => setForm({ ...form, tier: e.target.value as "" | "FREE" | "GROWTH" | "PRO" })}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">— (infer from name)</option>
+                <option value="FREE">FREE</option>
+                <option value="GROWTH">GROWTH</option>
+                <option value="PRO">PRO</option>
+              </select>
+            </FormField>
+
+            <FormField label="Website (Pro feature)">
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, website: !form.website })}
+                className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  form.website
+                    ? "border-brand-500 bg-brand-500 text-white"
+                    : "border-[var(--color-border)] bg-transparent hover:bg-muted"
+                }`}
+              >
+                {form.website ? "Website ON" : "Website OFF"}
+              </button>
+            </FormField>
           </div>
 
           <div className="flex gap-2 pt-2">
@@ -298,7 +332,11 @@ export function PlansManager() {
                 {plans.map((p) => (
                   <tr key={p.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="font-bold">{p.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold">{p.name}</span>
+                        {p.tier && <Badge variant="outline" className="text-[10px]">{p.tier}</Badge>}
+                        {p.features?.website && <Badge variant="secondary" className="text-[10px]">WEBSITE</Badge>}
+                      </div>
                       {p.description && <div className="text-xs text-muted-foreground">{p.description}</div>}
                     </td>
                     <td className="px-4 py-3">

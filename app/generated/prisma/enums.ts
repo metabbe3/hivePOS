@@ -47,6 +47,15 @@ export const SupportTicketStatus = {
 export type SupportTicketStatus = (typeof SupportTicketStatus)[keyof typeof SupportTicketStatus]
 
 
+export const PlanTier = {
+  FREE: 'FREE',
+  GROWTH: 'GROWTH',
+  PRO: 'PRO'
+} as const
+
+export type PlanTier = (typeof PlanTier)[keyof typeof PlanTier]
+
+
 export const SubscriptionStatus = {
   TRIAL: 'TRIAL',
   ACTIVE: 'ACTIVE',

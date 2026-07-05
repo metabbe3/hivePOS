@@ -80,12 +80,14 @@ export function middleware(req: NextRequest) {
   const isPublicPage =
     pathname === "/" ||
     pathname === "/landing" ||
+    pathname === "/demo" ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/terms") ||
     pathname.startsWith("/alternatif-moka-pos-laundry") ||
     pathname.startsWith("/track") ||
     pathname.startsWith("/pickup") ||
-    pathname.startsWith("/support");
+    pathname.startsWith("/support") ||
+    pathname.startsWith("/blog");
   const isLoginRoute = pathname.startsWith("/login");
   const isApiAuth = pathname.startsWith("/api/auth");
   const isPublicApi = pathname.startsWith("/api/public");
@@ -134,6 +136,10 @@ export function middleware(req: NextRequest) {
 
   // Registration endpoint — public (creates the first owner account + tenant).
   if (pathname === "/api/register") return NextResponse.next();
+
+  // Sandbox demo start — public (provisions an isolated demo tenant).
+  // IP rate-limited (5/hr) in the handler; auth happens via the returned creds.
+  if (pathname === "/api/demo/start") return NextResponse.next();
 
   // Super-admin login page — pass through (auth happens at the page level).
   if (isSuperAdminLoginRoute) return NextResponse.next();
