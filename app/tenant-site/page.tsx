@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { prisma } from "@/lib/prisma";
 import { getCachedTenantBySlug, type TenantPublicData } from "@/lib/tenant-cache";
 import { renderWhatsAppTemplate, type TemplateOverrides } from "@/lib/whatsapp-templates";
@@ -28,12 +28,6 @@ const inter = Inter({
   weight: ["400", "500", "600"],
   subsets: ["latin"],
   variable: "--font-body",
-  display: "swap",
-});
-const jetbrains = JetBrains_Mono({
-  weight: "500",
-  subsets: ["latin"],
-  variable: "--font-mono",
   display: "swap",
 });
 
@@ -497,7 +491,7 @@ export default async function TenantSitePage() {
     ],
   };
 
-  const fontClass = `${jakarta.variable} ${inter.variable} ${jetbrains.variable}`;
+  const fontClass = `${jakarta.variable} ${inter.variable}`;
 
   const mapEmbedUrl =
     primaryBranch?.latitude && primaryBranch?.longitude
@@ -525,7 +519,7 @@ export default async function TenantSitePage() {
       --amber: #D97706;
     }
     .pub-scope .font-display { font-family: var(--font-display), system-ui, sans-serif; }
-    .pub-scope .font-mono-label { font-family: var(--font-mono), ui-monospace, monospace; }
+    .pub-scope .font-mono-label { font-family: ui-monospace, monospace; }
     .pub-scope a:focus-visible,
     .pub-scope button:focus-visible,
     .pub-scope summary:focus-visible,
@@ -535,7 +529,7 @@ export default async function TenantSitePage() {
       border-radius: 6px;
     }
     .pub-scope .eyebrow {
-      font-family: var(--font-mono), ui-monospace, monospace;
+      font-family: ui-monospace, monospace;
       font-size: 11px;
       font-weight: 500;
       letter-spacing: 0.2em;

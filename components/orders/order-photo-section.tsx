@@ -51,8 +51,8 @@ const KINDS: { kind: PhotoKind; addKey: string; accent: string }[] = [
 ];
 
 // "Foto bukti cucian" — Pro-only before/after/damage proof photos. Served
-// through the auth-gated /api route (cookies same-origin), so a plain <img>
-// works and next/image isn't needed.
+// through the auth-gated /api route (cookies same-origin), so a plain image
+// element works and next/image isn't needed.
 export function OrderPhotoSection({ orderId }: Props) {
   const { t } = useTranslation();
   const confirm = useConfirm();

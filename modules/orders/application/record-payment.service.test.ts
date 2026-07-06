@@ -10,6 +10,7 @@ import {
   NotFoundError,
   AmountExceedsBalanceError,
   InsufficientBalanceError,
+  BusinessRuleError,
 } from "@/modules/shared";
 import type { OrderDetailRecord } from "@/modules/orders/domain/repository.port";
 
@@ -138,5 +139,43 @@ describe("RecordPaymentService", () => {
 
     const call = (paymentRepo.recordPayment as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(call.paidAt).toEqual(new Date("2025-06-10T12:00:00Z"));
+  });
+
+  it("throws BusinessRuleError when paidAt is before the order day", async () => {
+    const order = testOrderDetail({ receivedAt: new Date("2025-01-15") });
+    const { service } = makeService(order);
+
+    await expect(
+      service.execute(
+        "order-1",
+        { amount: 10000, paymentMethod: "CASH", paidAt: "2025-01-14" },
+        testContext(),
+      ),
+    ).rejects.toThrow(BusinessRuleError);
+  });
+
+  it("throws BusinessRuleError when paidAt is in the future", async () => {
+    const { service } = makeService();
+
+    await expect(
+      service.execute(
+        "order-1",
+        { amount: 10000, paymentMethod: "CASH", paidAt: "2099-01-01" },
+        testContext(),
+      ),
+    ).rejects.toThrow(BusinessRuleError);
+  });
+
+  it("allows paidAt on the same day as the order", async () => {
+    const order = testOrderDetail({ receivedAt: new Date("2025-01-15") });
+    const { service, paymentRepo } = makeService(order);
+
+    await service.execute(
+      "order-1",
+      { amount: 10000, paymentMethod: "CASH", paidAt: "2025-01-15" },
+      testContext(),
+    );
+
+    expect(paymentRepo.recordPayment).toHaveBeenCalled();
   });
 });

@@ -33,6 +33,7 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import { ReferralCard } from "@/components/billing/referral-card";
+import { useTranslation } from "@/hooks/use-translation";
 
 // ── Types ──
 interface Outlet {
@@ -139,6 +140,8 @@ export default function BillingPage() {
   // Plan tier (Growth vs Pro). Defaults from current plan on load.
   const [planTier, setPlanTier] = useState<"GROWTH" | "PRO">("GROWTH");
 
+  const { t } = useTranslation();
+
   // ── Fetch billing status ──
   const fetchStatus = useCallback(() => {
     setLoading(true);
@@ -161,7 +164,7 @@ export default function BillingPage() {
         toast.error(
           err instanceof ApiClientError
             ? err.message
-            : "Gagal memuat data billing.",
+            : t("billing.toast.loadFail"),
         ),
       )
       .finally(() => setLoading(false));
@@ -205,7 +208,7 @@ export default function BillingPage() {
   async function handleApplyPromo() {
     const code = promoInput.trim();
     if (!code) {
-      toast.error("Masukkan kode promo terlebih dahulu.");
+      toast.error(t("billing.toast.promoEmpty"));
       return;
     }
 
@@ -225,17 +228,17 @@ export default function BillingPage() {
       const data = res.data;
 
       if (!data.valid) {
-        setPromoPreview({ valid: false, error: data.error ?? "Kode promo tidak valid." });
+        setPromoPreview({ valid: false, error: data.error ?? t("billing.toast.promoInvalid") });
         setAppliedPromo(null);
         return;
       }
 
       setPromoPreview(data);
       setAppliedPromo(data);
-      toast.success(`Promo ${data.promoCode!.code} berhasil diterapkan!`);
+      toast.success(t("billing.toast.promoApplied").replace("{code}", data.promoCode!.code));
     } catch (err) {
       const errMsg =
-        err instanceof ApiClientError ? err.message : "Gagal memvalidasi kode promo.";
+        err instanceof ApiClientError ? err.message : t("billing.toast.promoValidateFail");
       setPromoPreview({ valid: false, error: errMsg });
       setAppliedPromo(null);
     } finally {
@@ -274,32 +277,32 @@ export default function BillingPage() {
       const data = res.data;
 
       if (data.status === "PAID") {
-        toast.success(data.message ?? "Pembayaran berhasil! Langganan diperpanjang.");
+        toast.success(data.message ?? t("billing.toast.paid"));
         handleRemovePromo();
         fetchStatus();
         return;
       }
 
       if (data.snapToken && window.snap) {
-        toast.info("Membuka halaman pembayaran Midtrans...");
+        toast.info(t("billing.toast.openingSnap"));
         window.snap.pay(data.snapToken, {
           onSuccess: () => {
-            toast.success("Pembayaran berhasil! Langganan diperpanjang.");
+            toast.success(t("billing.toast.paid"));
             handleRemovePromo();
             fetchStatus();
           },
           onPending: () => {
-            toast.info("Pembayaran masih tertunda. Selesaikan pembayaran Anda.");
+            toast.info(t("billing.toast.pending"));
             fetchStatus();
           },
           onError: () => {
-            toast.error("Pembayaran gagal. Silakan coba lagi.");
+            toast.error(t("billing.toast.failed"));
             fetchStatus();
           },
           onClose: () => {
             if (!closingRef.current) {
               closingRef.current = true;
-              toast.info("Popup pembayaran ditutup. Anda dapat membayar nanti dari riwayat.");
+              toast.info(t("billing.toast.closed"));
               fetchStatus();
             }
           },
@@ -307,12 +310,12 @@ export default function BillingPage() {
         return;
       }
 
-      toast.info("Menyiapkan pembayaran, mohon tunggu...");
+      toast.info(t("billing.toast.preparing"));
     } catch (err) {
       toast.error(
         err instanceof ApiClientError
           ? err.message
-          : "Terjadi kesalahan saat memproses pembayaran.",
+          : t("billing.toast.checkoutFail"),
       );
     } finally {
       setPaying(false);
@@ -361,7 +364,7 @@ export default function BillingPage() {
   if (loading || !status) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Billing" description="Kelola langganan Anda" />
+        <PageHeader title={t("billing.title")} description={t("billing.subtitleLoading")} />
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -381,7 +384,7 @@ export default function BillingPage() {
         onLoad={() => setSnapLoaded(true)}
       />
 
-      <PageHeader title="Billing" description="Kelola langganan dan pembayaran Anda" />
+      <PageHeader title={t("billing.title")} description={t("billing.subtitle")} />
 
       {/* ── Referral: invite other laundry owners, earn a free month ── */}
       <ReferralCard />
@@ -391,39 +394,39 @@ export default function BillingPage() {
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-base">
             <CreditCard className="h-4 w-4 text-primary" />
-            Status Langganan
+            {t("billing.status.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Plan */}
-            <FormField label="Plan">
+            <FormField label={t("billing.status.plan")}>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold">{status.limits.planName}</span>
                 <Badge variant={isPaid ? "default" : "secondary"}>
-                  {isPaid ? "PAID" : "FREE"}
+                  {isPaid ? t("billing.status.paid") : t("billing.status.free")}
                 </Badge>
               </div>
             </FormField>
 
             {/* Active Outlets */}
-            <FormField label="Outlet Aktif">
+            <FormField label={t("billing.status.activeOutlets")}>
               <div className="text-lg font-bold">
                 {status.activeCount}
-                <span className="text-sm text-muted-foreground"> outlet</span>
+                <span className="text-sm text-muted-foreground">{t("billing.status.activeOutletsUnit")}</span>
               </div>
             </FormField>
 
             {/* Locked Outlets */}
-            <FormField label="Outlet Terkunci">
+            <FormField label={t("billing.status.lockedOutlets")}>
               <div className="text-lg font-bold">
                 {status.lockedCount}
-                <span className="text-sm text-muted-foreground"> outlet</span>
+                <span className="text-sm text-muted-foreground">{t("billing.status.activeOutletsUnit")}</span>
               </div>
             </FormField>
 
             {/* Latest Expiry — fall back to trialEndsAt so trial users see when their trial ends */}
-            <FormField label="Berakhir Terlama">
+            <FormField label={t("billing.status.latestExpiry")}>
               <div className="text-lg font-bold">
                 {(status.subscription?.currentPeriodEnd ?? status.trialEndsAt)
                   ? formatDate(status.subscription?.currentPeriodEnd ?? status.trialEndsAt!)
@@ -438,9 +441,10 @@ export default function BillingPage() {
               <div className="flex items-start gap-2">
                 <Sparkles className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
                 <div className="text-sm text-amber-800 dark:text-amber-200">
-                  <span className="font-semibold">Batas Free Tier:</span>{" "}
-                  {status.limits.maxUsers} staff, {status.limits.maxOrders} order/bulan.
-                  Perpanjang outlet untuk akses tanpa batas.
+                  <span className="font-semibold">{t("billing.status.freeTierLabel")}</span>{" "}
+                  {t("billing.status.freeTierNotice")
+                    .replace("{users}", String(status.limits.maxUsers))
+                    .replace("{orders}", String(status.limits.maxOrders))}
                 </div>
               </div>
             </div>
@@ -452,8 +456,8 @@ export default function BillingPage() {
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
                 <div className="text-sm text-green-800 dark:text-green-200">
-                  <span className="font-semibold">Growth Plan aktif.</span> {status.activeCount}{" "}
-                  outlet aktif, staff &amp; order tanpa batas. Semua modul terbuka.
+                  <span className="font-semibold">{t("billing.status.growthActive")}</span>
+                  {t("billing.status.growthActiveDesc").replace("{outlets}", String(status.activeCount))}
                 </div>
               </div>
             </div>
@@ -467,30 +471,30 @@ export default function BillingPage() {
                 <div className="flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <span className="font-semibold text-sky-900 dark:text-sky-100">
-                      Upgrade ke Pro
+                      {t("billing.status.upgradePro")}
                     </span>
-                    <Badge variant="secondary" className="text-[10px]">WEBSITE</Badge>
+                    <Badge variant="secondary" className="text-[10px]">{t("billing.badge.website")}</Badge>
                   </div>
                   <p className="mb-2 text-sm text-sky-800 dark:text-sky-200">
-                    Dapatkan website laundry profesional di{" "}
+                    {t("billing.status.upgradeProDesc")}
                     <code className="rounded bg-sky-100 px-1 py-0.5 font-mono text-xs dark:bg-sky-900/50">
                       slug.hivepos.id
                     </code>
-                    , SEO Google, tracking pesanan online, QRIS, dan testimoni pelanggan.
+                    {t("billing.status.upgradeProDescSuffix")}
                   </p>
                   <ul className="mb-3 grid grid-cols-1 gap-y-1 gap-x-3 text-xs text-sky-700 dark:text-sky-300 sm:grid-cols-2">
-                    <li>✓ Subdomain + template profesional</li>
-                    <li>✓ SEO lokal (Google Maps, schema.org)</li>
-                    <li>✓ Tracking pesanan online</li>
-                    <li>✓ Bukti foto order (sebelum &amp; sesudah)</li>
-                    <li>✓ QRIS + testimoni pelanggan</li>
+                    <li>✓ {t("billing.status.upgradeProFeat1")}</li>
+                    <li>✓ {t("billing.status.upgradeProFeat2")}</li>
+                    <li>✓ {t("billing.status.upgradeProFeat3")}</li>
+                    <li>✓ {t("billing.status.upgradeProFeat4")}</li>
+                    <li>✓ {t("billing.status.upgradeProFeat5")}</li>
                   </ul>
                   <Link
                     href="/website"
                     className={cn(buttonVariants({ size: "sm" }))}
                   >
                     <Sparkles className="mr-1 h-3.5 w-3.5" />
-                    Pelajari Website Pro
+                    {t("billing.status.upgradeProCta")}
                   </Link>
                 </div>
               </div>
@@ -503,9 +507,9 @@ export default function BillingPage() {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
                 <div className="text-sm text-amber-800 dark:text-amber-200">
-                  <span className="font-semibold">{status.expiringSoon.length} outlet akan berakhir:</span>{" "}
+                  <span className="font-semibold">{t("billing.status.expiringSoon").replace("{count}", String(status.expiringSoon.length))}</span>{" "}
                   {status.expiringSoon.map((o) => o.name).join(", ")}
-                  . Pilih outlet di bawah untuk perpanjang.
+                  {t("billing.status.expiringSoonSuffix")}
                 </div>
               </div>
             </div>
@@ -518,14 +522,14 @@ export default function BillingPage() {
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-base">
             <Building2 className="h-4 w-4 text-primary" />
-            Outlet &amp; Coverage
+            {t("billing.outlet.title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
           {/* Plan tier selector — Growth (49K) vs Pro (79K + website) */}
           <div className="space-y-2">
             <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Pilih Paket
+              {t("billing.outlet.selectPlan")}
             </Label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -544,12 +548,12 @@ export default function BillingPage() {
                     : "border-border/40 bg-background hover:bg-muted/50",
                 )}
               >
-                <div className="text-sm font-bold">Growth</div>
+                <div className="text-sm font-bold">{t("billing.outlet.planGrowth")}</div>
                 <div className={cn(
                   "text-xs",
                   planTier === "GROWTH" ? "text-primary-foreground/80" : "text-muted-foreground",
                 )}>
-                  Rp 49K / outlet / bulan
+                  {t("billing.outlet.planGrowthPrice")}
                 </div>
               </button>
               <button
@@ -566,54 +570,51 @@ export default function BillingPage() {
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-bold">Pro</span>
+                  <span className="text-sm font-bold">{t("billing.outlet.planPro")}</span>
                   <Badge
                     variant={planTier === "PRO" ? "secondary" : "outline"}
                     className="text-[10px]"
                   >
-                    WEBSITE
+                    {t("billing.badge.website")}
                   </Badge>
                 </div>
                 <div className={cn(
                   "text-xs",
                   planTier === "PRO" ? "text-primary-foreground/80" : "text-muted-foreground",
                 )}>
-                  Rp 79K / outlet / bulan
+                  {t("billing.outlet.planProPrice")}
                 </div>
               </button>
             </div>
             {planTier === "PRO" && (
               <p className="text-xs text-muted-foreground">
-                Termasuk website laundry profesional di{" "}
+                {t("billing.outlet.planProIncludes")}
                 <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">
                   slug.hivepos.id
                 </code>
-                , SEO Google, tracking pesanan online.
+                {t("billing.outlet.planProIncludesSuffix")}
               </p>
             )}
           </div>
 
           {/* Price per outlet */}
           <div className="flex items-baseline gap-3 flex-wrap">
-            <span className="text-3xl font-black">{formatCurrency(unitPrice)}</span>
+            <span className="text-3xl font-black tabular-nums">{formatCurrency(unitPrice)}</span>
             {showStrikeThrough && (
               <>
-                <span className="text-lg text-muted-foreground line-through">
+                <span className="text-lg text-muted-foreground line-through tabular-nums">
                   {formatCurrency(originalUnitPrice)}
                 </span>
-                <Badge variant="destructive" className="text-xs">
-                  HEMAT 38%
-                </Badge>
               </>
             )}
-            <span className="text-sm text-muted-foreground">/ outlet / bulan</span>
+            <span className="text-sm text-muted-foreground">{t("billing.outlet.perOutletMonth")}</span>
           </div>
 
           {/* Outlet list */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Pilih Outlet untuk Diperpanjang
+                {t("billing.outlet.selectToRenew")}
               </Label>
               <div className="flex gap-2">
                 <Button
@@ -622,7 +623,7 @@ export default function BillingPage() {
                   className="h-7 text-xs"
                   onClick={selectAllRenewable}
                 >
-                  Pilih Semua
+                  {t("billing.outlet.selectAll")}
                 </Button>
                 {selectedCount > 0 && (
                   <Button
@@ -631,7 +632,7 @@ export default function BillingPage() {
                     className="h-7 text-xs"
                     onClick={deselectAll}
                   >
-                    Batalkan
+                    {t("billing.outlet.cancel")}
                   </Button>
                 )}
               </div>
@@ -639,7 +640,7 @@ export default function BillingPage() {
 
             {status.outlets.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm rounded-lg border border-dashed border-border/40">
-                Belum ada outlet. Tambahkan outlet di halaman Branches.
+                {t("billing.outlet.empty")}
               </div>
             ) : (
               <div className="space-y-2">
@@ -656,7 +657,7 @@ export default function BillingPage() {
 
             {selectedCount > 0 && (
               <p className="text-xs text-muted-foreground">
-                {selectedCount} outlet dipilih untuk diperpanjang
+                {t("billing.outlet.selectedCount").replace("{count}", String(selectedCount))}
               </p>
             )}
           </div>
@@ -666,7 +667,7 @@ export default function BillingPage() {
             <>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Pilih Durasi
+                  {t("billing.duration.title")}
                 </Label>
                 <div className="flex flex-wrap gap-2">
                   {MONTH_OPTIONS.map((m) => (
@@ -681,7 +682,7 @@ export default function BillingPage() {
                           : "border-border/40 bg-background hover:bg-muted/50",
                       )}
                     >
-                      {m} Bulan
+                      {t("billing.duration.months").replace("{m}", String(m))}
                     </button>
                   ))}
                 </div>
@@ -690,7 +691,7 @@ export default function BillingPage() {
               {/* Promo code input */}
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Kode Promo
+                  {t("billing.promo.title")}
                 </Label>
                 {appliedPromo ? (
                   <div className="flex items-center justify-between rounded-lg border border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-950/30 p-3">
@@ -706,7 +707,7 @@ export default function BillingPage() {
                       </div>
                     </div>
                     <Button variant="ghost" size="sm" onClick={handleRemovePromo}>
-                      Hapus
+                      {t("billing.promo.remove")}
                     </Button>
                   </div>
                 ) : (
@@ -716,7 +717,7 @@ export default function BillingPage() {
                       <Input
                         value={promoInput}
                         onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                        placeholder="Contoh: FREEMONTH"
+                        placeholder={t("billing.promo.placeholder")}
                         className="pl-9"
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
@@ -736,7 +737,7 @@ export default function BillingPage() {
                       ) : (
                         <Gift className="mr-2 h-4 w-4" />
                       )}
-                      Pakai
+                      {t("billing.promo.apply")}
                     </Button>
                   </div>
                 )}
@@ -749,25 +750,28 @@ export default function BillingPage() {
               <div className="rounded-lg border border-border/40 bg-muted/20 p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {formatCurrency(unitPrice)} × {selectedCount} outlet × {months} bulan
+                    {t("billing.summary.perLine")
+                      .replace("{price}", formatCurrency(unitPrice))
+                      .replace("{outlets}", String(selectedCount))
+                      .replace("{months}", String(months))}
                   </span>
-                  <span className="font-medium">{formatCurrency(grossTotal)}</span>
+                  <span className="font-medium tabular-nums">{formatCurrency(grossTotal)}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
-                    <span>Diskon promo</span>
-                    <span className="font-medium">-{formatCurrency(discount)}</span>
+                    <span>{t("billing.summary.promoDiscount")}</span>
+                    <span className="font-medium tabular-nums">-{formatCurrency(discount)}</span>
                   </div>
                 )}
                 {freeMonths > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
-                    <span>Bulan gratis dari promo</span>
-                    <span className="font-medium">+{freeMonths} bulan</span>
+                    <span>{t("billing.summary.freeMonths")}</span>
+                    <span className="font-medium">{t("billing.summary.freeMonthsValue").replace("{months}", String(freeMonths))}</span>
                   </div>
                 )}
                 <div className="border-t border-border/30 pt-2 flex justify-between">
-                  <span className="font-bold">Total</span>
-                  <span className="text-xl font-black">{formatCurrency(total)}</span>
+                  <span className="font-bold">{t("billing.summary.total")}</span>
+                  <span className="text-xl font-black tabular-nums">{formatCurrency(total)}</span>
                 </div>
               </div>
 
@@ -781,24 +785,26 @@ export default function BillingPage() {
                 {paying ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Memproses...
+                    {t("billing.checkout.processing")}
                   </>
                 ) : isFreeCheckout ? (
                   <>
                     <Gift className="mr-2 h-4 w-4" />
-                    Klaim {freeMonths > 0 ? `${freeMonths + months} Bulan Gratis` : "Gratis"}
+                    {freeMonths > 0
+                      ? t("billing.checkout.claimFreeMonths").replace("{months}", String(freeMonths + months))
+                      : t("billing.checkout.claimFree")}
                   </>
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
-                    Bayar {formatCurrency(total)}
+                    {t("billing.checkout.pay").replace("{amount}", formatCurrency(total))}
                   </>
                 )}
               </Button>
 
               {!snapLoaded && !isFreeCheckout && (
                 <p className="text-center text-xs text-muted-foreground">
-                  Memuat pembayaran Midtrans...
+                  {t("billing.checkout.loadingSnap")}
                 </p>
               )}
             </>
@@ -806,7 +812,7 @@ export default function BillingPage() {
 
           {selectedCount === 0 && renewableOutlets.length > 0 && (
             <div className="text-center py-6 text-muted-foreground text-sm rounded-lg border border-dashed border-border/40">
-              Pilih outlet di atas untuk memperpanjang langganan.
+              {t("billing.outlet.noneSelectedHint")}
             </div>
           )}
         </CardContent>
@@ -822,7 +828,7 @@ export default function BillingPage() {
         >
           <span className="flex items-center gap-2 text-sm font-medium">
             <History className="h-4 w-4 text-primary" />
-            Riwayat Pembayaran
+            {t("billing.history.title")}
             {status.payments.length > 0 && (
               <Badge variant="secondary" className="text-xs">
                 {status.payments.length}
@@ -840,7 +846,7 @@ export default function BillingPage() {
           <div className="px-4 pb-4 pt-2 space-y-2 border-t border-border/30">
             {status.payments.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground text-sm">
-                Belum ada riwayat pembayaran.
+                {t("billing.history.empty")}
               </div>
             ) : (
               <div className="space-y-2">
@@ -855,7 +861,9 @@ export default function BillingPage() {
                       </div>
                       <div>
                         <div className="font-medium text-sm">
-                          {p.monthsPurchased} bulan × {p.outletCount} outlet
+                          {t("billing.history.line")
+                            .replace("{months}", String(p.monthsPurchased))
+                            .replace("{outlets}", String(p.outletCount))}
                         </div>
                         <div className="text-xs text-muted-foreground flex items-center gap-2">
                           <Calendar className="h-3 w-3" />
@@ -867,7 +875,7 @@ export default function BillingPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-sm">{formatCurrency(p.amount)}</span>
+                      <span className="font-bold text-sm tabular-nums">{formatCurrency(p.amount)}</span>
                       <Badge
                         variant={
                           p.status === "PAID"
@@ -902,6 +910,7 @@ function OutletRow({
   selected: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   const isFreeTier = outlet.isFreeTier;
 
   const statusConfig: Record<
@@ -909,22 +918,22 @@ function OutletRow({
     { label: string; className: string; icon: typeof Lock }
   > = {
     FREE: {
-      label: "FREE TIER",
+      label: t("billing.outlet.statusFree"),
       className: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border-blue-200 dark:border-blue-900",
       icon: Sparkles,
     },
     ACTIVE: {
-      label: "AKTIF",
+      label: t("billing.outlet.statusActive"),
       className: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300 border-green-200 dark:border-green-900",
       icon: CheckCircle2,
     },
     EXPIRING: {
-      label: "AKAN BERAKHIR",
+      label: t("billing.outlet.statusExpiring"),
       className: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border-amber-200 dark:border-amber-900",
       icon: AlertTriangle,
     },
     LOCKED: {
-      label: "TERKUNCI",
+      label: t("billing.outlet.statusLocked"),
       className: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300 border-red-200 dark:border-red-900",
       icon: Lock,
     },
@@ -961,18 +970,20 @@ function OutletRow({
         </div>
         <div className="text-xs text-muted-foreground mt-0.5">
           {isFreeTier ? (
-            "Outlet free tier — centang untuk upgrade ke berbayar (staff & order tanpa batas)"
+            t("billing.outlet.freeTierHint")
           ) : outlet.coverageEnd ? (
             <>
-              s/d {formatDate(outlet.coverageEnd)}
+              {t("billing.outlet.until")} {formatDate(outlet.coverageEnd)}
               {outlet.expiresInDays !== null && (
                 <span className="ml-1">
-                  ({outlet.expiresInDays > 0 ? `${outlet.expiresInDays} hari lagi` : "kedaluwarsa"})
+                  ({outlet.expiresInDays > 0
+                    ? t("billing.outlet.daysLeft").replace("{days}", String(outlet.expiresInDays))
+                    : t("billing.outlet.expired")})
                 </span>
               )}
             </>
           ) : (
-            "Belum aktif — perpanjang untuk mengaktifkan"
+            t("billing.outlet.notActive")
           )}
         </div>
       </div>

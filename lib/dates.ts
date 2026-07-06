@@ -53,3 +53,15 @@ export function wibDateBounds(input: {
   if (input.to) out.lte = new Date(`${input.to}T23:59:59.999+07:00`);
   return out;
 }
+
+/**
+ * Format a Date as a **WIB (UTC+7) calendar-day** string `YYYY-MM-DD`.
+ *
+ * For day-granularity comparisons (e.g. is a payment day on/before/after the
+ * order day) where comparing raw instants would be wrong: a date-only string
+ * parses to UTC midnight and timestamps carry time-of-day, which together break
+ * same-day logic. `en-CA` locale yields ISO `YYYY-MM-DD`.
+ */
+export function wibDay(d: Date): string {
+  return d.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+}

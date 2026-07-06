@@ -240,7 +240,10 @@ export function NewOrderProvider({ children }: { children: ReactNode }) {
   // Debounced autosave — 3s after last change
   useEffect(() => {
     if (!draftChecked || submitting) return;
-    const dirty = selectedCustomer || items.length > 0 || orderNotes.trim();
+    // ponytail: only save a draft when there are ITEMS or notes — selecting a
+    // customer alone (a brief visit) shouldn't trigger the recovery modal on
+    // return. This prevents "modal blocks the page on every visit" (P1).
+    const dirty = items.length > 0 || orderNotes.trim();
     if (!dirty) return;
 
     const timer = setTimeout(() => {
@@ -373,6 +376,19 @@ export function NewOrderProvider({ children }: { children: ReactNode }) {
     e.preventDefault();
     if (!selectedCustomer) { toast.error(t("orders.selectCustomer")); return; }
     if (items.length === 0) { toast.error(t("orders.addItem")); return; }
+    // P0: reject zero-weight/qty items — prevents Rp 0 orders (real money lost).
+    for (const item of items) {
+      const svc = servicesById.get(item.serviceId);
+      if (!svc) continue;
+      if (svc.pricingType === "PER_KG" && (!item.weightKg || parseFloat(item.weightKg) <= 0)) {
+        toast.error("Berat harus lebih dari 0 untuk layanan kiloan.");
+        return;
+      }
+      if (svc.pricingType !== "PER_KG" && (!item.quantity || parseInt(item.quantity) <= 0)) {
+        toast.error("Jumlah harus lebih dari 0.");
+        return;
+      }
+    }
     if (paymentMethod === "DEPOSIT" && (selectedCustomer.balance || 0) < total) {
       toast.error(t("newOrder.insufficientBalance"));
       return;

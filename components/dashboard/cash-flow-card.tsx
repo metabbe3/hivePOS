@@ -43,7 +43,7 @@ export function CashFlowCard({ cashFlow }: CashFlowCardProps) {
     {
       name: t("dashboard.walletDeposits"),
       value: walletDeposits,
-      fill: "#3b82f6",
+      fill: "#6366f1",
     },
   ];
 

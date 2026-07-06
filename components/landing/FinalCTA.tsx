@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { ScrollReveal } from "./ScrollReveal";
 
 /**
@@ -26,7 +26,7 @@ export function FinalCTA() {
               href="/register"
               className="group flex w-full items-center justify-center gap-2 rounded-full bg-white px-8 py-3.5 text-base font-bold text-brand shadow-sm transition-all hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand active:scale-[0.98] sm:w-auto"
             >
-              Daftar Sekarang
+              Mulai Gratis
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
@@ -34,18 +34,20 @@ export function FinalCTA() {
               className="flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-8 py-3.5 text-base font-bold text-white transition-all hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand sm:w-auto"
             >
               <Sparkles className="h-4 w-4" />
-              Coba Demo
+              Lihat Demo
             </Link>
+          </div>
+          <p className="mt-5 text-sm text-white/70">
+            atau{" "}
             <a
               href="https://wa.me/6285121309381?text=Halo%20saya%20tertarik%20dengan%20hivePOS"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-white/40 px-8 py-3.5 text-base font-bold text-white transition-all hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand sm:w-auto"
+              className="font-semibold text-white underline-offset-2 hover:underline"
             >
-              <MessageCircle className="h-4 w-4" />
-              Chat WhatsApp
+              chat kami di WhatsApp
             </a>
-          </div>
+          </p>
         </ScrollReveal>
       </div>
     </section>

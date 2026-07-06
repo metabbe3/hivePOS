@@ -77,8 +77,8 @@ export default function ReportingPage() {
     { value: "customers", label: t("reporting.customers"), icon: Users },
     { value: "services", label: t("reporting.services"), icon: Sparkles },
     { value: "commission", label: t("reporting.commission"), icon: HandCoins },
-    { value: "piutang", label: "Piutang", icon: Clock },
-    { value: "monthlyPnl", label: "Laporan Bulanan", icon: FileSpreadsheet },
+    { value: "piutang", label: t("reporting.outstanding"), icon: Clock },
+    { value: "monthlyPnl", label: t("reporting.monthlyPnl"), icon: FileSpreadsheet },
   ];
 
   async function handleExportAll() {

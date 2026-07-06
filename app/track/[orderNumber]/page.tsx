@@ -197,7 +197,7 @@ function ItemCard({ item }: { item: TrackingItem }) {
           <div className="rounded-lg bg-slate-50 p-3">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">Detail Item</p>
-              <p className="text-xs font-semibold text-brand">{totalPieces} potong</p>
+              <p className="text-xs font-semibold text-brand-700">{totalPieces} potong</p>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
               {item.garmentBreakdown!.map((g, j) => (
@@ -238,7 +238,7 @@ export default function TrackOrderPage() {
           </div>
           <h1 className="font-serif text-xl font-extrabold tracking-tight text-slate-900">Pesanan Tidak Ditemukan</h1>
           <p className="text-sm text-slate-600">{error}</p>
-          <Link href="/" className="text-sm text-brand hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded">Kembali ke Beranda</Link>
+          <Link href="/" className="text-sm text-brand-700 hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded">Kembali ke Beranda</Link>
         </div>
       </div>
     );
@@ -549,7 +549,7 @@ export default function TrackOrderPage() {
                       href={mapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-brand hover:underline font-bold mt-1.5 cursor-pointer"
+                      className="inline-flex items-center gap-1 text-xs text-brand-700 hover:underline font-bold mt-1.5 cursor-pointer"
                     >
                       <ExternalLink className="h-3 w-3" />
                       Buka di Google Maps
@@ -563,7 +563,7 @@ export default function TrackOrderPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand shrink-0">
                   <Phone className="h-4 w-4" />
                 </div>
-                <a href={`tel:${data.branch.phone}`} className="text-sm text-brand hover:underline font-bold cursor-pointer">{data.branch.phone}</a>
+                <a href={`tel:${data.branch.phone}`} className="text-sm text-brand-700 hover:underline font-bold cursor-pointer">{data.branch.phone}</a>
               </div>
             )}
           </div>
@@ -603,7 +603,7 @@ export default function TrackOrderPage() {
             <p className="text-xs text-slate-400">
               Dibuat {new Date(data.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
             </p>
-            <Link href="/" className="inline-flex items-center gap-1 text-xs text-slate-400 transition-colors hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded font-medium">
+            <Link href="/" className="inline-flex items-center gap-1 text-xs text-slate-400 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded font-medium">
               <ArrowLeft className="h-3 w-3" />
               Kembali ke Beranda
             </Link>

@@ -48,7 +48,16 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(
     );
 
     observer.observe(node);
-    return () => observer.disconnect();
+
+    // Failsafe: if the observer never fires (bfcache, slow hydration, anchor
+    // navigation to an already-in-view section), force visible after 3s so
+    // content is never permanently trapped at opacity:0.
+    const failsafe = setTimeout(() => setIsVisible(true), 3000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(failsafe);
+    };
   }, [options]);
 
   return [ref, isVisible] as const;

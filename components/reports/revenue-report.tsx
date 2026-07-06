@@ -176,8 +176,8 @@ export function RevenueReport({ from, to }: RevenueReportProps) {
             data={dailyTrend as unknown as Record<string, unknown>[]}
             lines={[
               { dataKey: "grossRevenue", color: "#10b981", name: t("revenue.grossRevenue") },
-              { dataKey: "revenue", color: "#3b82f6", name: t("revenue.totalPaid") },
-              { dataKey: "orders", color: "#f97316", name: t("common.orders"), type: "bar", yAxisId: "right" },
+              { dataKey: "revenue", color: "#6366f1", name: t("revenue.totalPaid") },
+              { dataKey: "orders", color: "#f59e0b", name: t("common.orders"), type: "bar", yAxisId: "right" },
             ]}
             formatValue={(v) => formatCurrency(v)}
           />

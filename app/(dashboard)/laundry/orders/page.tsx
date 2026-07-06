@@ -16,12 +16,21 @@ import {
   Clock, Package, CheckCircle2, Truck, List, Inbox,
   Banknote,
   QrCode,
+  MoreHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
-import { PageLoading } from "@/components/shared/loading";
+import { TableSkeleton } from "@/components/shared/skeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,7 +39,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import {
-  ORDER_STATUS_CONFIG, ORDER_STATUS_FLOW, ORDER_STATUS_BORDER,
+  ORDER_STATUS_CONFIG, ORDER_STATUS_FLOW,
   PAYMENT_STATUS_CONFIG,
 } from "@/lib/constants";
 import { buildOrderWhatsAppUrl } from "@/lib/whatsapp";
@@ -38,6 +47,7 @@ import { useWhatsappTemplates } from "@/hooks/use-whatsapp-templates";
 import { toast } from "sonner";
 import Link from "next/link";
 import { EmptyState } from "@/components/shared/empty-state";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import { useUrlState } from "@/hooks/use-url-filters";
 
@@ -204,11 +214,18 @@ export default function OrdersPage() {
   }, [status, debouncedSearch, sortValue, paymentFilter, dateRangeIdx, setPageStr]);
 
   useEffect(() => {
+    // P1: include payment + date filters so tab counts match the visible rows.
+    const countParams = new URLSearchParams();
+    if (paymentFilter !== "ALL") countParams.set("paymentStatus", paymentFilter);
+    if (dateFrom) countParams.set("from", dateFrom);
+    if (dateTo) countParams.set("to", dateTo);
+    const cpQs = countParams.toString();
+    const cpSuffix = cpQs ? `&${cpQs}` : "";
     Promise.all([
-      apiFetch<unknown[]>(`/api/orders?status=RECEIVED&limit=1`),
-      apiFetch<unknown[]>(`/api/orders?status=IN_PROGRESS&limit=1`),
-      apiFetch<unknown[]>(`/api/orders?status=READY&limit=1`),
-      apiFetch<unknown[]>(`/api/orders?status=DELIVERED&limit=1`),
+      apiFetch<unknown[]>(`/api/orders?status=RECEIVED&limit=1${cpSuffix}`),
+      apiFetch<unknown[]>(`/api/orders?status=IN_PROGRESS&limit=1${cpSuffix}`),
+      apiFetch<unknown[]>(`/api/orders?status=READY&limit=1${cpSuffix}`),
+      apiFetch<unknown[]>(`/api/orders?status=DELIVERED&limit=1${cpSuffix}`),
     ]).then(([recv, prog, ready, deliv]) => {
       setStatusCounts({
         RECEIVED: recv.meta?.total ?? 0,
@@ -291,7 +308,7 @@ export default function OrdersPage() {
       );
       window.open(url, "_blank");
     } catch (err) {
-      toast.error(err instanceof ApiClientError ? err.message : "Failed to load order details");
+      toast.error(err instanceof ApiClientError ? err.message : t("orders.errors.loadDetails"));
     }
   }
 
@@ -314,54 +331,18 @@ export default function OrdersPage() {
   ) {
     return (
       <>
+        {/* Pay — inline primary */}
         {!isEmployee && order.paymentStatus !== "PAID" && (
           <button
             type="button"
             aria-label={t("orderDetails.recordPayment")}
             onClick={(e) => openPayDialog(order, e)}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50/80 transition-colors"
+            className="inline-flex items-center justify-center h-10 w-10 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50/80 transition-colors"
           >
             <Banknote className="h-4 w-4" />
           </button>
         )}
-        {can("orders", "edit") && order.status !== "DELIVERED" && (
-          <button
-            type="button"
-            aria-label={t("orders.editOrder")}
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(`/laundry/orders/${order.id}?edit=true`); }}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        )}
-        {!isEmployee && (
-          <button
-            type="button"
-            aria-label="WhatsApp"
-            onClick={(e) => openWhatsApp(order, e)}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-green-600 hover:text-green-700 hover:bg-green-50/80 transition-colors"
-          >
-            <MessageCircle className="h-4 w-4" />
-          </button>
-        )}
-        <button
-          type="button"
-          aria-label="Receipt"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(`/laundry/orders/${order.id}/receipt`, '_blank'); }}
-          className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
-        >
-          <FileText className="h-4 w-4" />
-        </button>
-        {can("orders", "delete") && (
-          <button
-            type="button"
-            aria-label="Delete"
-            onClick={(e) => deleteOrder(order, e)}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 transition-colors"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        )}
+        {/* Advance — inline primary (production line action) */}
         {action && !isEmployee && (
           <Button
             size="sm"
@@ -374,6 +355,43 @@ export default function OrdersPage() {
             {action.label}
           </Button>
         )}
+        {/* Overflow — secondary actions (Edit, WhatsApp, Receipt, Delete) */}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <button
+                type="button"
+                aria-label="More"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-colors"
+              />
+            }
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {can("orders", "edit") && order.status !== "DELIVERED" && (
+              <DropdownMenuItem onClick={() => router.push(`/laundry/orders/${order.id}?edit=true`)}>
+                <Pencil className="h-4 w-4 mr-2" /> {t("orders.editOrder")}
+              </DropdownMenuItem>
+            )}
+            {!isEmployee && (
+              <DropdownMenuItem onClick={() => openWhatsApp(order, {} as React.MouseEvent)}>
+                <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => window.open(`/laundry/orders/${order.id}/receipt`, "_blank")}>
+              <FileText className="h-4 w-4 mr-2" /> {t("orders.receipt")}
+            </DropdownMenuItem>
+            {can("orders", "delete") && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => deleteOrder(order, {} as React.MouseEvent)} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" /> {t("orders.deleteOrder")}
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </>
     );
   }
@@ -537,7 +555,7 @@ export default function OrdersPage() {
 
       {/* Orders List */}
       {loading ? (
-        <PageLoading />
+        <TableSkeleton rows={8} />
       ) : orders.length === 0 ? (
         <EmptyState
           icon={Inbox}
@@ -554,19 +572,93 @@ export default function OrdersPage() {
         />
       ) : (
         <>
-          <div className="space-y-3">
-            {orders.map((order, idx) => {
+          {/* Desktop: semantic table (sm and up) */}
+          <div className="hidden sm:block rounded-xl border border-border/40 bg-white dark:bg-gray-800/80 shadow-sm">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="pl-4">{t("common.orderNumber")}</TableHead>
+                  <TableHead>{t("common.customer")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead className="text-right">{t("common.amount")}</TableHead>
+                  <TableHead>{t("common.payment")}</TableHead>
+                  <TableHead className="pr-4 text-right">{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orders.map((order) => {
+                  const action = NEXT_ACTION[order.status];
+                  const statusCfg = ORDER_STATUS_CONFIG[order.status];
+                  const payCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus];
+                  return (
+                    <TableRow key={order.id} className="hover:bg-muted/30">
+                      {/* Order# — the navigation link for the row */}
+                      <TableCell className="pl-4 font-medium">
+                        <Link
+                          href={`/laundry/orders/${order.id}`}
+                          className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 hover:underline underline-offset-4"
+                        >
+                          {order.orderNumber}
+                        </Link>
+                      </TableCell>
+                      {/* Customer + date */}
+                      <TableCell>
+                        <div className="min-w-0">
+                          <p className="truncate">{order.customerName}</p>
+                          <p className="text-xs text-muted-foreground">{formatDateTime(order.receivedAt || order.createdAt)}</p>
+                        </div>
+                      </TableCell>
+                      {/* Status badge */}
+                      <TableCell>
+                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${statusCfg.color}`}>
+                          {t(statusCfg.labelKey)}
+                        </span>
+                      </TableCell>
+                      {/* Amount */}
+                      <TableCell className="text-right tabular-nums font-medium">
+                        {formatCurrency(order.totalAmount)}
+                      </TableCell>
+                      {/* Payment status */}
+                      <TableCell>
+                        {!isEmployee ? (
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${payCfg.color}`}>
+                            {order.paymentStatus === "PARTIAL"
+                              ? `${t("status.paid")} ${formatCurrency(order.paidAmount)}`
+                              : t(payCfg.labelKey)}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      {/* Actions */}
+                      <TableCell className="pr-4 text-right">
+                        <div className="inline-flex items-center gap-1">
+                          {renderOrderActions(order, action, "inline")}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile: stacked cards (<sm) */}
+          <div className="sm:hidden space-y-3">
+            {orders.map((order) => {
               const action = NEXT_ACTION[order.status];
+              const statusCfg = ORDER_STATUS_CONFIG[order.status];
+              const payCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus];
               return (
                 <Link key={order.id} href={`/laundry/orders/${order.id}`}>
-                  <Card className={`border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl transition-shadow hover:shadow-md mb-3 border-l-4 ${ORDER_STATUS_BORDER[order.status] ?? ""} animate-fade-in-up ${idx < 6 ? `stagger-${idx + 1}` : ""}`}>
+                  <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl transition-shadow hover:shadow-md mb-3">
                     <CardContent className="py-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-semibold">{order.orderNumber}</span>
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${ORDER_STATUS_CONFIG[order.status].color}`}>
-                              {t(ORDER_STATUS_CONFIG[order.status].labelKey)}
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${statusCfg.color}`}>
+                              {t(statusCfg.labelKey)}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate">
@@ -574,42 +666,19 @@ export default function OrdersPage() {
                           </p>
                           <p className="text-xs text-muted-foreground">{formatDateTime(order.receivedAt || order.createdAt)}</p>
                         </div>
-                        {/* Desktop: price + actions inline */}
-                        <div className="hidden sm:flex items-center gap-2 shrink-0">
-                          <div className="text-right">
-                            <p className="font-semibold">{formatCurrency(order.totalAmount)}</p>
-                            {!isEmployee && (
-                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                order.paymentStatus === "PAID"
-                                  ? "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                                  : order.paymentStatus === "PARTIAL"
-                                    ? "bg-orange-100/80 text-orange-600 dark:bg-orange-900/40 dark:text-orange-300"
-                                    : "bg-red-100/80 text-red-600 dark:bg-red-900/40 dark:text-red-300"
-                              }`}>
-                                {order.paymentStatus === "PAID" ? t("status.paid") : order.paymentStatus === "PARTIAL" ? `${t("status.paid")} ${formatCurrency(order.paidAmount)}` : t("status.unpaid")}
-                              </span>
-                            )}
-                          </div>
-                          {renderOrderActions(order, action, "inline")}
-                        </div>
-                        {/* Mobile: price only */}
-                        <div className="sm:hidden text-right shrink-0">
-                          <p className="font-semibold">{formatCurrency(order.totalAmount)}</p>
+                        <div className="text-right shrink-0">
+                          <p className="font-semibold tabular-nums">{formatCurrency(order.totalAmount)}</p>
                           {!isEmployee && (
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                              order.paymentStatus === "PAID"
-                                ? "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                                : order.paymentStatus === "PARTIAL"
-                                  ? "bg-orange-100/80 text-orange-600 dark:bg-orange-900/40 dark:text-orange-300"
-                                  : "bg-red-100/80 text-red-600 dark:bg-red-900/40 dark:text-red-300"
-                            }`}>
-                              {order.paymentStatus === "PAID" ? t("status.paid") : order.paymentStatus === "PARTIAL" ? `${t("status.paid")} ${formatCurrency(order.paidAmount)}` : t("status.unpaid")}
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap ${payCfg.color}`}>
+                              {order.paymentStatus === "PARTIAL"
+                                ? `${t("status.paid")} ${formatCurrency(order.paidAmount)}`
+                                : t(payCfg.labelKey)}
                             </span>
                           )}
                         </div>
                       </div>
                       {/* Mobile: actions row below */}
-                      <div className="flex sm:hidden items-center gap-1.5 mt-3 pt-3 border-t border-border/40">
+                      <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-border/40">
                         {renderOrderActions(order, action, "stacked")}
                       </div>
                     </CardContent>
@@ -714,7 +783,7 @@ export default function OrdersPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Tanggal Bayar</Label>
+              <Label>{t("orderDetails.paymentDate")}</Label>
               <Input
                 type="date"
                 value={payForm.paidAt}

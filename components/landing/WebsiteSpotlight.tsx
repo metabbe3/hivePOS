@@ -72,7 +72,7 @@ export function WebsiteSpotlight() {
         {/* Split: text | real storefront preview */}
         <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
           <ScrollReveal>
-            <p className="text-sm font-bold text-brand">Eksklusif Pro</p>
+            <p className="text-sm font-bold text-sky-700">Eksklusif Pro</p>
             <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
               Website laundry sendiri, otomatis.
             </h2>
@@ -99,7 +99,7 @@ export function WebsiteSpotlight() {
               href="/register"
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold text-white transition-all hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 active:scale-[0.98]"
             >
-              Coba Pro 14 Hari Gratis
+              Mulai Gratis
               <ArrowRight className="h-4 w-4" />
             </Link>
           </ScrollReveal>

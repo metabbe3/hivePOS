@@ -34,7 +34,7 @@ export function ProcessFlow() {
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-16 text-center">
           <ScrollReveal delay={1}>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-700">
               Cara Kerja
             </p>
           </ScrollReveal>

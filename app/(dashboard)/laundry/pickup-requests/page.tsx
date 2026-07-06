@@ -28,7 +28,6 @@ import { PickupRequestDetailDialog } from "@/components/dashboard/pickup-request
 import { PickupCreateDialog } from "@/components/dashboard/pickup-create-dialog";
 import {
   PICKUP_STATUS_BADGE,
-  PICKUP_STATUS_BORDER,
   PICKUP_STATUS_LABEL,
 } from "@/modules/pickup-requests/ui/status-styles";
 import type { PickupRequestDTO } from "@/modules/pickup-requests/application/dto";
@@ -152,9 +151,7 @@ export default function PickupRequestsPage() {
               <Card
                 key={p.id}
                 onClick={() => openDetail(p.id)}
-                className={`cursor-pointer rounded-xl border border-border/40 border-l-4 bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800/80 ${
-                  PICKUP_STATUS_BORDER[p.status]
-                }`}
+                className="cursor-pointer rounded-xl border border-border/40 bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800/80"
               >
                 <CardContent className="py-4">
                   <div className="flex items-start justify-between gap-3">

@@ -24,7 +24,7 @@ export function EmptyState({ icon: Icon = Inbox, title, description, action, act
   return (
     <Card className="animate-fade-in-up border-dashed border-border/60 bg-card/50">
       <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/8">
+        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/8">
           <Icon className="h-6 w-6 text-primary/60" />
         </div>
         <h3 className="mt-5 text-lg tracking-tight">{title}</h3>
@@ -38,7 +38,6 @@ export function EmptyState({ icon: Icon = Inbox, title, description, action, act
                 key={i}
                 variant={a.variant ?? "default"}
                 onClick={a.onClick}
-                className={a.variant ? "" : "bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15 hover:shadow-lg"}
               >
                 {a.label}
               </Button>
@@ -47,7 +46,7 @@ export function EmptyState({ icon: Icon = Inbox, title, description, action, act
         ) : action ? (
           <Button
             onClick={action.onClick}
-            className="mt-5 bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15 hover:shadow-lg"
+            className="mt-5"
           >
             {action.label}
           </Button>

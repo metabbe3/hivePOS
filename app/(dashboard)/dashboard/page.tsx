@@ -146,7 +146,7 @@ export default function DashboardPage() {
   if (roleLoading || isEmployee || isSuperAdmin || pendingOnboarding) return null;
   if (!stats) return <DashboardSkeleton />;
 
-  const userName = session?.user?.name || session?.user?.email?.split("@")[0] || "there";
+  const userName = session?.user?.name || session?.user?.email?.split("@")[0] || t("common.friend");
   // Brand-new tenant (no customers yet) → show a welcome panel instead of a wall
   // of zero-stat cards. customerInsights.total is a customers-ever count, so this
   // flips off the moment they add their first customer / ring their first order.
@@ -159,7 +159,7 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="font-bold text-3xl tracking-tight">{t("dashboard.title")}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-sm text-foreground/70 mt-0.5">
               {getGreeting(t)}, {userName}
             </p>
           </div>
@@ -235,7 +235,7 @@ export default function DashboardPage() {
           id="financials"
           title={t("dashboard.sections.financials")}
           icon={Wallet}
-          defaultOpen={true}
+          defaultOpen={false}
         >
           <div className="grid gap-4 lg:grid-cols-2">
             <RevenueTrendCard

@@ -10,7 +10,7 @@ import { SAAS_FAQS } from "@/lib/landing-data-saas";
  * Accordion is the right UX for 9 detailed Q&As on mobile; kept minimal.
  */
 export function LandingFAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(1);
 
   return (
     <section id="faq" className="bg-white py-20 md:py-28">

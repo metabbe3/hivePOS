@@ -247,8 +247,6 @@ export const SAAS_PRICING: SaasPricingPlan[] = [
   {
     name: "Growth",
     price: "Rp 49K",
-    originalPrice: "Rp 79K",
-    discount: "HEMAT 38%",
     period: "/outlet/bulan",
     desc: "Untuk laundry yang siap tumbuh",
     features: [
@@ -328,12 +326,6 @@ export const SAAS_NAV_LINKS = [
   { href: "#harga", label: "Harga" },
   { href: "#faq", label: "FAQ" },
   { href: "/blog", label: "Blog" },
-] as const;
-
-export const SAAS_TRUST_BADGES = [
-  "Gratis 1 Outlet Selamanya",
-  "Rp 49K/outlet",
-  "Live dalam 2 menit",
 ] as const;
 
 // ── Website (Pro) features ──

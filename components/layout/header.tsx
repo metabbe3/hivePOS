@@ -18,7 +18,6 @@ import { useTranslation } from "@/hooks/use-translation";
 import { BranchSelector } from "@/components/shared/branch-selector";
 import { TicketBell } from "@/components/tickets/ticket-bell";
 import { InstallAppButton } from "@/components/shared/install-app-button";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 // ponytail: route → i18n key. Values resolved via t() so titles follow the
 // active locale. New routes: add an entry here + the i18n key in lib/i18n.ts.
@@ -74,7 +73,6 @@ export function Header() {
       <div className="hidden sm:block"><BranchSelector /></div>
       <TicketBell />
       <InstallAppButton />
-      <ThemeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger render={
           <Button variant="ghost" size="sm" className="h-8 gap-2 rounded-lg px-2.5 text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground" />

@@ -2,7 +2,9 @@ import {
   NotFoundError,
   AmountExceedsBalanceError,
   InsufficientBalanceError,
+  BusinessRuleError,
 } from "@/modules/shared";
+import { wibDay } from "@/lib/dates";
 import type {
   OrderRepository,
   PaymentRepository,
@@ -45,7 +47,20 @@ export class RecordPaymentService {
       }
     }
 
-    // ── 4. Record payment (repository handles the cross-aggregate tx) ──
+    // ── 4. Guard: payment date must be on/after the order day, not in the future ──
+    // Compare WIB calendar days — paidAt arrives as a date-only "YYYY-MM-DD"
+    // (UTC midnight), so a raw-timestamp compare would reject same-day payments.
+    const orderDay = wibDay(order.receivedAt ?? order.createdAt);
+    const todayDay = wibDay(new Date());
+    const paidAtDay = input.paidAt ? wibDay(new Date(input.paidAt)) : todayDay;
+    if (paidAtDay < orderDay) {
+      throw new BusinessRuleError("Tanggal pembayaran tidak boleh sebelum tanggal order.");
+    }
+    if (paidAtDay > todayDay) {
+      throw new BusinessRuleError("Tanggal pembayaran tidak boleh di masa depan.");
+    }
+
+    // ── 5. Record payment (repository handles the cross-aggregate tx) ──
     const paidAt = input.paidAt ? new Date(input.paidAt) : new Date();
     const result = await this.paymentRepo.recordPayment(
       {

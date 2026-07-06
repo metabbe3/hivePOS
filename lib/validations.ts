@@ -68,7 +68,11 @@ export const paymentSchema = z.object({
   amount: z.coerce.number().positive("Jumlah harus lebih dari 0."),
   paymentMethod: z.enum(["CASH", "DEPOSIT", "QRIS", "TRANSFER"]),
   notes: z.string().optional(),
-  paidAt: z.string().optional(),
+  paidAt: z
+    .string()
+    .optional()
+    .refine((s) => !s || /^\d{4}-\d{2}-\d{2}$/.test(s), "Format tanggal tidak valid")
+    .refine((s) => !s || !Number.isNaN(new Date(s).getTime()), "Tanggal tidak valid"),
 });
 
 export const statusUpdateSchema = z.object({

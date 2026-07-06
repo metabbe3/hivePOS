@@ -115,7 +115,7 @@ export function OrderDetailHeader({
                   <Button
                     size="default"
                     onClick={onAdvanceStatus}
-                    className="gap-1.5 bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15 hover:shadow-lg hover:brightness-105"
+                    className="gap-1.5"
                   >
                     <ChevronRight className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">

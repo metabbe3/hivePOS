@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch, ApiClientError } from "@/modules/shared";
@@ -95,13 +95,11 @@ function KanbanOrderCard({
   order,
   onAdvance,
   advancing,
-  now,
   whatsappTemplates,
 }: {
   order: KanbanItem;
   onAdvance: (id: string, next: string) => void;
   advancing: string | null;
-  now: number;
   whatsappTemplates: TemplateOverrides;
 }) {
   const router = useRouter();
@@ -113,19 +111,9 @@ function KanbanOrderCard({
   const mainItem = order.items[0];
   const extraCount = order.items.length - 1;
 
-  // Time-based color for left border
-  const createdAt = new Date(order.createdAt).getTime();
-  const orderAgeHours = Math.max(0, (now - createdAt) / (1000 * 60 * 60));
-  const timeColor =
-    orderAgeHours > 24
-      ? "border-l-red-400"
-      : orderAgeHours > 12
-        ? "border-l-amber-400"
-        : "border-l-sky-300";
-
   return (
     <Card
-      className={`cursor-pointer border border-border/50 border-l-[3px] ${timeColor} bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all`}
+      className="cursor-pointer border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
       tabIndex={0}
       role="button"
       aria-label={`${order.customerName} - ${order.orderNumber}`}
@@ -225,15 +213,8 @@ export function KanbanBoard() {
   const { orders: hookOrders, loading, refetch } = useKanbanOrders();
   const [advancing, setAdvancing] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
-  const [now, setNow] = useState(() => Date.now());
   const whatsappTemplates = useWhatsappTemplates();
   const { t } = useTranslation();
-
-  // Keep time fresh for border color calculations
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 60000);
-    return () => clearInterval(timer);
-  }, []);
 
   const orders = hookOrders ?? [];
 
@@ -318,7 +299,6 @@ export function KanbanBoard() {
                     order={order}
                     onAdvance={handleAdvance}
                     advancing={advancing}
-                    now={now}
                     whatsappTemplates={whatsappTemplates}
                   />
                 ))

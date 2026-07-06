@@ -93,8 +93,11 @@ export function CartSection() {
             {/* Payment Method Selector */}
             {selectedCustomer && (
               <div className="space-y-3 mt-2">
-                <span className="text-sm font-medium">{t("newOrder.payment")}</span>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                <details>
+                  <summary className="text-sm font-medium cursor-pointer text-muted-foreground hover:text-foreground list-none">
+                    {t("newOrder.payment")}: {paymentMethod === "PAY_LATER" ? t("newOrder.payLater") : paymentMethod === "CASH" ? t("paymentMethod.cash") : paymentMethod === "QRIS" ? t("paymentMethod.qris") : paymentMethod === "TRANSFER" ? t("paymentMethod.transfer") : t("paymentMethod.deposit")}
+                  </summary>
+                <div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {([
                     { key: "PAY_LATER" as const, label: t("newOrder.payLater"), icon: <Clock className="h-4 w-4" /> },
                     { key: "CASH" as const, label: t("paymentMethod.cash"), icon: <span className="text-sm font-bold">Rp</span> },
@@ -117,6 +120,7 @@ export function CartSection() {
                     </button>
                   ))}
                 </div>
+                </details>
 
                 {paymentMethod === "PAY_LATER" && (
                   <p className="text-xs text-muted-foreground bg-muted/30 rounded-lg px-3 py-2">
@@ -204,11 +208,10 @@ export function CartSection() {
         </Card>
       )}
 
-      {/* Discount */}
+      {/* Discount — folded into cart flow (top-border separator, no separate card) */}
       {items.length > 0 && (
-        <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
-          <CardHeader><CardTitle className="text-base font-semibold">{t("newOrder.discount")}</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+        <div className="border-t border-border/40 pt-4 space-y-4">
+          <span className="text-sm font-semibold text-muted-foreground">{t("newOrder.discount")}</span>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -279,8 +282,7 @@ export function CartSection() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
       )}
 
       {/* Notes & Submit */}

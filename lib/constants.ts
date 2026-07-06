@@ -5,27 +5,16 @@ export const BUSINESS_TAGLINE_KEY = "app.tagline";
 
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, { labelKey: string; color: string }> = {
   RECEIVED: { labelKey: "status.received", color: "bg-sky-100/80 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300" },
-  IN_PROGRESS: { labelKey: "status.inProgress", color: "bg-amber-100/80 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
+  IN_PROGRESS: { labelKey: "status.inProgress", color: "bg-amber-100/80 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" },
   READY: { labelKey: "status.ready", color: "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
   DELIVERED: { labelKey: "status.delivered", color: "bg-stone-100/80 text-stone-500 dark:bg-stone-800/50 dark:text-stone-400" },
-  CANCELED: { labelKey: "status.canceled", color: "bg-red-100/80 text-red-600 dark:bg-red-900/40 dark:text-red-300" },
-};
-
-/**
- * Left-border color used by the order list cards to visually distinguish
- * each status at a glance. Pairs with `ORDER_STATUS_CONFIG`.
- */
-export const ORDER_STATUS_BORDER: Record<string, string> = {
-  RECEIVED: "border-l-sky-500",
-  IN_PROGRESS: "border-l-amber-500",
-  READY: "border-l-emerald-500",
-  DELIVERED: "border-l-slate-400",
+  CANCELED: { labelKey: "status.canceled", color: "bg-red-100/80 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
 };
 
 export const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, { labelKey: string; color: string }> = {
-  PENDING: { labelKey: "status.unpaid", color: "bg-red-100/80 text-red-600 dark:bg-red-900/40 dark:text-red-300" },
-  PARTIAL: { labelKey: "status.partial", color: "bg-orange-100/80 text-orange-600 dark:bg-orange-900/40 dark:text-orange-300" },
-  PAID: { labelKey: "status.paid", color: "bg-emerald-100/80 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300" },
+  PENDING: { labelKey: "status.unpaid", color: "bg-red-100/80 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
+  PARTIAL: { labelKey: "status.partial", color: "bg-orange-100/80 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
+  PAID: { labelKey: "status.paid", color: "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
   REFUNDED: { labelKey: "status.refunded", color: "bg-slate-100/80 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400" },
 };
 
@@ -103,9 +92,9 @@ export const ORDER_STATUS_FLOW: OrderStatus[] = ["RECEIVED", "IN_PROGRESS", "REA
 export type CustomerStatus = "ACTIVE" | "AT_RISK" | "LAPSED" | "NEW";
 
 export const CUSTOMER_STATUS_CONFIG: Record<CustomerStatus, { labelKey: string; color: string }> = {
-  ACTIVE: { labelKey: "status.active", color: "bg-emerald-100/80 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300" },
-  AT_RISK: { labelKey: "status.atRisk", color: "bg-amber-100/80 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300" },
-  LAPSED: { labelKey: "status.lapsed", color: "bg-red-100/80 text-red-600 dark:bg-red-900/40 dark:text-red-300" },
+  ACTIVE: { labelKey: "status.active", color: "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
+  AT_RISK: { labelKey: "status.atRisk", color: "bg-amber-100/80 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" },
+  LAPSED: { labelKey: "status.lapsed", color: "bg-red-100/80 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
   NEW: { labelKey: "status.new", color: "bg-sky-100/80 text-sky-600 dark:bg-sky-900/40 dark:text-sky-300" },
 };
 
@@ -159,15 +148,15 @@ export function getDateRangePreset(key: DateRangePreset): { from: string; to: st
 
 export const STOCK_MOVEMENT_TYPE_CONFIG: Record<StockMovementType, { labelKey: string; color: string }> = {
   IN: { labelKey: "reports.in", color: "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
-  OUT: { labelKey: "reports.out", color: "bg-red-100/80 text-red-600 dark:bg-red-900/40 dark:text-red-300" },
-  ADJUSTMENT: { labelKey: "reports.adjustment", color: "bg-amber-100/80 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300" },
+  OUT: { labelKey: "reports.out", color: "bg-red-100/80 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
+  ADJUSTMENT: { labelKey: "reports.adjustment", color: "bg-amber-100/80 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" },
 };
 
 export const DEPOSIT_TRANSACTION_TYPE_CONFIG: Record<DepositTransactionType, { labelKey: string; color: string }> = {
   TOP_UP: { labelKey: "deposit.topUp", color: "bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300" },
-  DEDUCTION: { labelKey: "deposit.deduction", color: "bg-red-100/80 text-red-600 dark:bg-red-900/40 dark:text-red-300" },
+  DEDUCTION: { labelKey: "deposit.deduction", color: "bg-red-100/80 text-red-700 dark:bg-red-900/40 dark:text-red-300" },
   REFUND: { labelKey: "deposit.refund", color: "bg-sky-100/80 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300" },
-  ADJUSTMENT: { labelKey: "deposit.adjustment", color: "bg-amber-100/80 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300" },
+  ADJUSTMENT: { labelKey: "deposit.adjustment", color: "bg-amber-100/80 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" },
 };
 
 export interface ServiceCategory {

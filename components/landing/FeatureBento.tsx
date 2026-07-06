@@ -36,7 +36,7 @@ export function FeatureBento() {
                 <article
                   className={`flex h-full flex-col p-6 transition-colors ${
                     isDark
-                      ? "rounded-xl bg-sky-600 text-white"
+                      ? "rounded-xl bg-sky-700 text-white"
                       : feature.visual === "receipt"
                         ? "rounded-xl border border-slate-200 bg-slate-50"
                         : "rounded-xl border border-slate-200 bg-white hover:border-slate-300"

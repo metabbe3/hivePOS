@@ -188,7 +188,7 @@ export function OrderPaymentDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label>Tanggal Bayar</Label>
+            <Label>{t("orderDetails.paymentDate")}</Label>
             <Input
               type="date"
               value={form.paidAt}

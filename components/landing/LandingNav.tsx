@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { BrandMark } from "@/components/public/brand-logo";
@@ -18,6 +19,27 @@ import { SAAS_NAV_LINKS } from "@/lib/landing-data-saas";
  * one line at md+, 64px tall. Single accent (brand) on the wordmark + primary CTA.
  */
 export function LandingNav() {
+  const [activeSection, setActiveSection] = useState("");
+
+  // Scroll-spy: highlight the nav link for the section currently in view.
+  useEffect(() => {
+    const ids = ["fitur", "modul", "harga", "faq"];
+    const sections = ids
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+    if (sections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { rootMargin: "-80px 0px -70% 0px" },
+    );
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-6">
@@ -38,7 +60,11 @@ export function LandingNav() {
             <a
               key={link.href}
               href={link.href}
-              className="rounded-md px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+              className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
+                link.href.startsWith("#") && activeSection === link.href.slice(1)
+                  ? "text-slate-900"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
             >
               {link.label}
             </a>
@@ -57,7 +83,7 @@ export function LandingNav() {
             href="/register"
             className="hidden rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 active:scale-[0.98] sm:inline-flex sm:items-center"
           >
-            Daftar Bisnis
+            Mulai Gratis
           </Link>
 
           {/* Mobile menu */}
@@ -108,7 +134,7 @@ export function LandingNav() {
                       href="/register"
                       className="rounded-full bg-brand py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-brand-700"
                     >
-                      Daftar Bisnis
+                      Mulai Gratis
                     </Link>
                   </div>
                 </nav>

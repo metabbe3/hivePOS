@@ -54,12 +54,12 @@ describe("CardListItem", () => {
 
   it("appends custom className after the shared classes", () => {
     const { container } = render(
-      <CardListItem className="border-l-4 border-l-emerald-500" />,
+      <CardListItem className="custom-flag bg-emerald-50" />,
     );
     const card = container.firstChild as HTMLElement;
     expect(card.className).toContain("rounded-xl");
-    expect(card.className).toContain("border-l-4");
-    expect(card.className).toContain("border-l-emerald-500");
+    expect(card.className).toContain("custom-flag");
+    expect(card.className).toContain("bg-emerald-50");
   });
 
   it("renders children inside the Card", () => {

@@ -6,10 +6,11 @@ const PRODUCT_LINKS = [
   { href: "#modul", label: "Modul" },
   { href: "#harga", label: "Harga" },
   { href: "#faq", label: "FAQ" },
+  { href: "/alternatif-moka-pos-laundry", label: "Alternatif Kasir Laundry" },
 ];
 
 const START_LINKS = [
-  { href: "/register", label: "Daftar Bisnis" },
+  { href: "/register", label: "Mulai Gratis" },
   { href: "/login", label: "Masuk" },
   { href: "/track", label: "Lacak Order" },
   { href: "/blog", label: "Blog" },

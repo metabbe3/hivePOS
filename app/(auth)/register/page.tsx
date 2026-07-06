@@ -104,7 +104,7 @@ function RegisterForm() {
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3 font-black text-2xl">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-600/25">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
               <BrandMark className="h-6 w-6" />
             </span>
             hive<span className="text-[var(--color-primary)]">POS</span>

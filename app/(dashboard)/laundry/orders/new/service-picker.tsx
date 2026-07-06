@@ -105,7 +105,8 @@ export function ServicePicker() {
                 return (
                   <div
                     key={item.normalizedName}
-                    role={useInlineSpeeds ? undefined : "button"}
+                    role={useInlineSpeeds ? "group" : "button"}
+                    aria-label={useInlineSpeeds ? item.baseName : undefined}
                     tabIndex={useInlineSpeeds ? undefined : 0}
                     className={`group flex flex-col items-start rounded-xl border border-border/40 p-3 text-left transition-all min-w-0 overflow-hidden ${
                       useInlineSpeeds

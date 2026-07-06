@@ -47,7 +47,7 @@ export function StatsCards({ stats }: Props) {
   return (
     <div className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
       {/* Operations: Blue */}
-      <div className="animate-fade-in-up stagger-1">
+      <div>
         <StatCard
           title={t("common.orders")}
           value={stats.todayOrders}
@@ -64,7 +64,7 @@ export function StatsCards({ stats }: Props) {
         />
       </div>
       {/* Financial: Emerald */}
-      <div className="animate-fade-in-up stagger-2">
+      <div>
         <StatCard
           title="Omset"
           value={formatCompactCurrency(stats.todayOmset)}
@@ -78,7 +78,7 @@ export function StatsCards({ stats }: Props) {
         />
       </div>
       {/* Operations: Blue */}
-      <div className="animate-fade-in-up stagger-3">
+      <div>
         <StatCard
           title="Pesanan Aktif"
           value={activeOrders}
@@ -90,7 +90,7 @@ export function StatsCards({ stats }: Props) {
         />
       </div>
       {/* Operations: Indigo */}
-      <div className="animate-fade-in-up stagger-4">
+      <div>
         <StatCard
           title="Siap Ambil"
           value={stats.readyForPickup}
@@ -102,7 +102,7 @@ export function StatsCards({ stats }: Props) {
         />
       </div>
       {/* Financial: Emerald */}
-      <div className="animate-fade-in-up stagger-5">
+      <div>
         <StatCard
           title={t("common.revenue")}
           value={formatCompactCurrency(stats.todayRevenue)}
