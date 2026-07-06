@@ -31,9 +31,12 @@ its signature, location, and call context — one cheap query instead of many re
   codebase scale (~1k symbols) in-memory search is sub-ms; no DB service, no
   native module, no app-DB schema change. (Upgrade path: SQLite-FTS5 for larger
   corpora, or embeddings via the local Ollama for semantic search — see below.)
-- **Retrieval: weighted lexical** over (name > signature > summary). Lexical-on-
-  summary is effective for code (symbols are named precisely) and avoids the
-  embedding-model/running-LLM dependency entirely — the most LLM-light option.
+- **Retrieval: two-stage lexical (BM25 + re-rank)** over weighted identifier
+  tokens (name subtokens > summary > signature/kind/params/path). camelCase/
+  snake_case splitting lands exact-string queries (`is_active_v2`, `ERR_AUTH_*`);
+  IDF dampens common tokens; a lexical cross-encoder re-ranks the top-25 → top-K.
+  No embedding model, no running LLM — the most LLM-light option that still
+  catches precise identifiers. (See SOP "Retrieval model".)
 - **Embeddings (optional, not in MVP):** when semantic search is wanted, embed
   the `summary` via the local Ollama (`LLM_API_URL/api/embeddings`,
   `nomic-embed-text`) and store the vector in the JSON record; query does cosine
@@ -51,19 +54,22 @@ its signature, location, and call context — one cheap query instead of many re
 | `inputs` | array | parameters (name + type) |
 | `outputs` | string | return type / JSX element / inferred |
 | `summary` | string | JSDoc if present, else synthesized from signature. **The retrieval key.** |
-| `called_by` | array | symbol ids that reference this one (second pass) |
+| `called_by` | array | symbol ids that reference this one — incoming edges (second pass) |
+| `calls` | array | symbol ids this one references — outgoing edges (second pass) |
 | `file_hash` | string | SHA-256 of the symbol's source snippet (delta-sync key) |
 | `code` | string | the source snippet (for the LLM to read on a hit) |
 
 ## Commands (`npx tsx scripts/codebase-rag.ts …`)
 
 - `index` — walk `app/ components/ lib/ modules/ hooks/`, AST-extract symbols,
-  SHA-256 delta-sync against the existing index, recompute `called_by`. Default
+  SHA-256 delta-sync against the existing index, recompute `called_by` + `calls`. Default
   summaries are deterministic; `--llm-summarize` enriches doc-less chunks via
   Ollama (only changed ones).
-- `query <term>` — weighted lexical search → top-K symbols with full metadata.
+- `query <term>` — BM25 recall (top-25) → lexical re-rank → top-K symbols, each
+  with a caller/callee mini-trace.
 - `symbol <name>` — exact-name lookup.
-- `callers <name>` — who references this symbol.
+- `callers <name>` — who references this symbol (incoming, ←).
+- `callees <name>` — what this symbol references (outgoing, →).
 - `stats` — index size / coverage.
 
 ## Delta-sync loop (also the CI job)

@@ -48,7 +48,8 @@ interface Symbol {
   inputs: Param[];
   outputs: string;
   summary: string;     // JSDoc or synthesized — the retrieval key
-  called_by: string[]; // ids that reference this symbol (approx)
+  called_by: string[]; // ids that reference this symbol (approx, incoming)
+  calls: string[];     // ids this symbol references (approx, outgoing)
   file_hash: string;   // sha256(code) — delta-sync key
   code: string;        // the source snippet
 }
@@ -133,7 +134,7 @@ function extractSymbols(relPath: string, content: string): Symbol[] {
       name, kind, file_path: relPath,
       startLine: lineOf(node.getStart(sf, false)),
       endLine: lineOf(node.getEnd()),
-      inputs, outputs, summary, called_by: [],
+      inputs, outputs, summary, called_by: [], calls: [],
       file_hash: sha256(code), code,
     };
   };
@@ -222,7 +223,7 @@ function recomputeCalledBy(symbols: Symbol[]): void {
     }
   }
   const byId = new Map(symbols.map((s) => [s.id, s]));
-  for (const s of symbols) s.called_by = [];
+  for (const s of symbols) { s.called_by = []; s.calls = []; }
   for (const s of symbols) {
     const tokens = s.code.match(/[A-Za-z_$][A-Za-z0-9_$]*/g) ?? [];
     const seen = new Set<string>();
@@ -230,9 +231,15 @@ function recomputeCalledBy(symbols: Symbol[]): void {
       const targetIds = nameToIds.get(tok);
       if (targetIds) for (const tid of targetIds) if (tid !== s.id) seen.add(tid);
     }
-    for (const tid of seen) byId.get(tid)?.called_by.push(s.id); // s references tid → s is a caller
+    for (const tid of seen) {
+      byId.get(tid)?.called_by.push(s.id); // incoming: s references tid
+      s.calls.push(tid);                   // outgoing: s references tid
+    }
   }
-  for (const s of symbols) s.called_by = [...new Set(s.called_by)].slice(0, 50);
+  for (const s of symbols) {
+    s.called_by = [...new Set(s.called_by)].slice(0, 50);
+    s.calls = [...new Set(s.calls)].slice(0, 50);
+  }
 }
 
 // ── index build (delta sync) ─────────────────────────────────────────────
@@ -286,25 +293,108 @@ function loadIndexSync(): Index {
   catch { console.error("No index found. Run: npx tsx scripts/codebase-rag.ts index"); process.exit(1); }
 }
 
-function query(term: string, k = 10): void {
-  const terms = term.toLowerCase().split(/\s+/).filter(Boolean);
-  const scored: { s: Symbol; score: number }[] = [];
-  for (const s of loadSymbols()) {
-    const name = s.name.toLowerCase();
-    const summary = s.summary.toLowerCase();
-    const sig = s.code.slice(0, 240).toLowerCase();
-    let score = 0;
-    for (const t of terms) {
-      if (name === t) score += 12;
-      else if (name.includes(t)) score += 5;
-      if (s.kind === "route" && name.includes(t)) score += 3;
-      if (summary.includes(t)) score += 2;
-      if (sig.includes(t)) score += 1;
-    }
-    if (score > 0) scored.push({ s, score });
+// ── retrieval: BM25 + lexical re-rank (no LLM, no embeddings) ───────────
+// ponytail: pure-TS BM25 over weighted identifier-token fields. Semantic/vector
+// layer (pgvector + embeddings) deferred — add if symbols >10k or lexical recall
+// proves insufficient. Identifier splitting (camelCase/snake_case) is what lands
+// exact-string queries like is_active_v2 / ERR_AUTH_501.
+const K1 = 1.2;
+const B = 0.75;
+const RECALL_N = 25;
+
+function tokenize(raw: string): string[] {
+  return raw
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2") // camelCase → space
+    .replace(/[_\-./:()<>,;{}[\]"'`|=+!?@#&]+/g, " ") // separators → space
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length >= 2 && !STOP_NAMES.has(t));
+}
+
+// Weighted token-frequency "document" for one symbol. Name subtokens weigh
+// highest (exact identifier match is the strongest signal), summary mid, rest low.
+function bm25Doc(s: Symbol): Map<string, number> {
+  const d = new Map<string, number>();
+  const add = (raw: string, wt: number) => {
+    for (const t of tokenize(raw)) d.set(t, (d.get(t) ?? 0) + wt);
+  };
+  add(s.name, 5);
+  if (!s.name.includes(" ")) add(s.name.toLowerCase(), 5); // raw name token too
+  add(s.summary, 2);
+  add(s.code.slice(0, 240), 1);
+  add(s.kind, 1);
+  for (const p of s.inputs) add(p.name, 1);
+  add(s.file_path, 1);
+  return d;
+}
+
+// Stage-2 lexical re-rank: query↔symbol joint score (deterministic cross-encoder).
+function rerank(qLower: string, s: Symbol): number {
+  const name = s.name.toLowerCase();
+  const qTokens = tokenize(qLower);
+  let score = 0;
+  if (qLower && name === qLower) score += 100;
+  if (qLower.length >= 3 && name.includes(qLower)) score += 40;
+  if (name.length >= 3 && qLower.includes(name)) score += 25;
+  if (qLower.length >= 2 && name.startsWith(qLower)) score += 20;
+  const docTokens = new Set<string>([
+    ...tokenize(s.name), ...tokenize(s.summary), ...tokenize(s.code.slice(0, 240)),
+  ]);
+  if (qTokens.length && docTokens.size) {
+    const overlap = qTokens.filter((t) => docTokens.has(t)).length;
+    score += 30 * (overlap / Math.max(qTokens.length, docTokens.size));
   }
-  scored.sort((a, b) => b.score - a.score);
-  printHits(scored.slice(0, k).map((x) => x.s), term);
+  if (qLower.length >= 3 && s.summary.toLowerCase().includes(qLower)) score += 15;
+  return score;
+}
+
+function query(term: string, k = 10): void {
+  const qLower = term.toLowerCase().trim();
+  const qTokens = tokenize(qLower);
+  const symbols = loadSymbols();
+  const N = symbols.length;
+
+  // Stage 1 (recall): BM25 over weighted token docs.
+  const docs = new Map<string, Map<string, number>>();
+  const df = new Map<string, number>();
+  let totalLen = 0;
+  for (const s of symbols) {
+    const d = bm25Doc(s);
+    docs.set(s.id, d);
+    let len = 0;
+    for (const [t, c] of d) { len += c; df.set(t, (df.get(t) ?? 0) + 1); }
+    totalLen += len;
+  }
+  const avgdl = N ? totalLen / N : 1;
+  const staged: { s: Symbol; bm: number }[] = [];
+  for (const s of symbols) {
+    const d = docs.get(s.id)!;
+    const dl = [...d.values()].reduce((a, b) => a + b, 0) || 1;
+    let bm = 0;
+    for (const t of qTokens) {
+      const tf = d.get(t);
+      if (!tf) continue;
+      const dft = df.get(t) ?? 0;
+      const idf = Math.log((N - dft + 0.5) / (dft + 0.5) + 1);
+      bm += idf * ((tf * (K1 + 1)) / (tf + K1 * (1 - B + (B * dl) / avgdl)));
+    }
+    // Fallback: raw substring on name+summary so single-stop-token / short
+    // queries (which tokenize may drop) still surface.
+    if (bm === 0 && qLower.length >= 2 &&
+        (s.name.toLowerCase().includes(qLower) || s.summary.toLowerCase().includes(qLower))) {
+      bm = 0.01;
+    }
+    if (bm > 0) staged.push({ s, bm });
+  }
+  staged.sort((a, b) => b.bm - a.bm);
+  const candidates = staged.slice(0, RECALL_N);
+
+  // Stage 2 (precision): lexical re-rank; BM25 breaks ties.
+  const ranked = candidates
+    .map(({ s, bm }) => ({ s, rr: rerank(qLower, s), bm }))
+    .sort((a, b) => b.rr - a.rr || b.bm - a.bm);
+
+  printHits(ranked.slice(0, k).map((x) => x.s), term);
 }
 
 function findByName(name: string): Symbol[] {
@@ -312,27 +402,38 @@ function findByName(name: string): Symbol[] {
   return loadSymbols().filter((s) => s.name.toLowerCase() === lower || s.name.toLowerCase().endsWith("." + lower));
 }
 
-function callers(name: string): void {
+function edges(name: string, field: "called_by" | "calls", arrow: "←" | "→", verb: string): void {
   const targets = findByName(name);
   if (!targets.length) { console.log(`No symbol named "${name}".`); return; }
   const refIds = new Set<string>();
-  for (const t of targets) for (const id of t.called_by) refIds.add(id);
+  for (const t of targets) for (const id of t[field] ?? []) refIds.add(id);
   const byId = new Map(loadSymbols().map((s) => [s.id, s]));
   const refs = ([...refIds].map((id) => byId.get(id)).filter(Boolean) as Symbol[]);
   console.log(`\n${targets.map((t) => `▸ ${t.name} (${t.file_path}:${t.startLine})`).join("\n")}`);
-  console.log(`  referenced by ${refs.length} symbol(s):`);
-  for (const r of refs.slice(0, 30)) console.log(`    ← ${r.kind} ${r.name}  ${r.file_path}:${r.startLine}`);
+  console.log(`  ${verb} ${refs.length} symbol(s):`);
+  for (const r of refs.slice(0, 30)) console.log(`    ${arrow} ${r.kind} ${r.name}  ${r.file_path}:${r.startLine}`);
 }
+function callers(name: string): void { edges(name, "called_by", "←", "referenced by"); }
+function callees(name: string): void { edges(name, "calls", "→", "calls"); }
 
 function printHits(hits: Symbol[], label: string): void {
   if (!hits.length) { console.log(`No matches for "${label}".`); return; }
+  const byId = new Map(loadSymbols().map((s) => [s.id, s]));
+  const fmt = (id: string) => {
+    const r = byId.get(id);
+    return r ? `${r.kind} ${r.name} ${r.file_path}:${r.startLine}` : "";
+  };
   console.log(`\nTop ${hits.length} for "${label}":\n`);
   for (const s of hits) {
     console.log(`▸ ${s.kind} ${s.name}  —  ${s.file_path}:${s.startLine}-${s.endLine}`);
     if (s.inputs.length) console.log(`  in:  ${s.inputs.map((p) => `${p.name}${p.type ? ": " + p.type : ""}`).join(", ")}`);
     if (s.outputs) console.log(`  out: ${s.outputs}`);
     console.log(`  ${s.summary.slice(0, 160)}`);
-    if (s.called_by.length) console.log(`  called_by: ${s.called_by.length} symbol(s)`);
+    // Mini execution trace — callers (←) + callees (→), top 3 each.
+    const callers3 = (s.called_by ?? []).slice(0, 3).map(fmt).filter(Boolean).join("  ,  ");
+    const callees3 = (s.calls ?? []).slice(0, 3).map(fmt).filter(Boolean).join("  ,  ");
+    if (callers3) console.log(`  ← callers:  ${callers3}`);
+    if (callees3) console.log(`  → callees:  ${callees3}`);
     console.log("");
   }
 }
@@ -374,6 +475,10 @@ const [cmd, ...rest] = positional;
       if (!rest.length) { console.log("usage: callers <name>"); break; }
       callers(rest[0]);
       break;
+    case "callees":
+      if (!rest.length) { console.log("usage: callees <name>"); break; }
+      callees(rest[0]);
+      break;
     case "stats":
       stats();
       break;
@@ -383,7 +488,8 @@ usage:
   npx tsx scripts/codebase-rag.ts index                 # build/update (SHA-256 delta sync)
   npx tsx scripts/codebase-rag.ts query "<term>" [-n 10] # lexical search
   npx tsx scripts/codebase-rag.ts symbol <name>          # exact-name lookup
-  npx tsx scripts/codebase-rag.ts callers <name>         # who references it
+  npx tsx scripts/codebase-rag.ts callers <name>         # who references it (←)
+  npx tsx scripts/codebase-rag.ts callees <name>         # what it references (→)
   npx tsx scripts/codebase-rag.ts stats                  # coverage`);
   }
 })();

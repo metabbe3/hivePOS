@@ -15,10 +15,12 @@ RAG **before** you grep / glob / Read.
 
 1. **Query the RAG** for the symbols involved:
    ```bash
-   npx tsx scripts/codebase-rag.ts query "<term>"      # lexical search → top hits
+   npx tsx scripts/codebase-rag.ts query "<term>"      # BM25 + re-rank → top hits
                                                        # with file:line + signature + summary
+                                                       # + caller/callee mini-trace
    npx tsx scripts/codebase-rag.ts symbol <ExactName>  # exact-name lookup
-   npx tsx scripts/codebase-rag.ts callers <name>      # who references it (approx)
+   npx tsx scripts/codebase-rag.ts callers <name>      # who references it (approx, ←)
+   npx tsx scripts/codebase-rag.ts callees <name>      # what it references (approx, →)
    npx tsx scripts/codebase-rag.ts stats               # index coverage
    ```
 2. **Read only what the RAG surfaces** — the specific `file:line` ranges it
@@ -48,6 +50,28 @@ A `query` returns the 5–10 exact symbols you need with their locations in **on
 call. The alternative — grep, open files, scroll to find the function — is 5–20
 `Read` calls per question. At 686 files / 2,171 symbols, RAG-first cuts
 navigation tokens by roughly an order of magnitude.
+
+## Retrieval model (no LLM, no embeddings)
+
+`query` is a **two-stage lexical pipeline** — deterministic, zero model cost:
+
+1. **BM25 recall** (top 25): scores every symbol's weighted token "document"
+   (name subtokens weigh highest, then summary, then signature/kind/params/path).
+   Identifiers are split on camelCase / snake_case / kebab / punctuation, so
+   exact-string queries like `is_active_v2` or `ERR_AUTH_501` land the defining
+   symbol rather than a conceptually-similar one. IDF dampens common tokens.
+2. **Lexical re-rank** (top `k`): re-scores the 25 by query↔symbol joint signal
+   (exact name > prefix > token overlap > summary phrase). BM25 breaks ties.
+
+Each result prints a **mini execution trace** — `← callers` (who references it)
+and `→ callees` (what it references), top 3 each — so you see the symbol in its
+call context (Route → Handler → DB call), not as a floating function.
+`callers`/`callees` give the full lists. Edges are name-token based → **approx**
+(DI/module-wired refs may be under-counted; generic names like `Icon` add noise).
+
+> **Deferred:** a semantic/vector layer (pgvector + embeddings) is intentionally
+> NOT built. Add it only if the index grows past ~10k symbols or lexical recall
+> proves insufficient. See `docs/specs/codebase-rag.md`.
 
 ## Rules
 
