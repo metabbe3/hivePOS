@@ -16,7 +16,7 @@
 //     takes over — no stale-data risk.
 //   - Non-GET + cross-origin: bypass (straight to network).
 
-const VERSION = "2026-06-24-5";
+const VERSION = "2026-07-06-1";
 const SHELL_CACHE = `hivepos-shell-v${VERSION}`;
 const RUNTIME_CACHE = `hivepos-runtime-v${VERSION}`;
 const SHELL_PRECACHE = ["/"];
