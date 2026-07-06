@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import { useOnlineStatus } from "@/lib/offline/use-online-status";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { createOrderOffline } from "@/lib/offline/offline-order-create";
 import { newClientId, shortPendingId } from "@/lib/offline/client-id";
 // ponytail: statically imported (not dynamic) so the offline code path works
@@ -141,6 +142,7 @@ export function NewOrderProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { t } = useTranslation();
   const online = useOnlineStatus();
+  const offlineEnabled = useFeatureFlag("offlineOrderCreate");
 
   const [services, setServices] = useState<Service[]>([]);
   const [serviceGroups, setServiceGroups] = useState<ServiceGroup[]>([]);
@@ -399,6 +401,12 @@ export function NewOrderProvider({ children }: { children: ReactNode }) {
     // here and let the order sync as PAY_LATER. The kasir collects payment
     // (cash/QRIS) at pickup time when the network is back.
     if (!online) {
+      // Flag-gate (non-negotiable #3): when offlineOrderCreate is OFF, never
+      // write to IDB — surface a clear disabled message instead.
+      if (!offlineEnabled) {
+        toast.error(t("offline.createDisabled"));
+        return;
+      }
       setSubmitting(true);
       try {
         const pricedItems = items.map((i) => {

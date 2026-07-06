@@ -1,6 +1,6 @@
 # Feature Spec / PRD — Offline Order Create (completion)
 
-> **Status:** Draft · **Last updated:** 2026-07-06
+> **Status:** Shipped (MVP — flag default OFF) · **Last updated:** 2026-07-06
 > **Related code:** `lib/offline/*`, `app/(dashboard)/laundry/orders/new/new-order-context.tsx`, `app/(dashboard)/laundry/orders/page.tsx`, `components/shared/offline-*` · **Flag:** `offlineOrderCreate` (defaults OFF)
 
 ## 1. Overview & Problem

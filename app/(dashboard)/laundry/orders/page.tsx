@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { PendingOrdersSection } from "@/components/orders/pending-orders-section";
 import { TableSkeleton } from "@/components/shared/skeletons";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -429,6 +430,9 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       <PageHeader title={t("orders.title")} description={t("orders.description")} action={{ label: t("orders.newOrder"), onClick: () => router.push("/laundry/orders/new") }} />
+
+      {/* Offline outbox — only renders when the flag is on AND there are pending/errored rows. */}
+      <PendingOrdersSection />
 
       {/* Status Tabs + Search */}
       <div className="flex flex-col gap-3">

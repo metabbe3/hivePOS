@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { drainOutbox, purgeOldSyncedRows, onSyncEvent } from "@/lib/offline/sync-engine";
 import { useOnlineStatus } from "@/lib/offline/use-online-status";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { useTranslation } from "@/hooks/use-translation";
 import { shortPendingId } from "@/lib/offline/client-id";
 
@@ -18,14 +19,15 @@ import { shortPendingId } from "@/lib/offline/client-id";
  */
 export function OfflineSyncManager() {
   const online = useOnlineStatus();
+  const offlineEnabled = useFeatureFlag("offlineOrderCreate");
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (!online) return;
+    if (!online || !offlineEnabled) return;
     drainOutbox().catch(() => {
       /* swallow — sync-engine handles per-row errors */
     });
-  }, [online]);
+  }, [online, offlineEnabled]);
 
   useEffect(() => {
     const interval = setInterval(() => {
