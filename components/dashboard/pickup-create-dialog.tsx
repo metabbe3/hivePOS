@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch, ApiClientError } from "@/modules/shared";
+import { useTranslation } from "@/hooks/use-translation";
 
 interface Customer {
   id: string;
@@ -47,7 +48,7 @@ function flattenSlots(raw: unknown): string[] {
   return Array.from(set);
 }
 
-function nextDates(count = 14): { value: string; label: string }[] {
+function nextDates(count = 14, lang = "id"): { value: string; label: string }[] {
   const out: { value: string; label: string }[] = [];
   const today = new Date();
   for (let i = 0; i < count; i++) {
@@ -55,7 +56,7 @@ function nextDates(count = 14): { value: string; label: string }[] {
     d.setDate(today.getDate() + i);
     out.push({
       value: d.toISOString().slice(0, 10),
-      label: d.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" }),
+      label: d.toLocaleDateString(lang === "id" ? "id-ID" : "en-US", { weekday: "short", day: "numeric", month: "short" }),
     });
   }
   return out;
@@ -64,6 +65,7 @@ function nextDates(count = 14): { value: string; label: string }[] {
 const DEFAULT_SLOTS = ["09:00-11:00", "11:00-13:00", "13:00-15:00", "15:00-17:00", "17:00-19:00"];
 
 export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
+  const { t, lang } = useTranslation();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [custSearch, setCustSearch] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -115,19 +117,19 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
   const selectedBranch = branches.find((b) => b.id === branchId);
   const slots = flattenSlots(selectedBranch?.pickupSlots);
   const slotOptions = slots.length > 0 ? slots : DEFAULT_SLOTS;
-  const dates = nextDates(14);
+  const dates = nextDates(14, lang);
 
   async function handleSubmit() {
     if (!selectedCustomer) {
-      toast.error("Pilih pelanggan terlebih dahulu");
+      toast.error(t("pickup.toast.selectCustomer"));
       return;
     }
     if (!branchId) {
-      toast.error("Outlet wajib dipilih.");
+      toast.error(t("pickup.toast.selectOutlet"));
       return;
     }
     if (addressText.trim().length < 4) {
-      toast.error("Alamat minimal 4 karakter");
+      toast.error(t("pickup.toast.addressMin"));
       return;
     }
     setSubmitting(true);
@@ -143,12 +145,12 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
           notes: notes.trim() || undefined,
         },
       });
-      toast.success("Pickup dibuat");
+      toast.success(t("pickup.toast.created"));
       onOpenChange(false);
       onCreated();
     } catch (err) {
       if (err instanceof ApiClientError) toast.error(err.message);
-      else toast.error("Gagal membuat pickup");
+      else toast.error(t("pickup.toast.failed"));
     } finally {
       setSubmitting(false);
     }
@@ -158,13 +160,13 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Buat Pickup</DialogTitle>
+          <DialogTitle>{t("pickup.title")}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Customer select */}
           <div className="space-y-1.5">
-            <Label>Pelanggan</Label>
+            <Label>{t("common.customer")}</Label>
             {selectedCustomer ? (
               <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
                 <div className="min-w-0">
@@ -188,7 +190,7 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   className="pl-9 bg-muted/30 border-border/30"
-                  placeholder="Cari nama / telepon..."
+                  placeholder={t("pickup.searchPlaceholder")}
                   value={custSearch}
                   onChange={(e) => {
                     setCustSearch(e.target.value);
@@ -220,7 +222,7 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
                 {showResults && custSearch && filteredCustomers.length === 0 && (
                   <div className="absolute top-full z-50 mt-1 w-full rounded-xl border border-border/30 bg-popover shadow-md p-3">
                     <p className="text-xs text-muted-foreground">
-                      Pelanggan tidak ditemukan. Tambahkan dari halaman Customers.
+                      {t("pickup.customerNotFound")}
                     </p>
                   </div>
                 )}
@@ -230,7 +232,7 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
 
           {/* Branch select */}
           <div className="space-y-1.5">
-            <Label>Outlet</Label>
+            <Label>{t("pickup.outlet")}</Label>
             <select
               className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
               value={branchId}
@@ -246,10 +248,10 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
 
           {/* Address */}
           <div className="space-y-1.5">
-            <Label>Alamat Pickup</Label>
+            <Label>{t("pickup.addressLabel")}</Label>
             <Textarea
               className="bg-muted/30 border-border/30 min-h-[72px]"
-              placeholder="Alamat penjemputan..."
+              placeholder={t("pickup.addressPlaceholder")}
               value={addressText}
               onChange={(e) => setAddressText(e.target.value)}
             />
@@ -258,7 +260,7 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
           {/* Date + slot */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Tanggal</Label>
+              <Label>{t("common.date")}</Label>
               <select
                 className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
                 value={requestedDate}
@@ -273,7 +275,7 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Slot</Label>
+              <Label>{t("pickup.slot")}</Label>
               <select
                 className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
                 value={requestedSlot}
@@ -291,10 +293,10 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <Label>Catatan (opsional)</Label>
+            <Label>{t("pickup.notesLabel")}</Label>
             <Textarea
               className="bg-muted/30 border-border/30 min-h-[56px]"
-              placeholder="Catatan tambahan..."
+              placeholder={t("pickup.notesPlaceholder")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -303,11 +305,11 @@ export function PickupCreateDialog({ open, onOpenChange, onCreated }: Props) {
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
-            Batal
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Buat Pickup
+            {t("pickup.title")}
           </Button>
         </DialogFooter>
       </DialogContent>

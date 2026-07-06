@@ -29,24 +29,28 @@ function detectSlaMs(items: { serviceName: string }[]): number {
   return 24 * 60 * 60 * 1000;
 }
 
-function formatRemaining(ms: number): string {
-  if (ms <= 0) return "LATE";
+function formatRemaining(ms: number, t: (k: string) => string): string {
+  if (ms <= 0) return t("dashboard.sla.late");
   const hours = Math.floor(ms / (60 * 60 * 1000));
   const mins = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
-  if (hours > 0) return `${hours}j ${mins}m`;
-  return `${mins}m`;
+  const h = t("dashboard.sla.hourShort");
+  const m = t("dashboard.sla.minShort");
+  if (hours > 0) return `${hours}${h} ${mins}${m}`;
+  return `${mins}${m}`;
 }
 
-function formatOverdueDuration(ms: number): string {
+function formatOverdueDuration(ms: number, t: (k: string) => string): string {
   const absMs = Math.abs(ms);
   const hours = Math.floor(absMs / (60 * 60 * 1000));
   const mins = Math.floor((absMs % (60 * 60 * 1000)) / (60 * 1000));
-  if (hours > 0) return `${hours}j ${mins}m`;
-  return `${mins}m`;
+  const h = t("dashboard.sla.hourShort");
+  const m = t("dashboard.sla.minShort");
+  if (hours > 0) return `${hours}${h} ${mins}${m}`;
+  return `${mins}${m}`;
 }
 
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+function formatTime(date: Date, lang: string): string {
+  return date.toLocaleTimeString(lang === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
 export function SLATracker() {
@@ -54,7 +58,7 @@ export function SLATracker() {
   const [slaItems, setSlaItems] = useState<SlaItem[]>([]);
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
 
   // Recompute SLA items whenever the shared kanban cache changes.
   // ponytail: filtered + sorted in a single pass; O(n) where n = active orders.
@@ -160,8 +164,8 @@ export function SLATracker() {
               : item.order.receivedAt
                 ? new Date(item.order.receivedAt).getTime()
                 : new Date(item.order.createdAt).getTime();
-            const startTime = formatTime(new Date(startMs));
-            const deadlineTime = formatTime(item.deadline);
+            const startTime = formatTime(new Date(startMs), lang);
+            const deadlineTime = formatTime(item.deadline, lang);
 
             const currentCheckpoint = item.order.status === "IN_PROGRESS" ? "washing" : "received";
 
@@ -185,7 +189,7 @@ export function SLATracker() {
                     ? "border-red-200 bg-red-50/60 dark:bg-red-950/20 dark:border-red-800/50 animate-pulse-subtle"
                     : item.isUrgent
                       ? "border-amber-200 bg-amber-50/60 dark:bg-amber-950/20 dark:border-amber-800/50"
-                      : "border-border/50 bg-white/60 dark:bg-gray-800/40 hover:border-border"
+                      : "border-border/50 bg-card/60 hover:border-border"
                 }`}
                 onClick={() => router.push(`/laundry/orders/${item.order.id}`)}
               >
@@ -203,17 +207,17 @@ export function SLATracker() {
                     {item.isOverdue ? (
                       <Badge variant="destructive" className="text-[11px] gap-0.5 px-1.5 py-0">
                         <AlertTriangle className="h-3 w-3" />
-                        {formatOverdueDuration(item.remaining)} {t("dashboard.sla.overdueLabel")}
+                        {formatOverdueDuration(item.remaining, t)} {t("dashboard.sla.overdueLabel")}
                       </Badge>
                     ) : item.isUrgent ? (
                       <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 text-[11px] gap-0.5 px-1.5 py-0">
                         <Timer className="h-3 w-3" />
-                        {formatRemaining(item.remaining)}
+                        {formatRemaining(item.remaining, t)}
                       </Badge>
                     ) : (
                       <Badge variant="secondary" className="text-[11px] gap-0.5 px-1.5 py-0">
                         <Clock className="h-3 w-3" />
-                        {formatRemaining(item.remaining)}
+                        {formatRemaining(item.remaining, t)}
                       </Badge>
                     )}
                   </div>
@@ -223,7 +227,7 @@ export function SLATracker() {
                 <div className="flex items-center gap-0">
                   {/* Received */}
                   <div className="flex flex-col items-center shrink-0">
-                    <div className={`w-3 h-3 rounded-full ${cpReceived} ring-2 ring-white dark:ring-gray-800`} />
+                    <div className={`w-3 h-3 rounded-full ${cpReceived} ring-2 ring-card`} />
                     <span className="text-[9px] mt-0.5 text-muted-foreground w-8 text-center">{startTime}</span>
                   </div>
                   {/* Segment 1 */}
@@ -232,7 +236,7 @@ export function SLATracker() {
                   </div>
                   {/* Washing */}
                   <div className="flex flex-col items-center shrink-0">
-                    <div className={`w-3 h-3 rounded-full ${cpWashing} ring-2 ring-white dark:ring-gray-800`} />
+                    <div className={`w-3 h-3 rounded-full ${cpWashing} ring-2 ring-card`} />
                     <span className="text-[9px] mt-0.5 text-muted-foreground w-8 text-center">{t("dashboard.sla.washing")}</span>
                   </div>
                   {/* Segment 2 */}
@@ -241,7 +245,7 @@ export function SLATracker() {
                   </div>
                   {/* Done / Deadline */}
                   <div className="flex flex-col items-center shrink-0">
-                    <div className={`w-3 h-3 rounded-full ${item.isOverdue ? "bg-red-500" : "bg-muted-foreground/30"} ring-2 ring-white dark:ring-gray-800`} />
+                    <div className={`w-3 h-3 rounded-full ${item.isOverdue ? "bg-red-500" : "bg-muted-foreground/30"} ring-2 ring-card`} />
                     <span className={`text-[9px] mt-0.5 w-8 text-center ${item.isOverdue ? "text-red-500 font-bold" : "text-muted-foreground"}`}>{deadlineTime}</span>
                   </div>
                 </div>

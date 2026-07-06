@@ -63,7 +63,7 @@ export function RevenueTrendCard({
               type="button"
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                 granularity === g
-                  ? "bg-white text-foreground shadow-sm dark:bg-gray-700"
+                  ? "bg-popover text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
               onClick={() => onGranularityChange(g)}

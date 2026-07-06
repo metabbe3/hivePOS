@@ -59,7 +59,7 @@ export function StatCard({
             {title}
           </p>
           <div className="mt-0.5 flex items-baseline gap-2">
-            <p className={`${isLg ? "text-3xl" : "text-2xl"} font-extrabold tabular-nums tracking-tight`}>{value}</p>
+            <p className={`${isLg ? "text-3xl" : "text-2xl"} font-extrabold sa-tnum tracking-tight`}>{value}</p>
           </div>
           {subtitle && (
             <p className="mt-0.5 text-[11px] text-muted-foreground/80">

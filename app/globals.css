@@ -303,6 +303,27 @@ body {
   animation: soft-pulse 2s ease-in-out infinite;
 }
 
+/* ─── Subtle opacity pulse (overdue SLA card) ─── */
+/* ponytail: opacity-only so it layers on any bg tint without color conflict.
+   Gated behind no-preference — reduced-motion users get a static card, never
+   a frozen mid-pulse. The overdue state is already signaled by the red tint +
+   badge, so the pulse is enhancement, not the only signal. */
+@keyframes pulse-subtle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-pulse-subtle {
+    animation: pulse-subtle 1.8s ease-in-out infinite;
+  }
+}
+
 /* ─── Gradient shift (animated backgrounds) ─── */
 @keyframes gradient-shift {
   0%,

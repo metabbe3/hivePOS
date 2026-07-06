@@ -17,11 +17,15 @@ export function TopCustomersCard({ customers }: TopCustomersCardProps) {
   if (!customers.length) {
     return (
       <Card className="border border-border/40 bg-card shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base font-medium flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            {t("dashboard.topCustomers")}
-          </CardTitle>
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/40">
+              <Users className="h-4 w-4 text-amber-600" />
+            </div>
+            <CardTitle className="text-base font-bold">
+              {t("dashboard.topCustomers")}
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <EmptyState
@@ -36,7 +40,7 @@ export function TopCustomersCard({ customers }: TopCustomersCardProps) {
   const maxSpent = Math.max(...customers.map((c) => c.totalSpent));
 
   return (
-    <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80">
+    <Card className="border border-border/40 bg-card shadow-sm">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/40">

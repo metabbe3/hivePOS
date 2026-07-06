@@ -192,8 +192,8 @@ function KanbanOrderCard({
                   onAdvance(order.id, nextStatus);
                 }}
                 disabled={isAdvancing}
-                aria-label={`Advance ${order.customerName} to next status`}
-                title="Advance status"
+                aria-label={t("dashboard.kanban.advanceAria").replace("{name}", order.customerName)}
+                title={t("dashboard.kanban.advanceTitle")}
               >
                 {isAdvancing ? (
                   <RefreshCw className="h-3.5 w-3.5 animate-spin" />

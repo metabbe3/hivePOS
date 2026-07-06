@@ -10,7 +10,7 @@ import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { toast } from "sonner";
 import { apiFetch, ApiClientError } from "@/modules/shared";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Calendar, Activity, Wallet, Users, Sparkles } from "lucide-react";
+import { RefreshCw, Calendar, Activity, Wallet, Users, Sparkles, AlertCircle } from "lucide-react";
 import { DashboardSkeleton } from "@/components/shared/loading";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DateRangePicker } from "@/components/shared/date-range-picker";
@@ -71,6 +71,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [heatmap, setHeatmap] = useState<HeatmapData | null>(null);
   const [spinning, setSpinning] = useState(false);
+  const [statsError, setStatsError] = useState(false);
   const [granularity, setGranularity] = useState<"daily" | "weekly" | "monthly">("daily");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [dateFrom, setDateFrom] = useState(() => {
@@ -110,10 +111,15 @@ export default function DashboardPage() {
     let cancelled = false;
     apiFetch<Stats>(`/api/dashboard/stats?from=${dateFrom}&to=${dateTo}`)
       .then((r) => {
-        if (!cancelled) setStats(r.data);
+        if (!cancelled) {
+          setStats(r.data);
+          setStatsError(false);
+        }
       })
       .catch((err) => {
+        if (cancelled) return;
         if (err instanceof ApiClientError) toast.error(err.message);
+        setStatsError(true);
       });
     return () => { cancelled = true; };
   }, [dateFrom, dateTo, roleLoading, isSuperAdmin, isEmployee]);
@@ -123,7 +129,7 @@ export default function DashboardPage() {
     let cancelled = false;
     apiFetch<HeatmapData>(`/api/dashboard/heatmap?from=${dateFrom}&to=${dateTo}&granularity=${granularity}`)
       .then((r) => { if (!cancelled) setHeatmap(r.data); })
-      .catch(() => {});
+      .catch((err) => { console.warn("[dashboard] heatmap load failed", err); });
     return () => { cancelled = true; };
   }, [dateFrom, dateTo, granularity, roleLoading, isSuperAdmin, isEmployee]);
 
@@ -136,14 +142,37 @@ export default function DashboardPage() {
       .then(([statsRes, heatmapRes]) => {
         setStats(statsRes.data);
         setHeatmap(heatmapRes.data);
+        setStatsError(false);
       })
       .catch((err) => {
         toast.error(err instanceof ApiClientError ? err.message : t("dashboard.failedLoadStats"));
+        setStatsError(true);
       })
       .finally(() => setSpinning(false));
   }, [dateFrom, dateTo, granularity, t]);
 
   if (roleLoading || isEmployee || isSuperAdmin || pendingOnboarding) return null;
+  // ponytail: failed initial fetch used to leave stats=null forever → infinite
+  // skeleton. Surface a real error state with retry instead of a frozen loader.
+  if (statsError && !stats) {
+    return (
+      <TooltipProvider>
+        <div className="flex min-h-[60vh] items-center justify-center px-4">
+          <div role="alert" className="flex max-w-sm flex-col items-center text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="h-7 w-7 text-destructive" />
+            </div>
+            <h2 className="text-lg font-bold tracking-tight">{t("dashboard.errorTitle")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.failedLoadStats")}</p>
+            <Button onClick={refresh} disabled={spinning} className="mt-5">
+              <RefreshCw className={`h-4 w-4 mr-2 ${spinning ? "animate-spin" : ""}`} />
+              {t("dashboard.tryAgain")}
+            </Button>
+          </div>
+        </div>
+      </TooltipProvider>
+    );
+  }
   if (!stats) return <DashboardSkeleton />;
 
   const userName = session?.user?.name || session?.user?.email?.split("@")[0] || t("common.friend");
@@ -177,7 +206,7 @@ export default function DashboardPage() {
             {/* Refresh button with tooltip */}
             <Tooltip>
               <TooltipTrigger render={
-                <Button variant="outline" size="icon" onClick={refresh} className="h-9 w-9 shrink-0" />
+                <Button variant="outline" size="icon" onClick={refresh} disabled={spinning} className="h-9 w-9 shrink-0" />
               }>
                 <RefreshCw className={`h-4 w-4 ${spinning ? "animate-spin" : ""}`} />
               </TooltipTrigger>
