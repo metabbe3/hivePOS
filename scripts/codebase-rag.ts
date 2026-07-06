@@ -20,6 +20,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const ROOT = process.cwd();
 const SRC_DIRS = ["app", "components", "lib", "modules", "hooks"];
@@ -37,8 +38,13 @@ const STOP_NAMES = new Set([
   "for", "map", "filter", "forEach", "then", "catch", "await", "async",
 ]);
 
-interface Param { name: string; type: string }
-interface Symbol {
+// Bump when the extractor or index shape changes. Delta sync is file-hash based,
+// so without this a new extractor never re-runs on unchanged files (the "0 files
+// changed" staleness). A mismatch discards the old index → full rebuild.
+const INDEX_FORMAT = 2;
+
+export interface Param { name: string; type: string }
+export interface Symbol {
   id: string;          // `${file_path}:${name}`
   name: string;
   kind: string;        // function | component | hook | class | method | type | interface | const | route
@@ -54,6 +60,7 @@ interface Symbol {
   code: string;        // the source snippet
 }
 interface Index {
+  format?: number;
   files: Record<string, { mtime: number; hash: string }>;
   symbols: Record<string, Symbol>;
 }
@@ -86,7 +93,7 @@ async function walk(dir: string, acc: string[] = []): Promise<string[]> {
 }
 
 // ── AST extraction ───────────────────────────────────────────────────────
-function extractSymbols(relPath: string, content: string): Symbol[] {
+export function extractSymbols(relPath: string, content: string): Symbol[] {
   const isTsx = relPath.endsWith(".tsx");
   const sf = ts.createSourceFile(
     relPath, content, ts.ScriptTarget.Latest, true,
@@ -129,10 +136,13 @@ function extractSymbols(relPath: string, content: string): Symbol[] {
     inputs: Param[], outputs: string, summary: string,
   ): Symbol => {
     const code = textOf(node);
+    const startLine = lineOf(node.getStart(sf, false));
     return {
-      id: `${relPath}:${name}`,
+      // Line-suffixed so nested same-name consts (e.g. two components each with
+      // `const refresh = useCallback(...)`) get distinct ids, not collided.
+      id: `${relPath}:${name}:${startLine}`,
       name, kind, file_path: relPath,
-      startLine: lineOf(node.getStart(sf, false)),
+      startLine,
       endLine: lineOf(node.getEnd()),
       inputs, outputs, summary, called_by: [], calls: [],
       file_hash: sha256(code), code,
@@ -152,6 +162,7 @@ function extractSymbols(relPath: string, content: string): Symbol[] {
       const kind = isComp ? "component" : isHook ? "hook" : "function";
       const summary = jsDoc(node) || `${kind} ${name}(${params.map((p) => p.name).join(", ")})${ret ? ": " + ret : ""}`;
       out.push(make(node, name, kind, params, ret || (isComp ? "JSX.Element" : ""), summary));
+      ts.forEachChild(node, visit); // recurse: nested named consts (useCallback/useMemo)
       return;
     }
     if (ts.isClassDeclaration(node)) {
@@ -165,6 +176,7 @@ function extractSymbols(relPath: string, content: string): Symbol[] {
           out.push(make(m, `${name}.${mname}`, "method", params, ret, jsDoc(m) || `${name}.${mname}(${params.map((p) => p.name).join(", ")})`));
         }
       }
+      ts.forEachChild(node, visit); // recurse into methods for nested named consts
       return;
     }
     if (ts.isInterfaceDeclaration(node)) {
@@ -190,6 +202,20 @@ function extractSymbols(relPath: string, content: string): Symbol[] {
           const kind = isComp ? "component" : isHook ? "hook" : "const";
           const summary = jsDoc(node) || jsDoc(decl) || `${kind} ${name}(${params.map((p) => p.name).join(", ")})`;
           out.push(make(decl, name, kind, params, ret, summary));
+        } else if (init && ts.isCallExpression(init) && init.arguments.length > 0) {
+          // const name = <HOF>(arrowFn, …) — useCallback/useMemo/custom hooks. The
+          // initializer is a CallExpression whose first arg is the real function.
+          const inner = init.arguments[0];
+          if (ts.isArrowFunction(inner) || ts.isFunctionExpression(inner)) {
+            const params = paramsOf(inner.parameters);
+            const isHookName = /^use[A-Z]/.test(name);
+            const body = inner.body;
+            const isComp = returnsJsx(body);
+            const ret = typeText(inner.type) || (isComp ? "JSX.Element" : body && !ts.isBlock(body) ? "=> " + body.getText(sf).slice(0, 40) : "");
+            const kind = isComp ? "component" : isHookName ? "hook" : "function";
+            const summary = jsDoc(node) || jsDoc(decl) || `${kind} ${name}(${params.map((p) => p.name).join(", ")})`;
+            out.push(make(decl, name, kind, params, ret, summary));
+          }
         } else if (init && ["GET", "POST", "PATCH", "PUT", "DELETE"].includes(name) && relPath.includes("/api/")) {
           // Next.js App Router handler
           const route = relPath.replace(/\/route\.tsx?$/, "").replace(/^app/, "");
@@ -197,6 +223,7 @@ function extractSymbols(relPath: string, content: string): Symbol[] {
         }
         // plain data consts skipped (too noisy)
       }
+      ts.forEachChild(node, visit); // recurse: nested named consts inside arrow/HOF bodies
       return;
     }
     ts.forEachChild(node, visit);
@@ -211,7 +238,7 @@ function extractSymbols(relPath: string, content: string): Symbol[] {
 // name. Incoming (who references me), per the blueprint's "called_by" field.
 // Name-based → approximate (DI-wired services referenced only via instance
 // names may be under-counted; common names are filtered).
-function recomputeCalledBy(symbols: Symbol[]): void {
+export function recomputeCalledBy(symbols: Symbol[]): void {
   const nameToIds = new Map<string, string[]>();
   for (const s of symbols) {
     const names = s.name.includes(".") ? [s.name, s.name.split(".")[1]] : [s.name];
@@ -245,7 +272,9 @@ function recomputeCalledBy(symbols: Symbol[]): void {
 // ── index build (delta sync) ─────────────────────────────────────────────
 async function buildIndex(): Promise<void> {
   await mkdir(STORE_DIR, { recursive: true });
-  const existing = await loadIndex();
+  const raw = await loadIndex();
+  // Format bump (extractor/index-shape change) → discard, force full rebuild.
+  const existing = raw.format === INDEX_FORMAT ? raw : { files: {}, symbols: {} };
   const files: string[] = [];
   for (const d of SRC_DIRS) (await walk(d)).forEach((f) => files.push(f));
 
@@ -276,7 +305,7 @@ async function buildIndex(): Promise<void> {
   const all = Object.values(symbols);
   recomputeCalledBy(all);
 
-  await writeFile(INDEX_PATH, JSON.stringify({ files: fileCache, symbols }));
+  await writeFile(INDEX_PATH, JSON.stringify({ format: INDEX_FORMAT, files: fileCache, symbols }));
   const byKind: Record<string, number> = {};
   for (const s of all) byKind[s.kind] = (byKind[s.kind] ?? 0) + 1;
   console.log(`✓ Indexed ${files.length} files → ${all.length} symbols (${changedFiles} file(s) changed).`);
@@ -302,7 +331,7 @@ const K1 = 1.2;
 const B = 0.75;
 const RECALL_N = 25;
 
-function tokenize(raw: string): string[] {
+export function tokenize(raw: string): string[] {
   return raw
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2") // camelCase → space
     .replace(/[_\-./:()<>,;{}[\]"'`|=+!?@#&]+/g, " ") // separators → space
@@ -313,7 +342,7 @@ function tokenize(raw: string): string[] {
 
 // Weighted token-frequency "document" for one symbol. Name subtokens weigh
 // highest (exact identifier match is the strongest signal), summary mid, rest low.
-function bm25Doc(s: Symbol): Map<string, number> {
+export function bm25Doc(s: Symbol): Map<string, number> {
   const d = new Map<string, number>();
   const add = (raw: string, wt: number) => {
     for (const t of tokenize(raw)) d.set(t, (d.get(t) ?? 0) + wt);
@@ -329,7 +358,7 @@ function bm25Doc(s: Symbol): Map<string, number> {
 }
 
 // Stage-2 lexical re-rank: query↔symbol joint score (deterministic cross-encoder).
-function rerank(qLower: string, s: Symbol): number {
+export function rerank(qLower: string, s: Symbol): number {
   const name = s.name.toLowerCase();
   const qTokens = tokenize(qLower);
   let score = 0;
@@ -458,7 +487,9 @@ for (let i = 0; i < argv.length; i++) {
 }
 const [cmd, ...rest] = positional;
 
-(async () => {
+// ponytail: main-module guard — importing this file (in tests) must NOT run the
+// CLI. Resolves argv[1] to an absolute path and compares to this file's URL.
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) (async () => {
   switch (cmd) {
     case "index":
       await buildIndex();

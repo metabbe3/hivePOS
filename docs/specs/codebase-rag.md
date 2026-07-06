@@ -12,8 +12,12 @@ its signature, location, and call context — one cheap query instead of many re
 ## Principles (from the blueprint)
 
 1. **AST extraction, not LLM.** Slice code into structural chunks (one chunk =
-   one function/class/component) via a parser. Never burn an LLM call just to
-   *locate* symbols.
+   one function/class/component) via a parser, recursing into bodies so nested
+   named consts are caught — including `const x = useCallback/useMemo/<HOF>(...)`
+   inside components/hooks (the common React pattern). Never burn an LLM call just
+   to *locate* symbols. Symbol ids are line-suffixed (`path:name:line`) so nested
+   same-name consts don't collide. An `INDEX_FORMAT` stamp discards the stored
+   index when the extractor changes, so new logic always re-runs.
 2. **Minimize LLM calls.** Summaries default to deterministic (JSDoc + signature)
    — zero LLM at index time. The optional `--llm-summarize` path calls the LLM
    only for chunks lacking JSDoc, and only on changed chunks (delta sync).
