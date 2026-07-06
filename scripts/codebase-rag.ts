@@ -1,0 +1,389 @@
+#!/usr/bin/env tsx
+/**
+ * Codebase RAG — structural index + retrieval. See docs/specs/codebase-rag.md.
+ *
+ * Principles: AST extraction (TS compiler API), not LLM. Deterministic summaries
+ * (JSDoc + signature) — zero LLM at index time. Per-symbol SHA-256 delta sync.
+ * Local JSON store + in-memory lexical retrieval (no DB service, no embeddings
+ * needed at this scale). One chunk = one symbol (function/class/component/...).
+ *
+ * Usage:
+ *   npx tsx scripts/codebase-rag.ts index [--llm-summarize]
+ *   npx tsx scripts/codebase-rag.ts query "<term>" [-n 10]
+ *   npx tsx scripts/codebase-rag.ts symbol <name>
+ *   npx tsx scripts/codebase-rag.ts callers <name>
+ *   npx tsx scripts/codebase-rag.ts stats
+ */
+
+import ts from "typescript";
+import { createHash } from "node:crypto";
+import { readFile, writeFile, mkdir, readdir, stat } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+const ROOT = process.cwd();
+const SRC_DIRS = ["app", "components", "lib", "modules", "hooks"];
+const STORE_DIR = ".codebase-rag";
+const INDEX_PATH = path.join(STORE_DIR, "index.json");
+const SKIP_DIRS = new Set([
+  "node_modules", ".next", ".git", "dist", "build", "generated",
+  "__pycache__", STORE_DIR, "coverage", "test-results", ".playwright-mcp",
+]);
+// Names too generic to be useful as call references (would match everything).
+const STOP_NAMES = new Set([
+  "props", "state", "data", "result", "value", "item", "items", "error",
+  "req", "res", "ctx", "use", "set", "get", "new", "this", "true", "false",
+  "null", "undefined", "return", "function", "const", "let", "var", "if",
+  "for", "map", "filter", "forEach", "then", "catch", "await", "async",
+]);
+
+interface Param { name: string; type: string }
+interface Symbol {
+  id: string;          // `${file_path}:${name}`
+  name: string;
+  kind: string;        // function | component | hook | class | method | type | interface | const | route
+  file_path: string;
+  startLine: number;
+  endLine: number;
+  inputs: Param[];
+  outputs: string;
+  summary: string;     // JSDoc or synthesized — the retrieval key
+  called_by: string[]; // ids that reference this symbol (approx)
+  file_hash: string;   // sha256(code) — delta-sync key
+  code: string;        // the source snippet
+}
+interface Index {
+  files: Record<string, { mtime: number; hash: string }>;
+  symbols: Record<string, Symbol>;
+}
+
+// ── helpers ──────────────────────────────────────────────────────────────
+const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
+
+async function loadIndex(): Promise<Index> {
+  try {
+    return JSON.parse(await readFile(INDEX_PATH, "utf8"));
+  } catch {
+    return { files: {}, symbols: {} };
+  }
+}
+
+async function walk(dir: string, acc: string[] = []): Promise<string[]> {
+  let entries: import("node:fs").Dirent[];
+  try { entries = await readdir(dir, { withFileTypes: true }); }
+  catch { return acc; }
+  for (const e of entries) {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) {
+      if (SKIP_DIRS.has(e.name)) continue;
+      await walk(full, acc);
+    } else if (/\.(ts|tsx)$/.test(e.name) && !/\.(test|spec)\.(ts|tsx)$/.test(e.name) && !/\.d\.ts$/.test(e.name)) {
+      acc.push(full);
+    }
+  }
+  return acc;
+}
+
+// ── AST extraction ───────────────────────────────────────────────────────
+function extractSymbols(relPath: string, content: string): Symbol[] {
+  const isTsx = relPath.endsWith(".tsx");
+  const sf = ts.createSourceFile(
+    relPath, content, ts.ScriptTarget.Latest, true,
+    isTsx ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+  const out: Symbol[] = [];
+  const fullText = sf.text;
+  const lineOf = (pos: number) => sf.getLineAndCharacterOfPosition(pos).line + 1;
+  const textOf = (n: ts.Node) => fullText.slice(n.getStart(sf, false), n.getEnd());
+  const typeText = (n?: ts.TypeNode) => (n ? n.getText(sf) : "");
+
+  const jsDoc = (node: ts.Node): string => {
+    const docs = (node as unknown as { jsDoc?: ts.JSDoc[] }).jsDoc;
+    if (!docs?.length) return "";
+    const c = docs[0].comment;
+    if (typeof c === "string") return c.trim().replace(/\s+/g, " ");
+    if (Array.isArray(c)) return c.map((p) => (typeof p === "string" ? p : (p as { text?: string }).text ?? "")).join(" ").trim().replace(/\s+/g, " ");
+    return "";
+  };
+
+  // Does the function body return JSX? (component detection)
+  const returnsJsx = (body?: ts.ConciseBody | ts.Block): boolean => {
+    if (!body) return false;
+    let hit = false;
+    const v = (n: ts.Node) => {
+      if (hit) return;
+      if (ts.isParenthesizedExpression(n) || ts.isJsxElement(n) || ts.isJsxFragment(n) || ts.isJsxSelfClosingElement(n)) {
+        // only count if it's a return value or arrow body
+        const parent = n.parent;
+        if (parent && (ts.isReturnStatement(parent) || ts.isArrowFunction(parent) || ts.isParenthesizedExpression(parent))) hit = true;
+      }
+      ts.forEachChild(n, v);
+    };
+    v(body);
+    return hit;
+  };
+
+  const make = (
+    node: ts.Node, name: string, kind: string,
+    inputs: Param[], outputs: string, summary: string,
+  ): Symbol => {
+    const code = textOf(node);
+    return {
+      id: `${relPath}:${name}`,
+      name, kind, file_path: relPath,
+      startLine: lineOf(node.getStart(sf, false)),
+      endLine: lineOf(node.getEnd()),
+      inputs, outputs, summary, called_by: [],
+      file_hash: sha256(code), code,
+    };
+  };
+
+  const paramsOf = (pl: ts.NodeArray<ts.ParameterDeclaration>): Param[] =>
+    pl.map((p) => ({ name: p.name.getText(sf), type: typeText(p.type) }));
+
+  const visit = (node: ts.Node) => {
+    if (ts.isFunctionDeclaration(node)) {
+      const name = node.name?.text ?? "<anonymous>";
+      const params = paramsOf(node.parameters);
+      const ret = typeText(node.type);
+      const isHook = /^use[A-Z]/.test(name);
+      const isComp = returnsJsx(node.body);
+      const kind = isComp ? "component" : isHook ? "hook" : "function";
+      const summary = jsDoc(node) || `${kind} ${name}(${params.map((p) => p.name).join(", ")})${ret ? ": " + ret : ""}`;
+      out.push(make(node, name, kind, params, ret || (isComp ? "JSX.Element" : ""), summary));
+      return;
+    }
+    if (ts.isClassDeclaration(node)) {
+      const name = node.name?.text ?? "<anonymous>";
+      out.push(make(node, name, "class", [], "", jsDoc(node) || `class ${name}`));
+      for (const m of node.members) {
+        if (ts.isMethodDeclaration(m) && !ts.isPrivateIdentifier(m.name)) {
+          const mname = m.name.getText(sf);
+          const params = paramsOf(m.parameters);
+          const ret = typeText(m.type);
+          out.push(make(m, `${name}.${mname}`, "method", params, ret, jsDoc(m) || `${name}.${mname}(${params.map((p) => p.name).join(", ")})`));
+        }
+      }
+      return;
+    }
+    if (ts.isInterfaceDeclaration(node)) {
+      const name = node.name.text;
+      out.push(make(node, name, "interface", [], "", jsDoc(node) || `interface ${name}`));
+      return;
+    }
+    if (ts.isTypeAliasDeclaration(node)) {
+      const name = node.name.text;
+      out.push(make(node, name, "type", [], "", jsDoc(node) || `type ${name}`));
+      return;
+    }
+    if (ts.isVariableStatement(node)) {
+      for (const decl of node.declarationList.declarations) {
+        const name = decl.name.getText(sf);
+        const init = decl.initializer;
+        if (init && (ts.isArrowFunction(init) || ts.isFunctionExpression(init))) {
+          const params = paramsOf(init.parameters);
+          const isHook = /^use[A-Z]/.test(name);
+          const body = init.body;
+          const isComp = returnsJsx(body);
+          const ret = typeText(init.type) || (isComp ? "JSX.Element" : body && !ts.isBlock(body) ? "=> " + body.getText(sf).slice(0, 40) : "");
+          const kind = isComp ? "component" : isHook ? "hook" : "const";
+          const summary = jsDoc(node) || jsDoc(decl) || `${kind} ${name}(${params.map((p) => p.name).join(", ")})`;
+          out.push(make(decl, name, kind, params, ret, summary));
+        } else if (init && ["GET", "POST", "PATCH", "PUT", "DELETE"].includes(name) && relPath.includes("/api/")) {
+          // Next.js App Router handler
+          const route = relPath.replace(/\/route\.tsx?$/, "").replace(/^app/, "");
+          out.push(make(decl, `${name} ${route}`, "route", [], "Response", jsDoc(node) || `${name} ${route}`));
+        }
+        // plain data consts skipped (too noisy)
+      }
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+
+  ts.forEachChild(sf, visit);
+  return out;
+}
+
+// ── called_by (incoming references, approx) ──────────────────────────────
+// For each symbol, find every OTHER symbol whose code references this one's
+// name. Incoming (who references me), per the blueprint's "called_by" field.
+// Name-based → approximate (DI-wired services referenced only via instance
+// names may be under-counted; common names are filtered).
+function recomputeCalledBy(symbols: Symbol[]): void {
+  const nameToIds = new Map<string, string[]>();
+  for (const s of symbols) {
+    const names = s.name.includes(".") ? [s.name, s.name.split(".")[1]] : [s.name];
+    for (const n of names) {
+      if (n.length < 3 || STOP_NAMES.has(n)) continue;
+      const arr = nameToIds.get(n) ?? [];
+      arr.push(s.id);
+      nameToIds.set(n, arr);
+    }
+  }
+  const byId = new Map(symbols.map((s) => [s.id, s]));
+  for (const s of symbols) s.called_by = [];
+  for (const s of symbols) {
+    const tokens = s.code.match(/[A-Za-z_$][A-Za-z0-9_$]*/g) ?? [];
+    const seen = new Set<string>();
+    for (const tok of tokens) {
+      const targetIds = nameToIds.get(tok);
+      if (targetIds) for (const tid of targetIds) if (tid !== s.id) seen.add(tid);
+    }
+    for (const tid of seen) byId.get(tid)?.called_by.push(s.id); // s references tid → s is a caller
+  }
+  for (const s of symbols) s.called_by = [...new Set(s.called_by)].slice(0, 50);
+}
+
+// ── index build (delta sync) ─────────────────────────────────────────────
+async function buildIndex(): Promise<void> {
+  await mkdir(STORE_DIR, { recursive: true });
+  const existing = await loadIndex();
+  const files: string[] = [];
+  for (const d of SRC_DIRS) (await walk(d)).forEach((f) => files.push(f));
+
+  const symbols: Record<string, Symbol> = {};
+  const fileCache: Record<string, { mtime: number; hash: string }> = {};
+  let changedFiles = 0;
+
+  for (const file of files) {
+    const rel = path.relative(ROOT, file).split(path.sep).join("/");
+    const content = await readFile(file, "utf8");
+    const contentHash = sha256(content);
+    const st = await stat(file);
+    fileCache[rel] = { mtime: Math.floor(st.mtimeMs), hash: contentHash };
+
+    const prev = existing.files[rel];
+    if (prev && prev.hash === contentHash) {
+      // unchanged → reuse this file's existing symbols (delta sync)
+      for (const s of Object.values(existing.symbols)) {
+        if (s.file_path === rel) symbols[s.id] = s;
+      }
+      continue;
+    }
+    changedFiles++;
+    for (const s of extractSymbols(rel, content)) symbols[s.id] = s;
+    // (deleted files' symbols simply never get copied in → dropped)
+  }
+
+  const all = Object.values(symbols);
+  recomputeCalledBy(all);
+
+  await writeFile(INDEX_PATH, JSON.stringify({ files: fileCache, symbols }));
+  const byKind: Record<string, number> = {};
+  for (const s of all) byKind[s.kind] = (byKind[s.kind] ?? 0) + 1;
+  console.log(`✓ Indexed ${files.length} files → ${all.length} symbols (${changedFiles} file(s) changed).`);
+  console.log("  by kind:", Object.entries(byKind).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}=${v}`).join(", "));
+}
+
+// ── retrieval ────────────────────────────────────────────────────────────
+function loadSymbols(): Symbol[] {
+  return Object.values(loadIndexSync().symbols);
+}
+function loadIndexSync(): Index {
+  // small files, sync read is fine for query commands
+  try { return JSON.parse(readFileSync(INDEX_PATH, "utf8")); }
+  catch { console.error("No index found. Run: npx tsx scripts/codebase-rag.ts index"); process.exit(1); }
+}
+
+function query(term: string, k = 10): void {
+  const terms = term.toLowerCase().split(/\s+/).filter(Boolean);
+  const scored: { s: Symbol; score: number }[] = [];
+  for (const s of loadSymbols()) {
+    const name = s.name.toLowerCase();
+    const summary = s.summary.toLowerCase();
+    const sig = s.code.slice(0, 240).toLowerCase();
+    let score = 0;
+    for (const t of terms) {
+      if (name === t) score += 12;
+      else if (name.includes(t)) score += 5;
+      if (s.kind === "route" && name.includes(t)) score += 3;
+      if (summary.includes(t)) score += 2;
+      if (sig.includes(t)) score += 1;
+    }
+    if (score > 0) scored.push({ s, score });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  printHits(scored.slice(0, k).map((x) => x.s), term);
+}
+
+function findByName(name: string): Symbol[] {
+  const lower = name.toLowerCase();
+  return loadSymbols().filter((s) => s.name.toLowerCase() === lower || s.name.toLowerCase().endsWith("." + lower));
+}
+
+function callers(name: string): void {
+  const targets = findByName(name);
+  if (!targets.length) { console.log(`No symbol named "${name}".`); return; }
+  const refIds = new Set<string>();
+  for (const t of targets) for (const id of t.called_by) refIds.add(id);
+  const byId = new Map(loadSymbols().map((s) => [s.id, s]));
+  const refs = ([...refIds].map((id) => byId.get(id)).filter(Boolean) as Symbol[]);
+  console.log(`\n${targets.map((t) => `▸ ${t.name} (${t.file_path}:${t.startLine})`).join("\n")}`);
+  console.log(`  referenced by ${refs.length} symbol(s):`);
+  for (const r of refs.slice(0, 30)) console.log(`    ← ${r.kind} ${r.name}  ${r.file_path}:${r.startLine}`);
+}
+
+function printHits(hits: Symbol[], label: string): void {
+  if (!hits.length) { console.log(`No matches for "${label}".`); return; }
+  console.log(`\nTop ${hits.length} for "${label}":\n`);
+  for (const s of hits) {
+    console.log(`▸ ${s.kind} ${s.name}  —  ${s.file_path}:${s.startLine}-${s.endLine}`);
+    if (s.inputs.length) console.log(`  in:  ${s.inputs.map((p) => `${p.name}${p.type ? ": " + p.type : ""}`).join(", ")}`);
+    if (s.outputs) console.log(`  out: ${s.outputs}`);
+    console.log(`  ${s.summary.slice(0, 160)}`);
+    if (s.called_by.length) console.log(`  called_by: ${s.called_by.length} symbol(s)`);
+    console.log("");
+  }
+}
+
+function stats(): void {
+  const idx = loadIndexSync();
+  const all = Object.values(idx.symbols);
+  const byKind: Record<string, number> = {};
+  for (const s of all) byKind[s.kind] = (byKind[s.kind] ?? 0) + 1;
+  console.log(`files indexed: ${Object.keys(idx.files).length}`);
+  console.log(`symbols: ${all.length}`);
+  console.log("by kind:", Object.entries(byKind).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}=${v}`).join(", "));
+}
+
+// ── CLI ──────────────────────────────────────────────────────────────────
+const argv = process.argv.slice(2);
+let k = 10;
+const positional: string[] = [];
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === "-n") k = parseInt(argv[++i], 10) || 10;
+  else positional.push(argv[i]);
+}
+const [cmd, ...rest] = positional;
+
+(async () => {
+  switch (cmd) {
+    case "index":
+      await buildIndex();
+      break;
+    case "query":
+      if (!rest.length) { console.log("usage: query <term>"); break; }
+      query(rest.join(" "), k);
+      break;
+    case "symbol":
+      if (!rest.length) { console.log("usage: symbol <name>"); break; }
+      printHits(findByName(rest[0]), rest[0]);
+      break;
+    case "callers":
+      if (!rest.length) { console.log("usage: callers <name>"); break; }
+      callers(rest[0]);
+      break;
+    case "stats":
+      stats();
+      break;
+    default:
+      console.log(`codebase-rag — structural code index
+usage:
+  npx tsx scripts/codebase-rag.ts index                 # build/update (SHA-256 delta sync)
+  npx tsx scripts/codebase-rag.ts query "<term>" [-n 10] # lexical search
+  npx tsx scripts/codebase-rag.ts symbol <name>          # exact-name lookup
+  npx tsx scripts/codebase-rag.ts callers <name>         # who references it
+  npx tsx scripts/codebase-rag.ts stats                  # coverage`);
+  }
+})();

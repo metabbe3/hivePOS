@@ -24,6 +24,8 @@ npx playwright test    # e2e
 
 > **Feature work? Spec first** — write/update `docs/specs/<feature>.md` (from `_TEMPLATE.md`, with Given/When/Then acceptance criteria) **before** the code. See Non-negotiable #11.
 
+> **Navigation: RAG-first** — before grepping/Reading to *locate* code, query the structural index: `npx tsx scripts/codebase-rag.ts query "<term>"` → returns the exact symbol + `file:line` + signature + who references it in **one** call (vs. 5–20 reads). `symbol <Name>` for exact, `callers <name>` for references. Only `grep`/`Read` if the RAG doesn't surface it. Re-index after changes (`codebase-rag.ts index`, SHA-256 delta sync, no LLM cost). **This is the default for every task** (`/goal`, `/impeccable`, bug fixes, features) — it cuts navigation tokens by ~10×. See `docs/sop/codebase-rag.md`.
+
 ## Stack at a glance
 
 | Tech | Version | Purpose |
