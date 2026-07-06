@@ -73,12 +73,6 @@
 
   /* ─── Radius ─── */
   --radius: 0.75rem;
-
-  /* ─── Sharp Light Bento (panel) ─── */
-  --card-radius: 0.5rem;
-  --card-border: 2px;
-  --hard-shadow: 4px 4px 0 0 var(--color-foreground);
-  --hard-shadow-sm: 2px 2px 0 0 var(--color-foreground);
 }
 
 /* ─── Dark Mode — override ALL theme tokens ─── */

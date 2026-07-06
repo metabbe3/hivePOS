@@ -129,14 +129,14 @@ Picture a real Indonesian laundry counter at 9am: wiped down, the till open, a k
 
 The system runs on **two committed hues across two surfaces, never mixed on one screen**. The product app (dashboard, kasir, super-admin, order tracking) speaks **Counter Indigo** — confident, operational, the color of the till. The public door (landing, blog, register, comparison, tenant-site) speaks **Buka-Browser Sky** — open, acquisitive, the color of "tinggal buka browser." The mechanism is a single scoped override (`.pub-scope`) that remaps the brand token, so the same components serve both identities without forking. This is the center of gravity for every visual decision.
 
-Density is **operator-grade, not marketing-air**: 32px-tall controls, 8px radii on cards, 12px on containers, tabular-aligned money, and a disciplined neutrals ramp (`#fafafa` counter on `#0a0a0f` ink). Restraint is the default — flat surfaces, hairline `ring-1 ring-foreground/10` borders, no decorative shadows. The one place the system raises its voice is the **bento hard-shadow** (`4px 4px 0 0 ink`) in the super-admin panel — a deliberate neo-brutalist accent that signals "this is the back office," used sparingly. Motion is purposeful and always carries a `prefers-reduced-motion` off-switch.
+Density is **operator-grade, not marketing-air**: 32px-tall controls, 8px radii on cards, 12px on containers, tabular-aligned money, and a disciplined neutrals ramp (`#fafafa` counter on `#0a0a0f` ink). Restraint is the default — flat surfaces, hairline `ring-1 ring-foreground/10` borders, no decorative shadows. Motion is purposeful and always carries a `prefers-reduced-motion` off-switch.
 
 **What this system explicitly rejects** (from `PRODUCT.md`): heavy iPad-POS aesthetics (Moka-style), all-in-one suite bloat (Majoo-style), hardware-bundle lock-in (Qasir-style), and the 2026 "warm AI" landing default — no cream/sand/beige body backgrounds, no gradient text, no glassmorphism-as-decoration, no hero-metric big-number template as a reflex, no side-stripe accent borders. Indonesian context (kiloan, QRIS, WhatsApp, 58mm thermal receipts) is the happy path, not a localization afterthought.
 
 **Key Characteristics:**
 - Two committed hues, two surfaces, never mixed (indigo in-app, sky on `.pub-scope`).
 - Operator-grade density: 32px controls, tabular money, hairline borders.
-- Flat by default; the bento hard-shadow is a rare, deliberate accent.
+- Flat by default; no decorative shadows.
 - Motion with a mandatory reduced-motion off-switch.
 - Hex is canonical for the core palette (iOS Safari < 15.4 safety); OKLCH reserved for the data-viz heat ramp.
 
@@ -159,7 +159,7 @@ A restrained palette: one indigo carries the app, one sky carries the door, emer
 ### Neutral
 - **Counter White** (`#fafafa`): body background — a true near-white, *not* a warm cream. The single biggest reason AI POS designs feel off is a sand/beige body; this is the deliberate counter-move.
 - **Surface** (`#ffffff`): cards, popovers, inputs.
-- **Ink** (`#0a0a0f`): primary text and the bento hard-shadow offset color.
+- **Ink** (`#0a0a0f`): primary text.
 - **Muted-Slate** (`#71717a`): secondary text — **use with care** (see rule below); on `#fafafa` it sits at ~4.6:1, borderline WCAG AA for body. Reserve for genuinely secondary metadata, never body copy or placeholder text.
 - **Hairline** (`#e4e4e7`): borders, dividers, input strokes.
 - **Muted-Fill** (`#f1f1f4`): subtle fills — table footer, tab track, hover wash.
@@ -198,12 +198,11 @@ This system is **flat by default**. Depth is conveyed by tonal layering (`#fffff
 
 ### Shadow Vocabulary
 - **Hairline ring** (`ring-1 ring-foreground/10`, ≈ 10% ink ring): the default container boundary — cards, popovers, dialogs, inputs' focus ring base. This is the workhorse; reach for it 90% of the time.
-- **Bento hard-shadow** (`box-shadow: 4px 4px 0 0 var(--color-foreground)`, plus `2px 2px 0 0` small): a neo-brutalist offset shadow. **Super-admin panel accent only.** Signals "back office / internals." Forbidden on tenant-facing surfaces.
 - **Popover/dialog lift** (`shadow-xl` + `ring-1 ring-foreground/10`): momentary elevation for floating layers — menus, dialogs, sheets. Removed on close.
 - **WhatsApp FAB glow** (`shadow-xl shadow-[#25d366]/30` + `animate-soft-pulse`): the one ambient shadow in the system, reserved for the persistent FAB.
 
 ### Named Rules
-**The Flat-By-Default Rule.** Surfaces are flat at rest. A shadow appears only when something is genuinely floating (dialog, popover, FAB) or when the bento accent is intentionally deployed in the back office. If a card has a resting ambient shadow, it's wrong — use a hairline ring instead.
+**The Flat-By-Default Rule.** Surfaces are flat at rest. A shadow appears only when something is genuinely floating (dialog, popover, FAB). If a card has a resting ambient shadow, it's wrong — use a hairline ring instead.
 
 **The No-Glass Rule.** Frosted-glass cards (`backdrop-filter: blur()` as a decoration) are forbidden except the one named landing nav/hero surface, and even there only in light mode. Glassmorphism is not a default — it is a rare, purposeful exception.
 
@@ -225,7 +224,7 @@ This system is **flat by default**. Depth is conveyed by tonal layering (`#fffff
 - **Corner:** 8px (`rounded-lg`) for cards, 12px (`rounded-xl`) for large containers/dialogs.
 - **Background:** Surface `#ffffff` on the Counter White body. Footer band uses `bg-muted/50`.
 - **Border:** hairline `ring-1 ring-foreground/10`, not a solid stroke.
-- **Shadow:** none at rest (Flat-By-Default). The bento hard-shadow is the one exception, super-admin only.
+- **Shadow:** none at rest (Flat-By-Default).
 - **Padding:** 16px default (`p-4`); 20px (`p-5`) for MetricTiles. **Nested cards are always wrong** — if you reach for a card inside a card, restructure.
 
 ### Inputs / Fields
@@ -245,8 +244,8 @@ The dashboard/super-admin stat tile. 20px padding, tinted icon circle (tone = de
 ### Signature: Heatmap
 The "Jam Ramai" (busy-hours) contribution heatmap — the system's model for colorblind-safe data viz. A 6-step OKLCH intensity ramp (`--heat-0…5`, hue drifting 75→55 as intensity rises) with a **45° pattern overlay on the top two levels** so peak cells are distinguishable without color. Every new chart should inherit this pattern-or-texture discipline.
 
-### Signature: Bento Panel + WhatsApp FAB
-The super-admin panel uses the hard-shadow bento (`4px 4px 0 0 ink`, 2px borders, 8px radius) as its back-office accent — energetic but contained. The WhatsApp FAB (`#25d366`, 56px circle, bottom-right, `animate-soft-pulse`) is the single persistent floating element across public surfaces.
+### Signature: WhatsApp FAB
+The super-admin panel uses the standard flat Counter-Indigo system — the same hairline-ring cards, solid primary fills, and `shadow-sm` surfaces as the tenant app (parity, not a separate back-office skin). The WhatsApp FAB (`#25d366`, 56px circle, bottom-right, `animate-soft-pulse`) is the single persistent floating element across public surfaces.
 
 ## 6. Do's and Don'ts
 
@@ -257,7 +256,6 @@ The super-admin panel uses the hard-shadow bento (`4px 4px 0 0 ink`, 2px borders
 - **Do** keep a visible `focus-visible` ring (`ring-3 ring-ring/50`) on every interactive element — keyboard users live here.
 - **Do** use concrete Indonesian copy: "Rp 49K/outlet", "2 menit", "1 outlet gratis" — nouns and numbers, not adjectives.
 - **Do** ship `prefers-reduced-motion` fallbacks on every animation (the system already does; preserve it).
-- **Do** reach for the bento hard-shadow in the super-admin panel when the back office wants energy.
 
 ### Don't:
 - **Don't** use border-left/border-right > 1px as a colored accent stripe on cards, list items, or alerts. Side-stripes are forbidden.

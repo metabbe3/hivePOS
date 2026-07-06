@@ -170,7 +170,7 @@ export function BlogManager() {
           <h1 className="text-2xl font-bold">Blog</h1>
           <p className="text-sm text-muted-foreground">Tulis &amp; publikasi artikel SEO (Markdown).</p>
         </div>
-        <Button onClick={openNew} className="bg-gradient-to-r from-brand-600 to-brand-700 text-white">
+        <Button onClick={openNew} className="bg-brand-600 hover:bg-brand-700 text-white">
           <Plus className="mr-1 h-4 w-4" /> Post Baru
         </Button>
       </div>
@@ -315,7 +315,7 @@ export function BlogManager() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="bg-gradient-to-r from-brand-600 to-brand-700 text-white"
+                className="bg-brand-600 hover:bg-brand-700 text-white"
               >
                 {saving ? "Menyimpan…" : "Simpan"}
               </Button>

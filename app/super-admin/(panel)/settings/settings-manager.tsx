@@ -121,7 +121,7 @@ export function SettingsManager({ admin }: { admin: { id: string; email: string;
             <Input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} required />
           </FormField>
         </div>
-        <Button type="submit" disabled={savingPw} className="bg-gradient-to-r from-brand-600 to-brand-700">
+        <Button type="submit" disabled={savingPw} className="bg-brand-600 hover:bg-brand-700">
           {savingPw && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Ubah Password
         </Button>

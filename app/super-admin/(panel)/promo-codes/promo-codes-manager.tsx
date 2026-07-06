@@ -191,7 +191,7 @@ export function PromoCodesManager() {
       {!showForm ? (
         <Button
           onClick={openCreate}
-          className="bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15"
+          className="bg-brand-600 hover:bg-brand-700"
         >
           <Plus className="mr-2 h-4 w-4" />
           Buat Promo Code
@@ -223,7 +223,7 @@ export function PromoCodesManager() {
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value as PromoType })}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <option value="FREE_MONTH">Free Month(s)</option>
                 <option value="DISCOUNT_PERCENT">Percent Off</option>
@@ -251,7 +251,7 @@ export function PromoCodesManager() {
               <select
                 value={form.applicablePlan}
                 onChange={(e) => setForm({ ...form, applicablePlan: e.target.value as ApplicablePlan })}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <option value="">Semua paket (Growth & Pro)</option>
                 <option value="GROWTH">Growth only</option>
@@ -296,7 +296,7 @@ export function PromoCodesManager() {
             <Button
               type="submit"
               disabled={saving}
-              className="bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15"
+              className="bg-brand-600 hover:bg-brand-700"
             >
               {saving ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

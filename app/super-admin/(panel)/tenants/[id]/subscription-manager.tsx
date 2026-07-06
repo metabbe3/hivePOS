@@ -129,7 +129,7 @@ export function SubscriptionManager({
                       <select
                         value={planId}
                         onChange={(e) => setPlanId(e.target.value)}
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                       >
                         {plans.map((p) => (
                           <option key={p.id} value={p.id}>{p.name} — Rp {p.priceMonthly.toLocaleString("id-ID")}/bln</option>

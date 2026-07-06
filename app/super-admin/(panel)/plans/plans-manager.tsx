@@ -196,7 +196,7 @@ export function PlansManager() {
       {!showForm ? (
         <Button
           onClick={startCreate}
-          className="bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15"
+          className="bg-brand-600 hover:bg-brand-700"
         >
           <Plus className="mr-2 h-4 w-4" />
           Buat Plan
@@ -270,7 +270,7 @@ export function PlansManager() {
               <select
                 value={form.tier}
                 onChange={(e) => setForm({ ...form, tier: e.target.value as "" | "FREE" | "GROWTH" | "PRO" })}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <option value="">— (infer from name)</option>
                 <option value="FREE">FREE</option>
@@ -298,7 +298,7 @@ export function PlansManager() {
             <Button
               type="submit"
               disabled={saving}
-              className="bg-gradient-to-r from-brand-600 to-brand-700 shadow-md shadow-brand-600/15"
+              className="bg-brand-600 hover:bg-brand-700"
             >
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
               {editing ? "Simpan" : "Buat"}

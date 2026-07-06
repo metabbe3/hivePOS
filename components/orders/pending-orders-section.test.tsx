@@ -34,6 +34,7 @@ import { PendingOrdersSection } from "./pending-orders-section";
 const row = (over: Partial<PendingOrderRow> = {}): PendingOrderRow => ({
   clientId: "abc123def456",
   status: "pending",
+  payload: { items: [] },
   pricedItems: [{ serviceName: "Cuci Setrika", quantity: 0, weightKg: 2, pricePerUnit: 7000, subtotal: 14000 }],
   totalAmount: 14000,
   discountAmount: 0,
