@@ -16,7 +16,9 @@
 //     takes over — no stale-data risk.
 //   - Non-GET + cross-origin: bypass (straight to network).
 
-const VERSION = "2026-07-06-1";
+// VERSION is a placeholder — the real value is injected at build time by
+// `scripts/gen-sw-version.mjs` (prebuild). Do not hand-edit; see that script.
+const VERSION = "dev";
 const SHELL_CACHE = `hivepos-shell-v${VERSION}`;
 const RUNTIME_CACHE = `hivepos-runtime-v${VERSION}`;
 const SHELL_PRECACHE = ["/"];

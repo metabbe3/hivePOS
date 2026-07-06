@@ -17,6 +17,12 @@ ARG NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=""
 ENV NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=$NEXT_PUBLIC_MIDTRANS_CLIENT_KEY
 ARG NEXT_PUBLIC_MIDTRANS_ENV="sandbox"
 ENV NEXT_PUBLIC_MIDTRANS_ENV=$NEXT_PUBLIC_MIDTRANS_ENV
+# ponytail: SW cache VERSION — deterministic per commit when the deployer passes
+# `--build-arg SW_VERSION=$(git rev-parse --short HEAD)`. Empty (.git excluded
+# from context) → scripts/gen-sw-version.mjs falls back to a build timestamp,
+# so every deploy still auto-invalidates returning PWAs.
+ARG SW_VERSION=""
+ENV SW_VERSION=$SW_VERSION
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
