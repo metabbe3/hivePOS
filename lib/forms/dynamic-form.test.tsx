@@ -79,7 +79,7 @@ describe("DynamicForm", () => {
     render(<DynamicForm schema={baseSchema} onSubmit={onSubmit} />);
     await user.type(screen.getByLabelText(/^Email/), "a@b.com");
     await user.type(screen.getByLabelText(/^Password/), "pass");
-    await user.click(screen.getByRole("button", { name: /form\.submit/ }));
+    await user.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
     expect(onSubmit.mock.calls[0][0]).toMatchObject({ email: "a@b.com", password: "pass" });
@@ -99,13 +99,13 @@ describe("DynamicForm", () => {
     render(<DynamicForm schema={baseSchema} />);
     await user.type(screen.getByLabelText(/^Email/), "a@b.com");
     await user.type(screen.getByLabelText(/^Password/), "pass");
-    await user.click(screen.getByRole("button", { name: /form\.submit/ }));
+    await user.click(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("boom"));
     fetchSpy.mockRestore();
   });
 
-  it("resolves labelKey via t() and falls back to literal", () => {
+  it("falls back to field name when labelKey is unresolved and no literal is set", () => {
     const schema: FormSchema = {
       id: "i18n-test",
       apiEndpoint: "/api/x",
@@ -113,12 +113,14 @@ describe("DynamicForm", () => {
       layout: { columns: 1 },
     };
     render(<DynamicForm schema={schema} hideActions />);
-    expect(screen.getByText("common.name")).toBeInTheDocument();
+    // t() is mocked pass-through → labelKey "common.name" is unresolved, no
+    // literal → resolveText falls back to the field name "name".
+    expect(screen.getByText("name")).toBeInTheDocument();
   });
 
   it("touchTargets propagates to submit button size", () => {
     render(<DynamicForm schema={{ ...baseSchema, touchTargets: true }} />);
-    const btn = screen.getByRole("button", { name: /form\.submit/ });
+    const btn = screen.getByRole("button", { name: "Submit" });
     expect(btn.className).toContain("h-11");
   });
 });
