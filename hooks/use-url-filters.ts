@@ -29,13 +29,20 @@ export function useUrlState(
 
   const setValue = useCallback(
     (next: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      // Read live URL params at call time instead of closing over `searchParams`.
+      // `useSearchParams()` returns a new instance whenever the query string
+      // changes, so depending on it here makes `setValue` change identity on
+      // every update — which fires any `useEffect(..., [setValue])` (e.g. the
+      // orders page's reset-to-page-1 effect) on every page change and bounces
+      // the user back to page 1. Dropping `searchParams` from deps stabilizes
+      // `setValue` so those effects only run when their real inputs change.
+      const params = new URLSearchParams(window.location.search);
       if (next === initial || next === "") params.delete(key);
       else params.set(key, next);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [router, pathname, searchParams, key, initial],
+    [router, pathname, key, initial],
   );
 
   return [value, setValue];
