@@ -470,7 +470,7 @@ function ExpensesContent() {
       ) : (
         <>
           {/* Summary */}
-          <div className="flex items-center justify-between rounded-lg border border-border/40 bg-white dark:bg-gray-800/80 px-4 py-3 shadow-sm">
+          <div className="flex items-center justify-between rounded-lg border border-border/40 bg-card px-4 py-3 shadow-sm">
             <span className="text-sm text-muted-foreground">
               {t("expenses.expenseCount").replace("{count}", String(expenses.length))}
             </span>
@@ -480,7 +480,7 @@ function ExpensesContent() {
           </div>
 
           {/* Table */}
-          <div className="rounded-xl border border-border/40 bg-white dark:bg-gray-800/80 shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>

@@ -10,8 +10,8 @@ import {
 describe("CARD_LIST_ITEM_CLASS", () => {
   it("includes the core tailwind classes used across the dashboard", () => {
     expect(CARD_LIST_ITEM_CLASS).toContain("border border-border/40");
-    expect(CARD_LIST_ITEM_CLASS).toContain("bg-white");
-    expect(CARD_LIST_ITEM_CLASS).toContain("dark:bg-gray-800/80");
+    expect(CARD_LIST_ITEM_CLASS).toContain("bg-card");
+    expect(CARD_LIST_ITEM_CLASS).not.toContain("dark:bg-gray-800");
     expect(CARD_LIST_ITEM_CLASS).toContain("rounded-xl");
     expect(CARD_LIST_ITEM_CLASS).toContain("shadow-sm");
   });
@@ -24,7 +24,7 @@ describe("CARD_LIST_ITEM_INTERACTIVE_CLASS", () => {
     expect(CARD_LIST_ITEM_INTERACTIVE_CLASS).toContain("card-clean");
     // Still includes the core classes.
     expect(CARD_LIST_ITEM_INTERACTIVE_CLASS).toContain("rounded-xl");
-    expect(CARD_LIST_ITEM_INTERACTIVE_CLASS).toContain("bg-white");
+    expect(CARD_LIST_ITEM_INTERACTIVE_CLASS).toContain("bg-card");
   });
 });
 
@@ -33,7 +33,7 @@ describe("CardListItem", () => {
     const { container } = render(<CardListItem />);
     const card = container.firstChild as HTMLElement;
     expect(card.className).toContain("rounded-xl");
-    expect(card.className).toContain("bg-white");
+    expect(card.className).toContain("bg-card");
     expect(card.className).toContain("shadow-sm");
   });
 

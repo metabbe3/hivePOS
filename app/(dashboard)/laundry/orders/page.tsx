@@ -573,7 +573,7 @@ export default function OrdersPage() {
       ) : (
         <>
           {/* Desktop: semantic table (sm and up) */}
-          <div className="hidden sm:block rounded-xl border border-border/40 bg-white dark:bg-gray-800/80 shadow-sm">
+          <div className="hidden sm:block rounded-xl border border-border/40 bg-card shadow-sm">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -651,7 +651,7 @@ export default function OrdersPage() {
               const payCfg = PAYMENT_STATUS_CONFIG[order.paymentStatus];
               return (
                 <Link key={order.id} href={`/laundry/orders/${order.id}`}>
-                  <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl transition-shadow hover:shadow-md mb-3">
+                  <Card className="border border-border/40 bg-card shadow-sm rounded-xl transition-shadow hover:shadow-md mb-3">
                     <CardContent className="py-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1 min-w-0">

@@ -50,7 +50,7 @@ export function ServicePicker() {
 
   return (
     <>
-      <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+      <Card className="border border-border/40 bg-card shadow-sm rounded-xl">
         <CardHeader><CardTitle className="text-base font-semibold">{t("newOrder.addServices")}</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div className="relative">

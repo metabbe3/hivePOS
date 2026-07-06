@@ -819,7 +819,7 @@ export default function BillingPage() {
       </CardListItem>
 
       {/* ── Payment History (collapsible) ── */}
-      <div className="rounded-xl border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 overflow-hidden">
+      <div className="rounded-xl border border-border/40 bg-card shadow-sm overflow-hidden">
         <button
           type="button"
           onClick={() => setShowHistory((s) => !s)}

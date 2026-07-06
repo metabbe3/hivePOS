@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
  * `<Card>` element used as a list row.
  */
 export const CARD_LIST_ITEM_CLASS =
-  "border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl";
+  "border border-border/40 bg-card shadow-sm rounded-xl";
 
 /**
  * Interactive list-item Card with hover lift + pointer affordance.

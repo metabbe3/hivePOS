@@ -106,7 +106,7 @@ function NewOrderLayout() {
       </div>
 
       {/* Waktu Order — preset-driven, calm */}
-      <div className="rounded-xl border border-border/40 bg-white p-3 shadow-sm animate-fade-in-up dark:bg-gray-800/80 sm:p-4">
+      <div className="rounded-xl border border-border/40 bg-card p-3 shadow-sm animate-fade-in-up sm:p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="mr-1 inline-flex items-center gap-1.5 text-sm font-medium">
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -259,7 +259,7 @@ function SuccessScreen({
         <p className="mt-1 text-sm text-muted-foreground">
           {t("newOrder.successBody")}
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-border/60 bg-white px-4 py-2 dark:bg-gray-800">
+        <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-border/60 bg-card px-4 py-2">
           <Receipt className="h-4 w-4 text-muted-foreground" />
           <span className="font-mono font-semibold">{orderNumber}</span>
           <span className="mx-2 h-4 w-px bg-border" />

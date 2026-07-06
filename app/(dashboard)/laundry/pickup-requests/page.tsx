@@ -151,7 +151,7 @@ export default function PickupRequestsPage() {
               <Card
                 key={p.id}
                 onClick={() => openDetail(p.id)}
-                className="cursor-pointer rounded-xl border border-border/40 bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-gray-800/80"
+                className="cursor-pointer rounded-xl border border-border/40 bg-card shadow-sm transition-shadow hover:shadow-md"
               >
                 <CardContent className="py-4">
                   <div className="flex items-start justify-between gap-3">

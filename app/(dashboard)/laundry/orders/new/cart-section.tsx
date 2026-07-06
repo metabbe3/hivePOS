@@ -45,7 +45,7 @@ export function CartSection() {
     <>
       {/* Cart / Order Items */}
       {items.length > 0 && (
-        <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+        <Card className="border border-border/40 bg-card shadow-sm rounded-xl">
           <CardHeader><CardTitle className="text-base font-semibold">{t("newOrder.orderItems")}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {items.map((item, idx) => (
@@ -111,7 +111,7 @@ export function CartSection() {
                       className={`flex flex-col items-center gap-1 rounded-xl border-2 px-2 py-2.5 text-xs font-semibold transition-all ${
                         paymentMethod === pm.key
                           ? "border-border bg-background text-foreground shadow-sm ring-1 ring-ring/20"
-                          : "border-border/40 bg-white dark:bg-gray-800/80 hover:border-border/80 hover:bg-muted/30"
+                          : "border-border/40 bg-card hover:border-border/80 hover:bg-muted/30"
                       }`}
                       onClick={() => setPaymentMethod(pm.key)}
                     >
@@ -138,7 +138,7 @@ export function CartSection() {
                           className={`rounded-xl border-2 px-3 py-3 text-sm font-semibold transition-all ${
                             cashReceived === opt.amount
                               ? "border-border bg-background text-foreground shadow-sm ring-1 ring-ring/20"
-                              : "border-border/40 bg-white dark:bg-gray-800/80 hover:border-border/80"
+                              : "border-border/40 bg-card hover:border-border/80"
                           }`}
                           onClick={() => setCashReceived(opt.amount)}
                         >
@@ -286,7 +286,7 @@ export function CartSection() {
       )}
 
       {/* Notes & Submit */}
-      <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+      <Card className="border border-border/40 bg-card shadow-sm rounded-xl">
         <CardContent className="pt-6 space-y-4">
           <div className="space-y-2">
             <Label>{t("common.notes")}</Label>

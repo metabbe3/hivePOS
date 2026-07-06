@@ -298,7 +298,7 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Customer */}
-      <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl overflow-visible">
+      <Card className="border border-border/40 bg-card shadow-sm rounded-xl overflow-visible">
         <CardHeader>
           <CardTitle className="text-base font-semibold">
             {t("common.customer")}
@@ -411,7 +411,7 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
       </Card>
 
       {/* Service Picker */}
-      <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+      <Card className="border border-border/40 bg-card shadow-sm rounded-xl">
         <CardHeader>
           <CardTitle className="text-base font-semibold">
             {t("newOrder.addServices")}
@@ -590,7 +590,7 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
 
       {/* Cart / Items */}
       {items.length > 0 && (
-        <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+        <Card className="border border-border/40 bg-card shadow-sm rounded-xl">
           <CardHeader>
             <CardTitle className="text-base font-semibold">
               {t("newOrder.orderItems")}
@@ -780,7 +780,7 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
 
       {/* Discount */}
       {items.length > 0 && (
-        <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+        <Card className="border border-border/40 bg-card shadow-sm rounded-xl">
           <CardHeader>
             <CardTitle className="text-base font-semibold">
               {t("newOrder.discount")}
@@ -875,7 +875,7 @@ export function OrderEditForm({ order, onSave, onCancel }: Props) {
       )}
 
       {/* Notes & Save */}
-      <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+      <Card className="border border-border/40 bg-card shadow-sm rounded-xl">
         <CardContent className="pt-6 space-y-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <button

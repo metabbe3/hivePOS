@@ -149,7 +149,7 @@ export function CustomerPicker() {
   // ── Selected state: a confident customer card ──
   if (selectedCustomer) {
     return (
-      <Card className="animate-fade-in-up border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl">
+      <Card className="animate-fade-in-up border border-border/40 bg-card shadow-sm rounded-xl">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold">
             {t("common.customer")}
@@ -205,7 +205,7 @@ export function CustomerPicker() {
 
   // ── Search / create state ──
   return (
-    <Card className="border border-border/40 bg-white shadow-sm dark:bg-gray-800/80 rounded-xl overflow-visible">
+    <Card className="border border-border/40 bg-card shadow-sm rounded-xl overflow-visible">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
           {t("common.customer")}
