@@ -326,9 +326,20 @@ function CartItemRow({ index, item, items, calcSubtotal, updateItem, removeItem,
   if (!svc) return null;
 
   return (
-    <div className="flex items-start sm:items-center gap-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-3">
+    <div
+      className={`flex items-start sm:items-center gap-3 rounded-xl border bg-muted/20 px-4 py-3 ${
+        svc.pricingType === "PER_KG" ? "border-border/60" : "border-border/40"
+      }`}
+    >
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{svc.name}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="font-medium text-sm truncate">{svc.name}</p>
+          {svc.pricingType === "PER_KG" && (
+            <span className="shrink-0 rounded-full bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-primary ring-1 ring-primary/20 dark:bg-brand-light/10">
+              {t("garment.kiloan")}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1.5 mt-2">
           {svc.pricingType === "PER_KG" ? (
             <>
