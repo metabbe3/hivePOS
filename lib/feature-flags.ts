@@ -6,8 +6,28 @@ import { prisma } from "@/lib/prisma";
 // Unknown flags default to true (permissive) so a missing seed never hides a
 // feature.
 
+// ponytail: per-tenant read-through cache. resolveAllFlags is called on every
+// auth'd request (jwt callback × credentials/Google/refresh/impersonation) +
+// by resolveFlag. 30s TTL bounds staleness; invalidateFeatureFlags() is wired
+// into the super-admin toggle endpoints so a change is effective immediately.
+// In-process Map — fine for the single Docker instance; add Redis if we scale.
+const FLAG_CACHE_TTL_MS = 30_000;
+const flagCache = new Map<string, { flags: Record<string, boolean>; expiresAt: number }>();
+
 /** All resolved flag keys for a tenant: { website: true, inventory: false, ... }. */
 export async function resolveAllFlags(
+  tenantId: string,
+): Promise<Record<string, boolean>> {
+  const now = Date.now();
+  const hit = flagCache.get(tenantId);
+  if (hit && hit.expiresAt > now) return hit.flags;
+
+  const flags = await resolveFlagsFromDb(tenantId);
+  flagCache.set(tenantId, { flags, expiresAt: now + FLAG_CACHE_TTL_MS });
+  return flags;
+}
+
+async function resolveFlagsFromDb(
   tenantId: string,
 ): Promise<Record<string, boolean>> {
   const flags = await prisma.featureFlag.findMany({
@@ -19,6 +39,17 @@ export async function resolveAllFlags(
     out[f.key] = override ? override.enabled : f.enabled;
   }
   return out;
+}
+
+/**
+ * Invalidate the flag cache. Pass a `tenantId` to clear one tenant (after a
+ * per-tenant override change); omit to clear ALL tenants (after a global flag
+ * default is created/toggled/deleted). Called from the super-admin flag routes
+ * so toggles are effective immediately instead of after the 30s TTL.
+ */
+export function invalidateFeatureFlags(tenantId?: string): void {
+  if (tenantId) flagCache.delete(tenantId);
+  else flagCache.clear();
 }
 
 /**
@@ -48,13 +79,10 @@ export async function resolveFlag(
   key: string,
   tenantId: string,
 ): Promise<boolean> {
-  const flag = await prisma.featureFlag.findUnique({
-    where: { key },
-    include: { overrides: { where: { tenantId } } },
-  });
-  if (!flag) return true;
-  const override = flag.overrides[0];
-  return override ? override.enabled : flag.enabled;
+  // Delegates to the cached resolveAllFlags — same permissive-unknown semantics,
+  // one DB round-trip per 30s per tenant instead of per call.
+  const all = await resolveAllFlags(tenantId);
+  return all[key] ?? true;
 }
 
 /** Catalog of all flag keys referenced in code. Keeps the seed + sidebar in sync. */

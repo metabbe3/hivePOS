@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler, apiSuccess, NotFoundError } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { invalidateFeatureFlags } from "@/lib/feature-flags";
 
 // GET — single flag with overrides expanded (tenant name + enabled + reason)
 export const GET = withErrorHandler(async (_req, ctx) => {
@@ -72,6 +73,8 @@ export const PATCH = withErrorHandler(async (req, ctx) => {
     return flag;
   });
 
+  invalidateFeatureFlags(); // global default changed → all tenants
+
   return apiSuccess({ flag: { id: updated.id, key: updated.key, enabled: updated.enabled } });
 });
 
@@ -94,6 +97,8 @@ export const DELETE = withErrorHandler(async (req, ctx) => {
       req,
     });
   });
+
+  invalidateFeatureFlags(); // flag deleted → all tenants
 
   return apiSuccess({ ok: true });
 });

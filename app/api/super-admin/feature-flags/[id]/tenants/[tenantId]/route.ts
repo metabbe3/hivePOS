@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler, apiSuccess, NotFoundError } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { invalidateFeatureFlags } from "@/lib/feature-flags";
 
 // DELETE — remove per-tenant override (tenant inherits global default again)
 export const DELETE = withErrorHandler(
@@ -27,6 +28,8 @@ export const DELETE = withErrorHandler(
         req,
       });
     });
+
+    invalidateFeatureFlags(tenantId); // per-tenant override removed
 
     return apiSuccess({ ok: true });
   },

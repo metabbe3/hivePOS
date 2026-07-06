@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { withErrorHandler, apiSuccess, ValidationError } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { invalidateFeatureFlags } from "@/lib/feature-flags";
 
 // GET — list all flags with override counts
 export const GET = withErrorHandler(async () => {
@@ -65,6 +66,8 @@ export const POST = withErrorHandler(async (req: Request) => {
     });
     return flag;
   });
+
+  invalidateFeatureFlags(); // new global flag → clear all tenants
 
   return apiSuccess({ flag: { id: created.id, key: created.key } });
 });

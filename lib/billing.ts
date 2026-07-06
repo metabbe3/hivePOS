@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { makeTtlCache } from "@/lib/cache";
 import type { PromoCode } from "@/app/generated/prisma/client";
 
 // ── Pricing constants ──
@@ -78,13 +79,18 @@ export async function getTenantPlan(tenantId: string): Promise<TenantPlan> {
  * pricing is configurable from the super-admin Plans page. Falls back to the
  * hardcoded constants if no active plan exists for the tier (never breaks).
  */
+// ponytail: plan prices change rarely (super-admin edit) → 5min TTL cache.
+const tierPriceCache = makeTtlCache<"GROWTH" | "PRO", number>(5 * 60_000);
 export async function getTierUnitPrice(tier: "GROWTH" | "PRO"): Promise<number> {
+  const cached = tierPriceCache.get(tier);
+  if (cached !== undefined) return cached;
   const plan = await prisma.plan.findFirst({
     where: { tier, isActive: true },
     select: { priceMonthly: true },
   });
-  if (plan) return Number(plan.priceMonthly);
-  return tier === "PRO" ? PRO_PRICE_PER_OUTLET : PRICE_PER_OUTLET;
+  const price = plan ? Number(plan.priceMonthly) : tier === "PRO" ? PRO_PRICE_PER_OUTLET : PRICE_PER_OUTLET;
+  tierPriceCache.set(tier, price);
+  return price;
 }
 
 // Free tier limits (when tenant has no paid outlets)
@@ -463,8 +469,12 @@ export async function extendOutletCoverage(
 
 // ── Subscription cache management ──
 
+// ponytail: the Growth plan id is stable once seeded → 5min TTL cache.
+const growthPlanIdCache = makeTtlCache<"growth", string>(5 * 60_000);
 /** Ensure a "Growth" plan exists, returning its id. */
 async function getGrowthPlanId(): Promise<string> {
+  const cached = growthPlanIdCache.get("growth");
+  if (cached) return cached;
   let plan = await prisma.plan.findUnique({ where: { name: GROWTH_PLAN_NAME } });
   if (!plan) {
     plan = await prisma.plan.create({
@@ -479,7 +489,14 @@ async function getGrowthPlanId(): Promise<string> {
       },
     });
   }
+  growthPlanIdCache.set("growth", plan.id);
   return plan.id;
+}
+
+/** Clear the plan caches. Call after a super-admin plan create/edit/deactivate/delete. */
+export function invalidatePlanCache(): void {
+  tierPriceCache.clear();
+  growthPlanIdCache.clear();
 }
 
 /**

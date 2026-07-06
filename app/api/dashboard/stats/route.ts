@@ -38,60 +38,67 @@ export const GET = withErrorHandler(async (req) => {
   weekStart.setDate(weekStart.getDate() - weekStart.getDay());
   weekStart.setHours(0, 0, 0, 0);
 
+  // ponytail: consolidated dashboard queries. Was 26 round-trips (12 of them
+  // individual count()/aggregate() per status/period) → now 17. The three
+  // groupBy(status) queries each replace several counts:
+  //  - periodByStatus → todayOrders (sum), pipeline RECEIVED/IN_PROGRESS/READY/
+  //    DELIVERED (per-status), AND currentOmset (sum totalAmount) in one query.
+  //  - prevPeriodByStatus → previousOrderCount + previousOmset in one query.
+  //  - allTimeByStatus → live-queue inProgress/readyForPickup (date-unbound).
+  // Customer counts (total / newThisWeek) are folded into allCustomers below.
   const [
-    todayOrders,
-    inProgress,
-    readyForPickup,
+    periodByStatus,
+    prevPeriodByStatus,
+    allTimeByStatus,
     revenueResult,
     previousRevenueResult,
     recentOrders,
     topCustomersGrouped,
     serviceBreakdownGrouped,
     paymentBreakdown,
-    // New widget data
     expenseResult,
     depositTopUpResult,
-    pipelineReceived,
-    pipelineInProgress,
-    pipelineReady,
-    pipelineDelivered,
     lowStockItems,
-    totalCustomerCount,
-    newCustomerCount,
     allCustomers,
-    // Period comparison
-    previousOrderCount,
     previousExpenseResult,
-    // Omset (total order value)
-    omsetResult,
-    previousOmsetResult,
-    // Unpaid delivered count (piutang)
     unpaidDelivered,
-    // Unpaid orders list
     unpaidOrdersRaw,
-    // Turnaround data
     turnaroundOrders,
   ] = await Promise.all([
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, ...receivedAtFilter } }),
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, status: "IN_PROGRESS" } }),
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, status: "READY" } }),
-    prisma.payment.aggregate({
-      _sum: { amount: true },
-      where: { order: { branchId: { in: branchIds },module: moduleFilter }, paidAt: { gte: from, lte: to } },
+    prisma.order.groupBy({
+      by: ["status"],
+      where: { branchId: { in: branchIds }, module: moduleFilter, ...receivedAtFilter },
+      _count: true,
+      _sum: { totalAmount: true },
+    }),
+    prisma.order.groupBy({
+      by: ["status"],
+      where: { branchId: { in: branchIds }, module: moduleFilter, ...prevReceivedAtFilter },
+      _count: true,
+      _sum: { totalAmount: true },
+    }),
+    prisma.order.groupBy({
+      by: ["status"],
+      where: { branchId: { in: branchIds }, module: moduleFilter },
+      _count: true,
     }),
     prisma.payment.aggregate({
       _sum: { amount: true },
-      where: { order: { branchId: { in: branchIds },module: moduleFilter }, paidAt: { gte: previousFrom, lte: previousTo } },
+      where: { order: { branchId: { in: branchIds }, module: moduleFilter }, paidAt: { gte: from, lte: to } },
+    }),
+    prisma.payment.aggregate({
+      _sum: { amount: true },
+      where: { order: { branchId: { in: branchIds }, module: moduleFilter }, paidAt: { gte: previousFrom, lte: previousTo } },
     }),
     prisma.order.findMany({
-      where: { branchId: { in: branchIds },module: moduleFilter },
+      where: { branchId: { in: branchIds }, module: moduleFilter },
       take: 10,
       orderBy: { createdAt: "desc" },
       include: { customer: { select: { name: true } } },
     }),
     prisma.order.groupBy({
       by: ["customerId"],
-      where: { branchId: { in: branchIds },module: moduleFilter, ...receivedAtFilter },
+      where: { branchId: { in: branchIds }, module: moduleFilter, ...receivedAtFilter },
       _sum: { totalAmount: true },
       _count: true,
       orderBy: { _sum: { totalAmount: "desc" } },
@@ -99,14 +106,14 @@ export const GET = withErrorHandler(async (req) => {
     }),
     prisma.orderItem.groupBy({
       by: ["serviceId"],
-      where: { order: { branchId: { in: branchIds },module: moduleFilter, ...receivedAtFilter } },
+      where: { order: { branchId: { in: branchIds }, module: moduleFilter, ...receivedAtFilter } },
       _sum: { subtotal: true },
       _count: true,
       orderBy: { _sum: { subtotal: "desc" } },
     }),
     prisma.payment.groupBy({
       by: ["paymentMethod"],
-      where: { order: { branchId: { in: branchIds },module: moduleFilter }, paidAt: { gte: from, lte: to } },
+      where: { order: { branchId: { in: branchIds }, module: moduleFilter }, paidAt: { gte: from, lte: to } },
       _sum: { amount: true },
       _count: true,
     }),
@@ -120,11 +127,6 @@ export const GET = withErrorHandler(async (req) => {
       _sum: { amount: true },
       where: { branchId: { in: branchIds },type: "TOP_UP", createdAt: { gte: from, lte: to } },
     }),
-    // Order pipeline counts for period
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, status: "RECEIVED", ...receivedAtFilter } }),
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, status: "IN_PROGRESS", ...receivedAtFilter } }),
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, status: "READY", ...receivedAtFilter } }),
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, status: "DELIVERED", ...receivedAtFilter } }),
     // Low stock items (branch-shared — NOT module-filtered)
     prisma.stockItem.findMany({
       where: { branchId: { in: branchIds },isActive: true },
@@ -136,28 +138,16 @@ export const GET = withErrorHandler(async (req) => {
         lowStockThreshold: true,
       },
     }),
-    // Customer insights (branch-shared — NOT module-filtered)
-    prisma.customer.count({ where: { branchId: { in: branchIds } } }),
-    prisma.customer.count({ where: { branchId: { in: branchIds },createdAt: { gte: weekStart } } }),
+    // Customer insights (branch-shared). Also drives totalCustomerCount +
+    // newCustomerCount (derived below) — saves two extra count() round-trips.
     prisma.customer.findMany({
       where: { branchId: { in: branchIds } },
       select: { id: true, createdAt: true, orders: { select: { createdAt: true }, orderBy: { createdAt: "desc" }, take: 1 } },
     }),
-    // Period comparison: previous period orders
-    prisma.order.count({ where: { branchId: { in: branchIds },module: moduleFilter, ...prevReceivedAtFilter } }),
     // Period comparison: previous period expenses (branch-shared)
     prisma.expense.aggregate({
       _sum: { amount: true },
       where: { branchId: { in: branchIds },date: { gte: previousFrom, lte: previousTo } },
-    }),
-    // Omset: total order value
-    prisma.order.aggregate({
-      _sum: { totalAmount: true },
-      where: { branchId: { in: branchIds },module: moduleFilter, ...receivedAtFilter },
-    }),
-    prisma.order.aggregate({
-      _sum: { totalAmount: true },
-      where: { branchId: { in: branchIds },module: moduleFilter, ...prevReceivedAtFilter },
     }),
     // Unpaid delivered count
     prisma.order.count({
@@ -186,6 +176,23 @@ export const GET = withErrorHandler(async (req) => {
       select: { id: true, receivedAt: true, deliveredAt: true },
     }),
   ]);
+
+  // ── Derive counts + omset from the consolidated groupBy queries ──
+  const countOf = (rows: { status: string; _count: number }[], s: string) =>
+    Number(rows.find((r) => r.status === s)?._count ?? 0);
+  const todayOrders = periodByStatus.reduce((s, g) => s + Number(g._count), 0);
+  const currentOmset = periodByStatus.reduce((s, g) => s + Number(g._sum.totalAmount ?? 0), 0);
+  const previousOrderCount = prevPeriodByStatus.reduce((s, g) => s + Number(g._count), 0);
+  const previousOmset = prevPeriodByStatus.reduce((s, g) => s + Number(g._sum.totalAmount ?? 0), 0);
+  const pipelineReceived = countOf(periodByStatus, "RECEIVED");
+  const pipelineInProgress = countOf(periodByStatus, "IN_PROGRESS");
+  const pipelineReady = countOf(periodByStatus, "READY");
+  const pipelineDelivered = countOf(periodByStatus, "DELIVERED");
+  // Live queue — NOT date-bound (orders currently in progress / ready).
+  const inProgress = countOf(allTimeByStatus, "IN_PROGRESS");
+  const readyForPickup = countOf(allTimeByStatus, "READY");
+  const totalCustomerCount = allCustomers.length;
+  const newCustomerCount = allCustomers.filter((c) => c.createdAt.getTime() >= weekStart.getTime()).length;
 
   // Resolve top-customer + service names in parallel (was two sequential awaits).
   const customerIds = topCustomersGrouped.map((tc) => tc.customerId);
@@ -230,9 +237,6 @@ export const GET = withErrorHandler(async (req) => {
   const currentRevenue = Number(revenueResult._sum.amount ?? 0);
   const previousRevenue = Number(previousRevenueResult._sum.amount ?? 0);
   const revenueChange = previousRevenue === 0 ? null : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
-
-  const currentOmset = Number(omsetResult._sum.totalAmount ?? 0);
-  const previousOmset = Number(previousOmsetResult._sum.totalAmount ?? 0);
   const omsetChange = previousOmset === 0 ? null : ((currentOmset - previousOmset) / previousOmset) * 100;
 
   // Cash flow data
@@ -356,8 +360,10 @@ export const GET = withErrorHandler(async (req) => {
       };
     })(),
     sparkline: await (async () => {
-      // Compute the 7 day-ranges, then fire all counts in parallel (was a
-      // sequential for-loop with await — 7 serial DB round-trips).
+      // 7-day order-count sparkline. Kept as parallel counts (not a raw
+      // date_trunc GROUP BY) to preserve the exact WIB day-boundary math
+      // (endOfDay + receivedAt/createdAt fallback) — a raw version risks an
+      // off-by-one across DB/JS timezones.
       const ranges: { from: Date; to: Date }[] = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date();

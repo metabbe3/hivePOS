@@ -7,6 +7,7 @@ import {
 } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { invalidatePlanCache } from "@/lib/billing";
 
 // GET — list all plans with subscription counts
 export const GET = withErrorHandler(async (req: Request) => {
@@ -91,6 +92,8 @@ export const POST = withErrorHandler(async (req: Request) => {
     });
     return plan;
   });
+
+  invalidatePlanCache(); // new plan → tier prices / growth id may change
 
   return apiSuccess({ plan: { id: created.id, name: created.name } });
 });

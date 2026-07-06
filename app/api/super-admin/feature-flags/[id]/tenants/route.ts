@@ -7,6 +7,7 @@ import {
 } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { invalidateFeatureFlags } from "@/lib/feature-flags";
 
 // GET — search tenants, with their override status for this flag
 // ?q=foo  → search by name/slug
@@ -99,6 +100,8 @@ export const POST = withErrorHandler(async (req, ctx) => {
     });
     return ov;
   });
+
+  invalidateFeatureFlags(tenantId); // per-tenant override changed
 
   return apiSuccess({ override: { id: updated.id, tenantId, enabled: updated.enabled } });
 });

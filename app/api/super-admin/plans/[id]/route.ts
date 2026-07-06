@@ -8,6 +8,7 @@ import {
 } from "@/modules/shared";
 import { assertSuperAdminOrThrow } from "@/lib/super-admin/permissions";
 import { auditLog } from "@/lib/audit";
+import { invalidatePlanCache } from "@/lib/billing";
 
 // PATCH — update plan fields. Cannot rename to a name already in use by another plan.
 export const PATCH = withErrorHandler(
@@ -77,6 +78,8 @@ export const PATCH = withErrorHandler(
       return p;
     });
 
+    invalidatePlanCache(); // plan pricing/fields changed
+
     return apiSuccess({ plan: { id: updated.id, name: updated.name } });
   },
 );
@@ -109,6 +112,8 @@ export const DELETE = withErrorHandler(
         req,
       });
     });
+
+    invalidatePlanCache(); // plan deleted
 
     return apiSuccess({ deleted: id });
   },

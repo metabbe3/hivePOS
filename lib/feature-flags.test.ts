@@ -11,10 +11,12 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-import { resolveAllFlags, resolveAllFlagsSafe } from "./feature-flags";
+import { resolveAllFlags, resolveAllFlagsSafe, invalidateFeatureFlags } from "./feature-flags";
 
 describe("resolveAllFlags", () => {
-  beforeEach(() => findManyMock.mockReset());
+  // Clear the in-process flag cache between cases — each test mocks a different
+  // findMany result and the cache would otherwise leak the first result.
+  beforeEach(() => { findManyMock.mockReset(); invalidateFeatureFlags(); });
 
   it("applies a per-tenant override over the global default", async () => {
     findManyMock.mockResolvedValue([
@@ -31,7 +33,7 @@ describe("resolveAllFlags", () => {
 });
 
 describe("resolveAllFlagsSafe (Non-negotiable #8: flags must resolve in every auth path)", () => {
-  beforeEach(() => findManyMock.mockReset());
+  beforeEach(() => { findManyMock.mockReset(); invalidateFeatureFlags(); });
 
   it("delegates to resolveAllFlags on success", async () => {
     findManyMock.mockResolvedValue([{ key: "orders", enabled: true, overrides: [] }]);

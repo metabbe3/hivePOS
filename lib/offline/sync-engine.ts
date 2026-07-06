@@ -25,6 +25,12 @@ import {
  */
 
 const MAX_ATTEMPTS = 4;
+// ponytail: drain rows in parallel chunks of this size within each phase
+// (customers-then-orders). Phases stay sequential (orders may reference a
+// customer synced this run); rows within a phase are independent. Chunked
+// (not unbounded Promise.all) so a big offline burst doesn't overwhelm the
+// server. 5 keeps the pool (25) + per-row tx comfortable.
+const CHUNK = 5;
 
 type SyncEvent =
   | { type: "started" }
@@ -62,33 +68,16 @@ export async function drainOutbox(): Promise<{ synced: number; errors: number }>
     );
     const customerIdMap = new Map<string, string>(); // pendingClientId → serverId
 
-    for (const row of customers) {
-      try {
-        await updatePendingCustomer(row.clientId, { status: "syncing", lastError: undefined });
-        // ponytail: strip null/undefined — customerSchema rejects null on
-        // optional string fields. IDB stores empty phone as null; the online
-        // form path sends "" so the schema is shaped for that. Cleanest fix
-        // is here, at the sync boundary, not loosening the schema.
-        const customerBody: Record<string, unknown> = { name: row.payload.name };
-        if (row.payload.phone) customerBody.phone = row.payload.phone;
-        if (row.payload.email) customerBody.email = row.payload.email;
-        if (row.payload.notes) customerBody.notes = row.payload.notes;
-        const server = await postWithRetry<{
-          id: string;
-        }>("/api/customers", customerBody, row.clientId);
-        await updatePendingCustomer(row.clientId, {
-          status: "synced",
-          serverId: server.id,
-          syncedAt: new Date().toISOString(),
-        });
-        customerIdMap.set(row.clientId, server.id);
-        synced++;
-        emit({ type: "customer-synced", clientId: row.clientId, serverId: server.id });
-      } catch (err) {
-        const msg = errMsg(err);
-        await updatePendingCustomer(row.clientId, { status: "error", lastError: msg });
-        errors++;
-        emit({ type: "row-error", clientId: row.clientId, error: msg });
+    // ponytail: customers are independent of each other → drain in parallel
+    // chunks (was sequential, one HTTP per row). Customers still finish before
+    // orders (orders may reference a customer synced this run via customerIdMap).
+    for (let i = 0; i < customers.length; i += CHUNK) {
+      const results = await Promise.all(
+        customers.slice(i, i + CHUNK).map((row) => syncCustomer(row, customerIdMap)),
+      );
+      for (const ok of results) {
+        if (ok) synced++;
+        else errors++;
       }
     }
 
@@ -96,52 +85,16 @@ export async function drainOutbox(): Promise<{ synced: number; errors: number }>
     const orders = (await listPendingOrders()).filter(
       (o) => o.status === "pending" || o.status === "syncing",
     );
-    for (const row of orders) {
-      try {
-        // Resolve customer reference
-        let customerId: string | undefined = row.customerId;
-        if (row.pendingCustomerId) {
-          // Check customerIdMap first (just synced this run), else IDB.
-          customerId =
-            customerIdMap.get(row.pendingCustomerId) ??
-            (await lookupSyncedCustomerId(row.pendingCustomerId)) ??
-            undefined;
-        }
-        if (!customerId) {
-          throw new Error("Customer not yet synced — will retry on next drain");
-        }
-
-        await updatePendingOrder(row.clientId, { status: "syncing", lastError: undefined });
-        const server = await postWithRetry<{
-          id: string;
-          orderNumber: string;
-        }>("/api/orders", {
-          customerId,
-          items: row.payload.items,
-          notes: row.payload.notes,
-          discountType: row.payload.discountType,
-          discountAmount: row.payload.discountAmount,
-          receivedAt: row.payload.receivedAt,
-        }, row.clientId);
-
-        await updatePendingOrder(row.clientId, {
-          status: "synced",
-          serverId: server.id,
-          serverOrderNumber: server.orderNumber,
-          syncedAt: new Date().toISOString(),
-        });
-        synced++;
-        emit({
-          type: "order-synced",
-          clientId: row.clientId,
-          serverId: server.id,
-          orderNumber: server.orderNumber,
-        });
-      } catch (err) {
-        const msg = errMsg(err);
-        await updatePendingOrder(row.clientId, { status: "error", lastError: msg });
-        errors++;
-        emit({ type: "row-error", clientId: row.clientId, error: msg });
+    // ponytail: orders are independent of each other (each resolves its own
+    // customerId) → drain in parallel chunks. Order-number allocation is
+    // concurrency-safe (transactional per-branch counter).
+    for (let i = 0; i < orders.length; i += CHUNK) {
+      const results = await Promise.all(
+        orders.slice(i, i + CHUNK).map((row) => syncOrder(row, customerIdMap)),
+      );
+      for (const ok of results) {
+        if (ok) synced++;
+        else errors++;
       }
     }
   } finally {
@@ -192,6 +145,89 @@ function sleep(ms: number): Promise<void> {
 function errMsg(err: unknown): string {
   if (err instanceof Error) return err.message;
   return String(err);
+}
+
+/** Sync one customer. Returns true on success, false on failure (status + emit handled). */
+async function syncCustomer(
+  row: PendingCustomerRow,
+  customerIdMap: Map<string, string>,
+): Promise<boolean> {
+  try {
+    await updatePendingCustomer(row.clientId, { status: "syncing", lastError: undefined });
+    // ponytail: strip null/undefined — customerSchema rejects null on optional
+    // string fields. IDB stores empty phone as null; the online form path sends
+    // "" so the schema is shaped for that. Cleanest fix is at the sync boundary.
+    const customerBody: Record<string, unknown> = { name: row.payload.name };
+    if (row.payload.phone) customerBody.phone = row.payload.phone;
+    if (row.payload.email) customerBody.email = row.payload.email;
+    if (row.payload.notes) customerBody.notes = row.payload.notes;
+    const server = await postWithRetry<{ id: string }>("/api/customers", customerBody, row.clientId);
+    await updatePendingCustomer(row.clientId, {
+      status: "synced",
+      serverId: server.id,
+      syncedAt: new Date().toISOString(),
+    });
+    customerIdMap.set(row.clientId, server.id);
+    emit({ type: "customer-synced", clientId: row.clientId, serverId: server.id });
+    return true;
+  } catch (err) {
+    const msg = errMsg(err);
+    await updatePendingCustomer(row.clientId, { status: "error", lastError: msg });
+    emit({ type: "row-error", clientId: row.clientId, error: msg });
+    return false;
+  }
+}
+
+/** Sync one order. Returns true on success, false on failure (status + emit handled). */
+async function syncOrder(
+  row: PendingOrderRow,
+  customerIdMap: Map<string, string>,
+): Promise<boolean> {
+  try {
+    let customerId: string | undefined = row.customerId;
+    if (row.pendingCustomerId) {
+      // Check customerIdMap first (just synced this run), else IDB (previous run).
+      customerId =
+        customerIdMap.get(row.pendingCustomerId) ??
+        (await lookupSyncedCustomerId(row.pendingCustomerId)) ??
+        undefined;
+    }
+    if (!customerId) {
+      throw new Error("Customer not yet synced — will retry on next drain");
+    }
+
+    await updatePendingOrder(row.clientId, { status: "syncing", lastError: undefined });
+    const server = await postWithRetry<{ id: string; orderNumber: string }>(
+      "/api/orders",
+      {
+        customerId,
+        items: row.payload.items,
+        notes: row.payload.notes,
+        discountType: row.payload.discountType,
+        discountAmount: row.payload.discountAmount,
+        receivedAt: row.payload.receivedAt,
+      },
+      row.clientId,
+    );
+    await updatePendingOrder(row.clientId, {
+      status: "synced",
+      serverId: server.id,
+      serverOrderNumber: server.orderNumber,
+      syncedAt: new Date().toISOString(),
+    });
+    emit({
+      type: "order-synced",
+      clientId: row.clientId,
+      serverId: server.id,
+      orderNumber: server.orderNumber,
+    });
+    return true;
+  } catch (err) {
+    const msg = errMsg(err);
+    await updatePendingOrder(row.clientId, { status: "error", lastError: msg });
+    emit({ type: "row-error", clientId: row.clientId, error: msg });
+    return false;
+  }
 }
 
 /**
