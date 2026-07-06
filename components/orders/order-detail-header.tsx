@@ -10,7 +10,9 @@ import {
   Trash2,
   MoreVertical,
   Banknote,
+  Copy,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -91,6 +93,22 @@ export function OrderDetailHeader({
                 <h1 className="truncate text-xl sm:text-2xl font-bold tracking-tight">
                   {order.orderNumber}
                 </h1>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
+                  aria-label={t("orders.copyOrderNumber")}
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(order.orderNumber);
+                      toast.success(t("orders.orderNumberCopied"));
+                    } catch {
+                      toast.error(t("orders.copyFailed"));
+                    }
+                  }}
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
                 <Badge className={cn(statusCfg.color, "border-0")}>
                   {t(statusCfg.labelKey)}
                 </Badge>
