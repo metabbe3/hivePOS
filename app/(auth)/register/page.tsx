@@ -176,7 +176,7 @@ function RegisterForm() {
           }}
           onSubmit={handleRegister}
           disabled={loading}
-          className="[&_input[name=email]]:opacity-60 [&_input[name=email]]:pointer-events-none"
+          className={isGoogleFlow ? "[&_input[name=email]]:opacity-60 [&_input[name=email]]:pointer-events-none" : undefined}
         />
 
         <p className="text-center text-sm text-[var(--color-muted-foreground)] mt-6">
