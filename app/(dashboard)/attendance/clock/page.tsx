@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { formatDuration } from "@/lib/format";
 
 // Simple kiosk page: the kasir opens this on the shared device, hands it to
 // staff, who tap their name + enter a 4-6 digit PIN to clock in/out. One screen,
@@ -17,7 +18,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 
 type Staff = { id: string; name: string };
 type InNow = { id: string; name: string; since: string };
-type ClockResult = { type: "CLOCK_IN" | "CLOCK_OUT"; userName: string };
+type ClockResult = { type: "CLOCK_IN" | "CLOCK_OUT"; userName: string; sessionMs?: number };
 
 const PIN_PAD = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
 
@@ -29,6 +30,13 @@ export default function AttendanceClockPage() {
   const [selected, setSelected] = useState<Staff | null>(null);
   const [pin, setPin] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Tick once a minute so elapsed-working durations on the chips stay fresh.
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const refresh = useCallback(async () => {
     try {
@@ -51,7 +59,7 @@ export default function AttendanceClockPage() {
 
   const press = (d: string) => {
     if (d === "del") setPin((p) => p.slice(0, -1));
-    else if (d && pin.length < 6) setPin((p) => p + d);
+    else if (d && pin.length < 8) setPin((p) => p + d);
   };
 
   const submit = async () => {
@@ -63,7 +71,8 @@ export default function AttendanceClockPage() {
         body: { userId: selected.id, pin },
       });
       const label = r.data.type === "CLOCK_IN" ? t("attendance.clockIn") : t("attendance.clockOut");
-      toast.success(`${label} — ${r.data.userName}`);
+      const dur = r.data.type === "CLOCK_OUT" && r.data.sessionMs ? ` (${formatDuration(r.data.sessionMs, lang)})` : "";
+      toast.success(`${label} — ${r.data.userName}${dur}`);
       setSelected(null);
       setPin("");
       void refresh();
@@ -91,7 +100,7 @@ export default function AttendanceClockPage() {
               <span key={s.id} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 {s.name}
-                <span className="sa-tnum text-xs text-emerald-600">{timeFmt(s.since)}</span>
+                <span className="sa-tnum text-xs text-emerald-600">{timeFmt(s.since)} · {formatDuration(now - new Date(s.since).getTime(), lang)}</span>
               </span>
             ))}
           </div>

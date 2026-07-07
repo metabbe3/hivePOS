@@ -4,6 +4,7 @@ import { withErrorHandler, apiCreated, ValidationError } from "@/modules/shared"
 import { requirePermissionOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/modules/shared/application/password";
+import { pinField } from "@/lib/validations";
 import { z } from "zod";
 
 // Quick-add an attendance-only staff (no email/login). Email + password are
@@ -14,7 +15,7 @@ import { z } from "zod";
 const schema = z.object({
   name: z.string().min(1).max(100),
   phone: z.string().optional(),
-  pin: z.string().regex(/^\d{4,6}$/),
+  pin: pinField,
   branchId: z.string().optional(),
 });
 

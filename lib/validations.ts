@@ -2,6 +2,18 @@ import { z } from "zod/v4";
 
 const emailField = z.email();
 const passwordField = (min = 6) => z.string().min(min);
+
+// Clock PIN: 4-8 digits, reject weak (all-same / sequential). Used at SET time
+// (quick-staff, set-pin). Clock VERIFY uses a looser schema (old PINs must still clock).
+const isWeakPin = (p: string) => {
+  if (/^(\d)\1{3,}$/.test(p)) return true; // 0000, 1111, …
+  const asc = "0123456789", desc = "9876543210";
+  return asc.includes(p) || desc.includes(p); // 1234, 4321, …
+};
+export const pinField = z
+  .string()
+  .regex(/^\d{4,8}$/, "PIN harus 4-8 digit angka.")
+  .refine((p) => !isWeakPin(p), "PIN terlalu mudah ditebak (jangan 1111/1234).");
 const slugField = z
   .string()
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung.");

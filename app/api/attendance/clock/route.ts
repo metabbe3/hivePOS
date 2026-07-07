@@ -13,7 +13,7 @@ const COOLDOWN_MS = 60_000;
 const bodySchema = z
   .object({
     userId: z.string().uuid().optional(),
-    pin: z.string().min(4).max(6).optional(),
+    pin: z.string().min(4).max(8).optional(),
     qrToken: z.string().min(8).optional(),
   })
   .refine((d) => (d.userId && d.pin) || d.qrToken, {
@@ -62,10 +62,12 @@ export const POST = withErrorHandler(async (req) => {
   const now = new Date();
   let type: "CLOCK_IN" | "CLOCK_OUT" = "CLOCK_IN";
   let autoClosed = false;
+  let sessionMs: number | undefined;
   if (last?.type === "CLOCK_IN") {
     const sameDay = last.timestamp.toDateString() === now.toDateString();
     if (sameDay) {
       type = "CLOCK_OUT";
+      sessionMs = now.getTime() - last.timestamp.getTime();
     } else {
       // Stale open IN from a previous day → auto-close at end of that day, then a fresh IN.
       const endOf = new Date(last.timestamp);
@@ -80,5 +82,5 @@ export const POST = withErrorHandler(async (req) => {
   const ev = await prisma.clockEvent.create({
     data: { userId: user.id, tenantId: ctx.tenantId, branchId: ctx.branchId, type, timestamp: now },
   });
-  return apiCreated({ ...ev, userName: user.name, autoClosed });
+  return apiCreated({ ...ev, userName: user.name, autoClosed, sessionMs });
 });

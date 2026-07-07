@@ -11,6 +11,17 @@ export function formatCurrency(amount: number | string): string {
   }).format(num);
 }
 
+// Format a millisecond duration as "3h 12m" (en) / "3j 12m" (id). Used by the
+// attendance clock (elapsed working time + clock-out session duration).
+export function formatDuration(ms: number, lang: string = "id"): string {
+  if (!Number.isFinite(ms) || ms < 60_000) return "<1m";
+  const mins = Math.floor(ms / 60_000);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const hLabel = lang === "id" ? "j" : "h";
+  return h > 0 ? `${h}${hLabel} ${m}m` : `${m}m`;
+}
+
 export function formatCompactCurrency(amount: number | string): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
   if (isNaN(num) || num === 0) return "Rp 0";

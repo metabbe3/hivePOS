@@ -3,11 +3,12 @@ import { randomBytes } from "node:crypto";
 import { withErrorHandler, apiSuccess, ValidationError } from "@/modules/shared";
 import { requirePermissionOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
+import { pinField } from "@/lib/validations";
 import { z } from "zod";
 
 const schema = z
   .object({
-    pin: z.string().regex(/^\d{4,6}$/).optional(),
+    pin: pinField.optional(),
     rotateQr: z.boolean().optional(),
   })
   .refine((d) => d.pin !== undefined || d.rotateQr, { message: "pin or rotateQr required" });
