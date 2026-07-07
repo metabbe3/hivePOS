@@ -53,6 +53,8 @@ export type UserMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   lastTicketEventReadAt: Date | null
+  pinHash: string | null
+  qrToken: string | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -74,6 +76,8 @@ export type UserMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   lastTicketEventReadAt: Date | null
+  pinHash: string | null
+  qrToken: string | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -95,6 +99,8 @@ export type UserCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   lastTicketEventReadAt: number
+  pinHash: number
+  qrToken: number
   _all: number
 }
 
@@ -126,6 +132,8 @@ export type UserMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   lastTicketEventReadAt?: true
+  pinHash?: true
+  qrToken?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -147,6 +155,8 @@ export type UserMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   lastTicketEventReadAt?: true
+  pinHash?: true
+  qrToken?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -168,6 +178,8 @@ export type UserCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   lastTicketEventReadAt?: true
+  pinHash?: true
+  qrToken?: true
   _all?: true
 }
 
@@ -276,6 +288,8 @@ export type UserGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   lastTicketEventReadAt: Date | null
+  pinHash: string | null
+  qrToken: string | null
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -320,10 +334,13 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastTicketEventReadAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  pinHash?: Prisma.StringNullableFilter<"User"> | string | null
+  qrToken?: Prisma.StringNullableFilter<"User"> | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   roleRef?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
   submittedTickets?: Prisma.SupportTicketListRelationFilter
+  clockEvents?: Prisma.ClockEventListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -345,15 +362,19 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastTicketEventReadAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pinHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  qrToken?: Prisma.SortOrderInput | Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   branch?: Prisma.BranchOrderByWithRelationInput
   roleRef?: Prisma.RoleOrderByWithRelationInput
   submittedTickets?: Prisma.SupportTicketOrderByRelationAggregateInput
+  clockEvents?: Prisma.ClockEventOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  qrToken?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
@@ -373,11 +394,13 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastTicketEventReadAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  pinHash?: Prisma.StringNullableFilter<"User"> | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   branch?: Prisma.XOR<Prisma.BranchNullableScalarRelationFilter, Prisma.BranchWhereInput> | null
   roleRef?: Prisma.XOR<Prisma.RoleNullableScalarRelationFilter, Prisma.RoleWhereInput> | null
   submittedTickets?: Prisma.SupportTicketListRelationFilter
-}, "id" | "email">
+  clockEvents?: Prisma.ClockEventListRelationFilter
+}, "id" | "email" | "qrToken">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -398,6 +421,8 @@ export type UserOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastTicketEventReadAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  pinHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  qrToken?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -427,6 +452,8 @@ export type UserScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   lastTicketEventReadAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  pinHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  qrToken?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
 export type UserCreateInput = {
@@ -445,10 +472,13 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   tenant: Prisma.TenantCreateNestedOneWithoutUsersInput
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   roleRef?: Prisma.RoleCreateNestedOneWithoutUsersInput
   submittedTickets?: Prisma.SupportTicketCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -470,7 +500,10 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   submittedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -489,10 +522,13 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUsersNestedInput
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   roleRef?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   submittedTickets?: Prisma.SupportTicketUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -514,7 +550,10 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -536,6 +575,8 @@ export type UserCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -554,6 +595,8 @@ export type UserUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -575,6 +618,8 @@ export type UserUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserNullableScalarRelationFilter = {
@@ -611,6 +656,8 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastTicketEventReadAt?: Prisma.SortOrder
+  pinHash?: Prisma.SortOrder
+  qrToken?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -636,6 +683,8 @@ export type UserMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastTicketEventReadAt?: Prisma.SortOrder
+  pinHash?: Prisma.SortOrder
+  qrToken?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -657,10 +706,17 @@ export type UserMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastTicketEventReadAt?: Prisma.SortOrder
+  pinHash?: Prisma.SortOrder
+  qrToken?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
   sessionVersion?: Prisma.SortOrder
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type UserCreateNestedOneWithoutSubmittedTicketsInput = {
@@ -767,6 +823,20 @@ export type EnumUserRoleFieldUpdateOperationsInput = {
   set?: $Enums.UserRole
 }
 
+export type UserCreateNestedOneWithoutClockEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutClockEventsInput, Prisma.UserUncheckedCreateWithoutClockEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutClockEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutClockEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutClockEventsInput, Prisma.UserUncheckedCreateWithoutClockEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutClockEventsInput
+  upsert?: Prisma.UserUpsertWithoutClockEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutClockEventsInput, Prisma.UserUpdateWithoutClockEventsInput>, Prisma.UserUncheckedUpdateWithoutClockEventsInput>
+}
+
 export type UserCreateNestedManyWithoutRoleRefInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutRoleRefInput, Prisma.UserUncheckedCreateWithoutRoleRefInput> | Prisma.UserCreateWithoutRoleRefInput[] | Prisma.UserUncheckedCreateWithoutRoleRefInput[]
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutRoleRefInput | Prisma.UserCreateOrConnectWithoutRoleRefInput[]
@@ -825,9 +895,12 @@ export type UserCreateWithoutSubmittedTicketsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   tenant: Prisma.TenantCreateNestedOneWithoutUsersInput
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   roleRef?: Prisma.RoleCreateNestedOneWithoutUsersInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubmittedTicketsInput = {
@@ -849,6 +922,9 @@ export type UserUncheckedCreateWithoutSubmittedTicketsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubmittedTicketsInput = {
@@ -883,9 +959,12 @@ export type UserUpdateWithoutSubmittedTicketsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUsersNestedInput
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   roleRef?: Prisma.RoleUpdateOneWithoutUsersNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubmittedTicketsInput = {
@@ -907,6 +986,9 @@ export type UserUncheckedUpdateWithoutSubmittedTicketsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTenantInput = {
@@ -925,9 +1007,12 @@ export type UserCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   roleRef?: Prisma.RoleCreateNestedOneWithoutUsersInput
   submittedTickets?: Prisma.SupportTicketCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTenantInput = {
@@ -948,7 +1033,10 @@ export type UserUncheckedCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   submittedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTenantInput = {
@@ -999,6 +1087,8 @@ export type UserScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastTicketEventReadAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  pinHash?: Prisma.StringNullableFilter<"User"> | string | null
+  qrToken?: Prisma.StringNullableFilter<"User"> | string | null
 }
 
 export type UserCreateWithoutBranchInput = {
@@ -1017,9 +1107,12 @@ export type UserCreateWithoutBranchInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   tenant: Prisma.TenantCreateNestedOneWithoutUsersInput
   roleRef?: Prisma.RoleCreateNestedOneWithoutUsersInput
   submittedTickets?: Prisma.SupportTicketCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBranchInput = {
@@ -1040,7 +1133,10 @@ export type UserUncheckedCreateWithoutBranchInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   submittedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBranchInput = {
@@ -1069,6 +1165,118 @@ export type UserUpdateManyWithWhereWithoutBranchInput = {
   data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutBranchInput>
 }
 
+export type UserCreateWithoutClockEventsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name: string
+  phone?: string | null
+  googleId?: string | null
+  emailVerified?: Date | string | null
+  lastLoginAt?: Date | string | null
+  avatar?: string | null
+  role?: $Enums.UserRole
+  sessionVersion?: number
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
+  tenant: Prisma.TenantCreateNestedOneWithoutUsersInput
+  branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
+  roleRef?: Prisma.RoleCreateNestedOneWithoutUsersInput
+  submittedTickets?: Prisma.SupportTicketCreateNestedManyWithoutSubmittedByInput
+}
+
+export type UserUncheckedCreateWithoutClockEventsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  name: string
+  phone?: string | null
+  googleId?: string | null
+  emailVerified?: Date | string | null
+  lastLoginAt?: Date | string | null
+  avatar?: string | null
+  role?: $Enums.UserRole
+  roleId?: string | null
+  tenantId: string
+  branchId?: string | null
+  sessionVersion?: number
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
+  submittedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutSubmittedByInput
+}
+
+export type UserCreateOrConnectWithoutClockEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutClockEventsInput, Prisma.UserUncheckedCreateWithoutClockEventsInput>
+}
+
+export type UserUpsertWithoutClockEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutClockEventsInput, Prisma.UserUncheckedUpdateWithoutClockEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutClockEventsInput, Prisma.UserUncheckedCreateWithoutClockEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutClockEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutClockEventsInput, Prisma.UserUncheckedUpdateWithoutClockEventsInput>
+}
+
+export type UserUpdateWithoutClockEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutUsersNestedInput
+  branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
+  roleRef?: Prisma.RoleUpdateOneWithoutUsersNestedInput
+  submittedTickets?: Prisma.SupportTicketUpdateManyWithoutSubmittedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutClockEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  roleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutSubmittedByNestedInput
+}
+
 export type UserCreateWithoutRoleRefInput = {
   id?: string
   email: string
@@ -1085,9 +1293,12 @@ export type UserCreateWithoutRoleRefInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   tenant: Prisma.TenantCreateNestedOneWithoutUsersInput
   branch?: Prisma.BranchCreateNestedOneWithoutUsersInput
   submittedTickets?: Prisma.SupportTicketCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRoleRefInput = {
@@ -1108,7 +1319,10 @@ export type UserUncheckedCreateWithoutRoleRefInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
   submittedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutSubmittedByInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRoleRefInput = {
@@ -1155,6 +1369,8 @@ export type UserCreateManyTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
 }
 
 export type UserUpdateWithoutTenantInput = {
@@ -1173,9 +1389,12 @@ export type UserUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   roleRef?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   submittedTickets?: Prisma.SupportTicketUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTenantInput = {
@@ -1196,7 +1415,10 @@ export type UserUncheckedUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutTenantInput = {
@@ -1217,6 +1439,8 @@ export type UserUncheckedUpdateManyWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserCreateManyBranchInput = {
@@ -1237,6 +1461,8 @@ export type UserCreateManyBranchInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
 }
 
 export type UserUpdateWithoutBranchInput = {
@@ -1255,9 +1481,12 @@ export type UserUpdateWithoutBranchInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUsersNestedInput
   roleRef?: Prisma.RoleUpdateOneWithoutUsersNestedInput
   submittedTickets?: Prisma.SupportTicketUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBranchInput = {
@@ -1278,7 +1507,10 @@ export type UserUncheckedUpdateWithoutBranchInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutBranchInput = {
@@ -1299,6 +1531,8 @@ export type UserUncheckedUpdateManyWithoutBranchInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserCreateManyRoleRefInput = {
@@ -1319,6 +1553,8 @@ export type UserCreateManyRoleRefInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastTicketEventReadAt?: Date | string | null
+  pinHash?: string | null
+  qrToken?: string | null
 }
 
 export type UserUpdateWithoutRoleRefInput = {
@@ -1337,9 +1573,12 @@ export type UserUpdateWithoutRoleRefInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutUsersNestedInput
   branch?: Prisma.BranchUpdateOneWithoutUsersNestedInput
   submittedTickets?: Prisma.SupportTicketUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRoleRefInput = {
@@ -1360,7 +1599,10 @@ export type UserUncheckedUpdateWithoutRoleRefInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   submittedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutSubmittedByNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutRoleRefInput = {
@@ -1381,6 +1623,8 @@ export type UserUncheckedUpdateManyWithoutRoleRefInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastTicketEventReadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pinHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1390,10 +1634,12 @@ export type UserUncheckedUpdateManyWithoutRoleRefInput = {
 
 export type UserCountOutputType = {
   submittedTickets: number
+  clockEvents: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   submittedTickets?: boolean | UserCountOutputTypeCountSubmittedTicketsArgs
+  clockEvents?: boolean | UserCountOutputTypeCountClockEventsArgs
 }
 
 /**
@@ -1411,6 +1657,13 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
  */
 export type UserCountOutputTypeCountSubmittedTicketsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SupportTicketWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountClockEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClockEventWhereInput
 }
 
 
@@ -1433,10 +1686,13 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   lastTicketEventReadAt?: boolean
+  pinHash?: boolean
+  qrToken?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   roleRef?: boolean | Prisma.User$roleRefArgs<ExtArgs>
   submittedTickets?: boolean | Prisma.User$submittedTicketsArgs<ExtArgs>
+  clockEvents?: boolean | Prisma.User$clockEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1459,6 +1715,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   lastTicketEventReadAt?: boolean
+  pinHash?: boolean
+  qrToken?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   roleRef?: boolean | Prisma.User$roleRefArgs<ExtArgs>
@@ -1483,6 +1741,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   lastTicketEventReadAt?: boolean
+  pinHash?: boolean
+  qrToken?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   roleRef?: boolean | Prisma.User$roleRefArgs<ExtArgs>
@@ -1507,14 +1767,17 @@ export type UserSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   lastTicketEventReadAt?: boolean
+  pinHash?: boolean
+  qrToken?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "phone" | "googleId" | "emailVerified" | "lastLoginAt" | "avatar" | "role" | "roleId" | "tenantId" | "branchId" | "sessionVersion" | "isActive" | "createdAt" | "updatedAt" | "lastTicketEventReadAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "phone" | "googleId" | "emailVerified" | "lastLoginAt" | "avatar" | "role" | "roleId" | "tenantId" | "branchId" | "sessionVersion" | "isActive" | "createdAt" | "updatedAt" | "lastTicketEventReadAt" | "pinHash" | "qrToken", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   branch?: boolean | Prisma.User$branchArgs<ExtArgs>
   roleRef?: boolean | Prisma.User$roleRefArgs<ExtArgs>
   submittedTickets?: boolean | Prisma.User$submittedTicketsArgs<ExtArgs>
+  clockEvents?: boolean | Prisma.User$clockEventsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1535,6 +1798,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     branch: Prisma.$BranchPayload<ExtArgs> | null
     roleRef: Prisma.$RolePayload<ExtArgs> | null
     submittedTickets: Prisma.$SupportTicketPayload<ExtArgs>[]
+    clockEvents: Prisma.$ClockEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1575,6 +1839,14 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      * Null = never opened the bell → all events appear unread.
      */
     lastTicketEventReadAt: Date | null
+    /**
+     * Attendance: bcrypt-hashed clock PIN (separate from login passwordHash).
+     */
+    pinHash: string | null
+    /**
+     * Attendance: opaque random token for QR-based clock-in (null = QR disabled).
+     */
+    qrToken: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1973,6 +2245,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   branch<T extends Prisma.User$branchArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$branchArgs<ExtArgs>>): Prisma.Prisma__BranchClient<runtime.Types.Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   roleRef<T extends Prisma.User$roleRefArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$roleRefArgs<ExtArgs>>): Prisma.Prisma__RoleClient<runtime.Types.Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   submittedTickets<T extends Prisma.User$submittedTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$submittedTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  clockEvents<T extends Prisma.User$clockEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$clockEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClockEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2020,6 +2293,8 @@ export interface UserFieldRefs {
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly lastTicketEventReadAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly pinHash: Prisma.FieldRef<"User", 'String'>
+  readonly qrToken: Prisma.FieldRef<"User", 'String'>
 }
     
 
@@ -2480,6 +2755,30 @@ export type User$submittedTicketsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.SupportTicketScalarFieldEnum | Prisma.SupportTicketScalarFieldEnum[]
+}
+
+/**
+ * User.clockEvents
+ */
+export type User$clockEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClockEvent
+   */
+  select?: Prisma.ClockEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClockEvent
+   */
+  omit?: Prisma.ClockEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClockEventInclude<ExtArgs> | null
+  where?: Prisma.ClockEventWhereInput
+  orderBy?: Prisma.ClockEventOrderByWithRelationInput | Prisma.ClockEventOrderByWithRelationInput[]
+  cursor?: Prisma.ClockEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClockEventScalarFieldEnum | Prisma.ClockEventScalarFieldEnum[]
 }
 
 /**

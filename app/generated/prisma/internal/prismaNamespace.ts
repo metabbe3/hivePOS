@@ -396,6 +396,7 @@ export const ModelName = {
   Subscription: 'Subscription',
   Branch: 'Branch',
   User: 'User',
+  ClockEvent: 'ClockEvent',
   Role: 'Role',
   Customer: 'Customer',
   Service: 'Service',
@@ -432,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "superAdmin" | "blogPost" | "auditLog" | "errorLog" | "supportTicket" | "ticketComment" | "plan" | "tenant" | "referral" | "subscription" | "branch" | "user" | "role" | "customer" | "service" | "serviceGroup" | "order" | "orderPhoto" | "orderItem" | "payment" | "pickupRequest" | "depositTransaction" | "stockItem" | "stockMovement" | "expenseCategory" | "expense" | "promoCode" | "promoRedemption" | "saaSPayment" | "featureFlag" | "tenantFeatureFlag" | "systemSetting" | "telemetryEvent"
+    modelProps: "superAdmin" | "blogPost" | "auditLog" | "errorLog" | "supportTicket" | "ticketComment" | "plan" | "tenant" | "referral" | "subscription" | "branch" | "user" | "clockEvent" | "role" | "customer" | "service" | "serviceGroup" | "order" | "orderPhoto" | "orderItem" | "payment" | "pickupRequest" | "depositTransaction" | "stockItem" | "stockMovement" | "expenseCategory" | "expense" | "promoCode" | "promoRedemption" | "saaSPayment" | "featureFlag" | "tenantFeatureFlag" | "systemSetting" | "telemetryEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1321,6 +1322,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    ClockEvent: {
+      payload: Prisma.$ClockEventPayload<ExtArgs>
+      fields: Prisma.ClockEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClockEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClockEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>
+        }
+        findFirst: {
+          args: Prisma.ClockEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClockEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>
+        }
+        findMany: {
+          args: Prisma.ClockEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>[]
+        }
+        create: {
+          args: Prisma.ClockEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>
+        }
+        createMany: {
+          args: Prisma.ClockEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClockEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>[]
+        }
+        delete: {
+          args: Prisma.ClockEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>
+        }
+        update: {
+          args: Prisma.ClockEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClockEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClockEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClockEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClockEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClockEventPayload>
+        }
+        aggregate: {
+          args: Prisma.ClockEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClockEvent>
+        }
+        groupBy: {
+          args: Prisma.ClockEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClockEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClockEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClockEventCountAggregateOutputType> | number
         }
       }
     }
@@ -3126,6 +3201,7 @@ export const BranchScalarFieldEnum = {
   isFreeTier: 'isFreeTier',
   slug: 'slug',
   pickupSlots: 'pickupSlots',
+  workDays: 'workDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3151,10 +3227,25 @@ export const UserScalarFieldEnum = {
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  lastTicketEventReadAt: 'lastTicketEventReadAt'
+  lastTicketEventReadAt: 'lastTicketEventReadAt',
+  pinHash: 'pinHash',
+  qrToken: 'qrToken'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const ClockEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tenantId: 'tenantId',
+  branchId: 'branchId',
+  type: 'type',
+  timestamp: 'timestamp',
+  createdAt: 'createdAt'
+} as const
+
+export type ClockEventScalarFieldEnum = (typeof ClockEventScalarFieldEnum)[keyof typeof ClockEventScalarFieldEnum]
 
 
 export const RoleScalarFieldEnum = {
@@ -3740,6 +3831,20 @@ export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 
 
 /**
+ * Reference to a field of type 'ClockType'
+ */
+export type EnumClockTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ClockType'>
+    
+
+
+/**
+ * Reference to a field of type 'ClockType[]'
+ */
+export type ListEnumClockTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ClockType[]'>
+    
+
+
+/**
  * Reference to a field of type 'PricingType'
  */
 export type EnumPricingTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PricingType'>
@@ -4014,6 +4119,7 @@ export type GlobalOmitConfig = {
   subscription?: Prisma.SubscriptionOmit
   branch?: Prisma.BranchOmit
   user?: Prisma.UserOmit
+  clockEvent?: Prisma.ClockEventOmit
   role?: Prisma.RoleOmit
   customer?: Prisma.CustomerOmit
   service?: Prisma.ServiceOmit

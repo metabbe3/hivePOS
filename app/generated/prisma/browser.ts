@@ -84,6 +84,11 @@ export type Branch = Prisma.BranchModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model ClockEvent
+ * 
+ */
+export type ClockEvent = Prisma.ClockEventModel
+/**
  * Model Role
  * Per-tenant role definitions with granular permissions (RBAC)
  */

@@ -30,12 +30,14 @@ export type BranchAvgAggregateOutputType = {
   latitude: number | null
   longitude: number | null
   printerPort: number | null
+  workDays: number | null
 }
 
 export type BranchSumAggregateOutputType = {
   latitude: number | null
   longitude: number | null
   printerPort: number | null
+  workDays: number[]
 }
 
 export type BranchMinAggregateOutputType = {
@@ -111,6 +113,7 @@ export type BranchCountAggregateOutputType = {
   isFreeTier: number
   slug: number
   pickupSlots: number
+  workDays: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -121,12 +124,14 @@ export type BranchAvgAggregateInputType = {
   latitude?: true
   longitude?: true
   printerPort?: true
+  workDays?: true
 }
 
 export type BranchSumAggregateInputType = {
   latitude?: true
   longitude?: true
   printerPort?: true
+  workDays?: true
 }
 
 export type BranchMinAggregateInputType = {
@@ -202,6 +207,7 @@ export type BranchCountAggregateInputType = {
   isFreeTier?: true
   slug?: true
   pickupSlots?: true
+  workDays?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -316,6 +322,7 @@ export type BranchGroupByOutputType = {
   isFreeTier: boolean
   slug: string | null
   pickupSlots: runtime.JsonValue | null
+  workDays: number[]
   createdAt: Date
   updatedAt: Date
   _count: BranchCountAggregateOutputType | null
@@ -366,6 +373,7 @@ export type BranchWhereInput = {
   isFreeTier?: Prisma.BoolFilter<"Branch"> | boolean
   slug?: Prisma.StringNullableFilter<"Branch"> | string | null
   pickupSlots?: Prisma.JsonNullableFilter<"Branch">
+  workDays?: Prisma.IntNullableListFilter<"Branch">
   createdAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -379,6 +387,7 @@ export type BranchWhereInput = {
   depositTransactions?: Prisma.DepositTransactionListRelationFilter
   serviceGroups?: Prisma.ServiceGroupListRelationFilter
   pickupRequests?: Prisma.PickupRequestListRelationFilter
+  clockEvents?: Prisma.ClockEventListRelationFilter
 }
 
 export type BranchOrderByWithRelationInput = {
@@ -404,6 +413,7 @@ export type BranchOrderByWithRelationInput = {
   isFreeTier?: Prisma.SortOrder
   slug?: Prisma.SortOrderInput | Prisma.SortOrder
   pickupSlots?: Prisma.SortOrderInput | Prisma.SortOrder
+  workDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -417,6 +427,7 @@ export type BranchOrderByWithRelationInput = {
   depositTransactions?: Prisma.DepositTransactionOrderByRelationAggregateInput
   serviceGroups?: Prisma.ServiceGroupOrderByRelationAggregateInput
   pickupRequests?: Prisma.PickupRequestOrderByRelationAggregateInput
+  clockEvents?: Prisma.ClockEventOrderByRelationAggregateInput
 }
 
 export type BranchWhereUniqueInput = Prisma.AtLeast<{
@@ -446,6 +457,7 @@ export type BranchWhereUniqueInput = Prisma.AtLeast<{
   coverageEnd?: Prisma.DateTimeNullableFilter<"Branch"> | Date | string | null
   isFreeTier?: Prisma.BoolFilter<"Branch"> | boolean
   pickupSlots?: Prisma.JsonNullableFilter<"Branch">
+  workDays?: Prisma.IntNullableListFilter<"Branch">
   createdAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -459,6 +471,7 @@ export type BranchWhereUniqueInput = Prisma.AtLeast<{
   depositTransactions?: Prisma.DepositTransactionListRelationFilter
   serviceGroups?: Prisma.ServiceGroupListRelationFilter
   pickupRequests?: Prisma.PickupRequestListRelationFilter
+  clockEvents?: Prisma.ClockEventListRelationFilter
 }, "id" | "slug" | "tenantId_name">
 
 export type BranchOrderByWithAggregationInput = {
@@ -484,6 +497,7 @@ export type BranchOrderByWithAggregationInput = {
   isFreeTier?: Prisma.SortOrder
   slug?: Prisma.SortOrderInput | Prisma.SortOrder
   pickupSlots?: Prisma.SortOrderInput | Prisma.SortOrder
+  workDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BranchCountOrderByAggregateInput
@@ -519,6 +533,7 @@ export type BranchScalarWhereWithAggregatesInput = {
   isFreeTier?: Prisma.BoolWithAggregatesFilter<"Branch"> | boolean
   slug?: Prisma.StringNullableWithAggregatesFilter<"Branch"> | string | null
   pickupSlots?: Prisma.JsonNullableWithAggregatesFilter<"Branch">
+  workDays?: Prisma.IntNullableListFilter<"Branch">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Branch"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Branch"> | Date | string
 }
@@ -545,6 +560,7 @@ export type BranchCreateInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -558,6 +574,7 @@ export type BranchCreateInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateInput = {
@@ -583,6 +600,7 @@ export type BranchUncheckedCreateInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -595,6 +613,7 @@ export type BranchUncheckedCreateInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUpdateInput = {
@@ -619,6 +638,7 @@ export type BranchUpdateInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -632,6 +652,7 @@ export type BranchUpdateInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateInput = {
@@ -657,6 +678,7 @@ export type BranchUncheckedUpdateInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -669,6 +691,7 @@ export type BranchUncheckedUpdateInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateManyInput = {
@@ -694,6 +717,7 @@ export type BranchCreateManyInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -720,6 +744,7 @@ export type BranchUpdateManyMutationInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -747,6 +772,7 @@ export type BranchUncheckedUpdateManyInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -759,6 +785,14 @@ export type BranchListRelationFilter = {
 
 export type BranchOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type IntNullableListFilter<$PrismaModel = never> = {
+  equals?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel> | null
+  has?: number | Prisma.IntFieldRefInput<$PrismaModel> | null
+  hasEvery?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  hasSome?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type BranchTenantIdNameCompoundUniqueInput = {
@@ -789,6 +823,7 @@ export type BranchCountOrderByAggregateInput = {
   isFreeTier?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   pickupSlots?: Prisma.SortOrder
+  workDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -797,6 +832,7 @@ export type BranchAvgOrderByAggregateInput = {
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   printerPort?: Prisma.SortOrder
+  workDays?: Prisma.SortOrder
 }
 
 export type BranchMaxOrderByAggregateInput = {
@@ -853,6 +889,7 @@ export type BranchSumOrderByAggregateInput = {
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
   printerPort?: Prisma.SortOrder
+  workDays?: Prisma.SortOrder
 }
 
 export type BranchNullableScalarRelationFilter = {
@@ -907,12 +944,21 @@ export type BranchUncheckedUpdateManyWithoutTenantNestedInput = {
   deleteMany?: Prisma.BranchScalarWhereInput | Prisma.BranchScalarWhereInput[]
 }
 
+export type BranchCreateworkDaysInput = {
+  set: number[]
+}
+
 export type NullableFloatFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type BranchUpdateworkDaysInput = {
+  set?: number[]
+  push?: number | number[]
 }
 
 export type BranchCreateNestedOneWithoutUsersInput = {
@@ -929,6 +975,20 @@ export type BranchUpdateOneWithoutUsersNestedInput = {
   delete?: Prisma.BranchWhereInput | boolean
   connect?: Prisma.BranchWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.BranchUpdateToOneWithWhereWithoutUsersInput, Prisma.BranchUpdateWithoutUsersInput>, Prisma.BranchUncheckedUpdateWithoutUsersInput>
+}
+
+export type BranchCreateNestedOneWithoutClockEventsInput = {
+  create?: Prisma.XOR<Prisma.BranchCreateWithoutClockEventsInput, Prisma.BranchUncheckedCreateWithoutClockEventsInput>
+  connectOrCreate?: Prisma.BranchCreateOrConnectWithoutClockEventsInput
+  connect?: Prisma.BranchWhereUniqueInput
+}
+
+export type BranchUpdateOneRequiredWithoutClockEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.BranchCreateWithoutClockEventsInput, Prisma.BranchUncheckedCreateWithoutClockEventsInput>
+  connectOrCreate?: Prisma.BranchCreateOrConnectWithoutClockEventsInput
+  upsert?: Prisma.BranchUpsertWithoutClockEventsInput
+  connect?: Prisma.BranchWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BranchUpdateToOneWithWhereWithoutClockEventsInput, Prisma.BranchUpdateWithoutClockEventsInput>, Prisma.BranchUncheckedUpdateWithoutClockEventsInput>
 }
 
 export type BranchCreateNestedOneWithoutCustomersInput = {
@@ -1079,6 +1139,7 @@ export type BranchCreateWithoutTenantInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserCreateNestedManyWithoutBranchInput
@@ -1091,6 +1152,7 @@ export type BranchCreateWithoutTenantInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutTenantInput = {
@@ -1115,6 +1177,7 @@ export type BranchUncheckedCreateWithoutTenantInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -1127,6 +1190,7 @@ export type BranchUncheckedCreateWithoutTenantInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutTenantInput = {
@@ -1181,6 +1245,7 @@ export type BranchScalarWhereInput = {
   isFreeTier?: Prisma.BoolFilter<"Branch"> | boolean
   slug?: Prisma.StringNullableFilter<"Branch"> | string | null
   pickupSlots?: Prisma.JsonNullableFilter<"Branch">
+  workDays?: Prisma.IntNullableListFilter<"Branch">
   createdAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Branch"> | Date | string
 }
@@ -1207,6 +1272,7 @@ export type BranchCreateWithoutUsersInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -1219,6 +1285,7 @@ export type BranchCreateWithoutUsersInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutUsersInput = {
@@ -1244,6 +1311,7 @@ export type BranchUncheckedCreateWithoutUsersInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
@@ -1255,6 +1323,7 @@ export type BranchUncheckedCreateWithoutUsersInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutUsersInput = {
@@ -1295,6 +1364,7 @@ export type BranchUpdateWithoutUsersInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -1307,6 +1377,7 @@ export type BranchUpdateWithoutUsersInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutUsersInput = {
@@ -1332,8 +1403,178 @@ export type BranchUncheckedUpdateWithoutUsersInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
+  services?: Prisma.ServiceUncheckedUpdateManyWithoutBranchNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutBranchNestedInput
+  stockItems?: Prisma.StockItemUncheckedUpdateManyWithoutBranchNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutBranchNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutBranchNestedInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
+  serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
+  pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
+}
+
+export type BranchCreateWithoutClockEventsInput = {
+  id?: string
+  name: string
+  address?: string | null
+  phone?: string | null
+  invoiceFooter?: string | null
+  isActive?: boolean
+  latitude?: number | null
+  longitude?: number | null
+  operatingHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  whatsappLink?: string | null
+  googleMapsLink?: string | null
+  printerHost?: string | null
+  printerPort?: number
+  printerName?: string | null
+  printerEnabled?: boolean
+  printerLastSeen?: Date | string | null
+  printerPaperSize?: string
+  coverageEnd?: Date | string | null
+  isFreeTier?: boolean
+  slug?: string | null
+  pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
+  users?: Prisma.UserCreateNestedManyWithoutBranchInput
+  customers?: Prisma.CustomerCreateNestedManyWithoutBranchInput
+  services?: Prisma.ServiceCreateNestedManyWithoutBranchInput
+  orders?: Prisma.OrderCreateNestedManyWithoutBranchInput
+  stockItems?: Prisma.StockItemCreateNestedManyWithoutBranchInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutBranchInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutBranchInput
+  depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
+  serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
+  pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+}
+
+export type BranchUncheckedCreateWithoutClockEventsInput = {
+  id?: string
+  name: string
+  address?: string | null
+  phone?: string | null
+  invoiceFooter?: string | null
+  isActive?: boolean
+  tenantId: string
+  latitude?: number | null
+  longitude?: number | null
+  operatingHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  whatsappLink?: string | null
+  googleMapsLink?: string | null
+  printerHost?: string | null
+  printerPort?: number
+  printerName?: string | null
+  printerEnabled?: boolean
+  printerLastSeen?: Date | string | null
+  printerPaperSize?: string
+  coverageEnd?: Date | string | null
+  isFreeTier?: boolean
+  slug?: string | null
+  pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
+  customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutBranchInput
+  services?: Prisma.ServiceUncheckedCreateNestedManyWithoutBranchInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBranchInput
+  stockItems?: Prisma.StockItemUncheckedCreateNestedManyWithoutBranchInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutBranchInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutBranchInput
+  depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
+  serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
+  pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+}
+
+export type BranchCreateOrConnectWithoutClockEventsInput = {
+  where: Prisma.BranchWhereUniqueInput
+  create: Prisma.XOR<Prisma.BranchCreateWithoutClockEventsInput, Prisma.BranchUncheckedCreateWithoutClockEventsInput>
+}
+
+export type BranchUpsertWithoutClockEventsInput = {
+  update: Prisma.XOR<Prisma.BranchUpdateWithoutClockEventsInput, Prisma.BranchUncheckedUpdateWithoutClockEventsInput>
+  create: Prisma.XOR<Prisma.BranchCreateWithoutClockEventsInput, Prisma.BranchUncheckedCreateWithoutClockEventsInput>
+  where?: Prisma.BranchWhereInput
+}
+
+export type BranchUpdateToOneWithWhereWithoutClockEventsInput = {
+  where?: Prisma.BranchWhereInput
+  data: Prisma.XOR<Prisma.BranchUpdateWithoutClockEventsInput, Prisma.BranchUncheckedUpdateWithoutClockEventsInput>
+}
+
+export type BranchUpdateWithoutClockEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  operatingHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  whatsappLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleMapsLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  printerHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  printerPort?: Prisma.IntFieldUpdateOperationsInput | number
+  printerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  printerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  printerLastSeen?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  printerPaperSize?: Prisma.StringFieldUpdateOperationsInput | string
+  coverageEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
+  users?: Prisma.UserUpdateManyWithoutBranchNestedInput
+  customers?: Prisma.CustomerUpdateManyWithoutBranchNestedInput
+  services?: Prisma.ServiceUpdateManyWithoutBranchNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutBranchNestedInput
+  stockItems?: Prisma.StockItemUpdateManyWithoutBranchNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutBranchNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutBranchNestedInput
+  depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
+  serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
+  pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+}
+
+export type BranchUncheckedUpdateWithoutClockEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invoiceFooter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  operatingHours?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  whatsappLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googleMapsLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  printerHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  printerPort?: Prisma.IntFieldUpdateOperationsInput | number
+  printerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  printerEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  printerLastSeen?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  printerPaperSize?: Prisma.StringFieldUpdateOperationsInput | string
+  coverageEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
   customers?: Prisma.CustomerUncheckedUpdateManyWithoutBranchNestedInput
   services?: Prisma.ServiceUncheckedUpdateManyWithoutBranchNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutBranchNestedInput
@@ -1367,6 +1608,7 @@ export type BranchCreateWithoutCustomersInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -1379,6 +1621,7 @@ export type BranchCreateWithoutCustomersInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutCustomersInput = {
@@ -1404,6 +1647,7 @@ export type BranchUncheckedCreateWithoutCustomersInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -1415,6 +1659,7 @@ export type BranchUncheckedCreateWithoutCustomersInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutCustomersInput = {
@@ -1455,6 +1700,7 @@ export type BranchUpdateWithoutCustomersInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -1467,6 +1713,7 @@ export type BranchUpdateWithoutCustomersInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutCustomersInput = {
@@ -1492,6 +1739,7 @@ export type BranchUncheckedUpdateWithoutCustomersInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -1503,6 +1751,7 @@ export type BranchUncheckedUpdateWithoutCustomersInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutServicesInput = {
@@ -1527,6 +1776,7 @@ export type BranchCreateWithoutServicesInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -1539,6 +1789,7 @@ export type BranchCreateWithoutServicesInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutServicesInput = {
@@ -1564,6 +1815,7 @@ export type BranchUncheckedCreateWithoutServicesInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -1575,6 +1827,7 @@ export type BranchUncheckedCreateWithoutServicesInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutServicesInput = {
@@ -1615,6 +1868,7 @@ export type BranchUpdateWithoutServicesInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -1627,6 +1881,7 @@ export type BranchUpdateWithoutServicesInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutServicesInput = {
@@ -1652,6 +1907,7 @@ export type BranchUncheckedUpdateWithoutServicesInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -1663,6 +1919,7 @@ export type BranchUncheckedUpdateWithoutServicesInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutServiceGroupsInput = {
@@ -1687,6 +1944,7 @@ export type BranchCreateWithoutServiceGroupsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -1699,6 +1957,7 @@ export type BranchCreateWithoutServiceGroupsInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutBranchInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutServiceGroupsInput = {
@@ -1724,6 +1983,7 @@ export type BranchUncheckedCreateWithoutServiceGroupsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -1735,6 +1995,7 @@ export type BranchUncheckedCreateWithoutServiceGroupsInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutBranchInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutServiceGroupsInput = {
@@ -1775,6 +2036,7 @@ export type BranchUpdateWithoutServiceGroupsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -1787,6 +2049,7 @@ export type BranchUpdateWithoutServiceGroupsInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutBranchNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutServiceGroupsInput = {
@@ -1812,6 +2075,7 @@ export type BranchUncheckedUpdateWithoutServiceGroupsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -1823,6 +2087,7 @@ export type BranchUncheckedUpdateWithoutServiceGroupsInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutBranchNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutOrdersInput = {
@@ -1847,6 +2112,7 @@ export type BranchCreateWithoutOrdersInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -1859,6 +2125,7 @@ export type BranchCreateWithoutOrdersInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutOrdersInput = {
@@ -1884,6 +2151,7 @@ export type BranchUncheckedCreateWithoutOrdersInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -1895,6 +2163,7 @@ export type BranchUncheckedCreateWithoutOrdersInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutOrdersInput = {
@@ -1935,6 +2204,7 @@ export type BranchUpdateWithoutOrdersInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -1947,6 +2217,7 @@ export type BranchUpdateWithoutOrdersInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutOrdersInput = {
@@ -1972,6 +2243,7 @@ export type BranchUncheckedUpdateWithoutOrdersInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -1983,6 +2255,7 @@ export type BranchUncheckedUpdateWithoutOrdersInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutPickupRequestsInput = {
@@ -2007,6 +2280,7 @@ export type BranchCreateWithoutPickupRequestsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -2019,6 +2293,7 @@ export type BranchCreateWithoutPickupRequestsInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutBranchInput
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutPickupRequestsInput = {
@@ -2044,6 +2319,7 @@ export type BranchUncheckedCreateWithoutPickupRequestsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -2055,6 +2331,7 @@ export type BranchUncheckedCreateWithoutPickupRequestsInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutBranchInput
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutPickupRequestsInput = {
@@ -2095,6 +2372,7 @@ export type BranchUpdateWithoutPickupRequestsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -2107,6 +2385,7 @@ export type BranchUpdateWithoutPickupRequestsInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutBranchNestedInput
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutPickupRequestsInput = {
@@ -2132,6 +2411,7 @@ export type BranchUncheckedUpdateWithoutPickupRequestsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -2143,6 +2423,7 @@ export type BranchUncheckedUpdateWithoutPickupRequestsInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutBranchNestedInput
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutDepositTransactionsInput = {
@@ -2167,6 +2448,7 @@ export type BranchCreateWithoutDepositTransactionsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -2179,6 +2461,7 @@ export type BranchCreateWithoutDepositTransactionsInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutDepositTransactionsInput = {
@@ -2204,6 +2487,7 @@ export type BranchUncheckedCreateWithoutDepositTransactionsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -2215,6 +2499,7 @@ export type BranchUncheckedCreateWithoutDepositTransactionsInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutDepositTransactionsInput = {
@@ -2255,6 +2540,7 @@ export type BranchUpdateWithoutDepositTransactionsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -2267,6 +2553,7 @@ export type BranchUpdateWithoutDepositTransactionsInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutDepositTransactionsInput = {
@@ -2292,6 +2579,7 @@ export type BranchUncheckedUpdateWithoutDepositTransactionsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -2303,6 +2591,7 @@ export type BranchUncheckedUpdateWithoutDepositTransactionsInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutStockItemsInput = {
@@ -2327,6 +2616,7 @@ export type BranchCreateWithoutStockItemsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -2339,6 +2629,7 @@ export type BranchCreateWithoutStockItemsInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutStockItemsInput = {
@@ -2364,6 +2655,7 @@ export type BranchUncheckedCreateWithoutStockItemsInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -2375,6 +2667,7 @@ export type BranchUncheckedCreateWithoutStockItemsInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutStockItemsInput = {
@@ -2415,6 +2708,7 @@ export type BranchUpdateWithoutStockItemsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -2427,6 +2721,7 @@ export type BranchUpdateWithoutStockItemsInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutStockItemsInput = {
@@ -2452,6 +2747,7 @@ export type BranchUncheckedUpdateWithoutStockItemsInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -2463,6 +2759,7 @@ export type BranchUncheckedUpdateWithoutStockItemsInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutExpenseCategoriesInput = {
@@ -2487,6 +2784,7 @@ export type BranchCreateWithoutExpenseCategoriesInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -2499,6 +2797,7 @@ export type BranchCreateWithoutExpenseCategoriesInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutExpenseCategoriesInput = {
@@ -2524,6 +2823,7 @@ export type BranchUncheckedCreateWithoutExpenseCategoriesInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -2535,6 +2835,7 @@ export type BranchUncheckedCreateWithoutExpenseCategoriesInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutExpenseCategoriesInput = {
@@ -2575,6 +2876,7 @@ export type BranchUpdateWithoutExpenseCategoriesInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -2587,6 +2889,7 @@ export type BranchUpdateWithoutExpenseCategoriesInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutExpenseCategoriesInput = {
@@ -2612,6 +2915,7 @@ export type BranchUncheckedUpdateWithoutExpenseCategoriesInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -2623,6 +2927,7 @@ export type BranchUncheckedUpdateWithoutExpenseCategoriesInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateWithoutExpensesInput = {
@@ -2647,6 +2952,7 @@ export type BranchCreateWithoutExpensesInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBranchesInput
@@ -2659,6 +2965,7 @@ export type BranchCreateWithoutExpensesInput = {
   depositTransactions?: Prisma.DepositTransactionCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventCreateNestedManyWithoutBranchInput
 }
 
 export type BranchUncheckedCreateWithoutExpensesInput = {
@@ -2684,6 +2991,7 @@ export type BranchUncheckedCreateWithoutExpensesInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
   users?: Prisma.UserUncheckedCreateNestedManyWithoutBranchInput
@@ -2695,6 +3003,7 @@ export type BranchUncheckedCreateWithoutExpensesInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedCreateNestedManyWithoutBranchInput
   serviceGroups?: Prisma.ServiceGroupUncheckedCreateNestedManyWithoutBranchInput
   pickupRequests?: Prisma.PickupRequestUncheckedCreateNestedManyWithoutBranchInput
+  clockEvents?: Prisma.ClockEventUncheckedCreateNestedManyWithoutBranchInput
 }
 
 export type BranchCreateOrConnectWithoutExpensesInput = {
@@ -2735,6 +3044,7 @@ export type BranchUpdateWithoutExpensesInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBranchesNestedInput
@@ -2747,6 +3057,7 @@ export type BranchUpdateWithoutExpensesInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutExpensesInput = {
@@ -2772,6 +3083,7 @@ export type BranchUncheckedUpdateWithoutExpensesInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -2783,6 +3095,7 @@ export type BranchUncheckedUpdateWithoutExpensesInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchCreateManyTenantInput = {
@@ -2807,6 +3120,7 @@ export type BranchCreateManyTenantInput = {
   isFreeTier?: boolean
   slug?: string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchCreateworkDaysInput | number[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2833,6 +3147,7 @@ export type BranchUpdateWithoutTenantInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUpdateManyWithoutBranchNestedInput
@@ -2845,6 +3160,7 @@ export type BranchUpdateWithoutTenantInput = {
   depositTransactions?: Prisma.DepositTransactionUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateWithoutTenantInput = {
@@ -2869,6 +3185,7 @@ export type BranchUncheckedUpdateWithoutTenantInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   users?: Prisma.UserUncheckedUpdateManyWithoutBranchNestedInput
@@ -2881,6 +3198,7 @@ export type BranchUncheckedUpdateWithoutTenantInput = {
   depositTransactions?: Prisma.DepositTransactionUncheckedUpdateManyWithoutBranchNestedInput
   serviceGroups?: Prisma.ServiceGroupUncheckedUpdateManyWithoutBranchNestedInput
   pickupRequests?: Prisma.PickupRequestUncheckedUpdateManyWithoutBranchNestedInput
+  clockEvents?: Prisma.ClockEventUncheckedUpdateManyWithoutBranchNestedInput
 }
 
 export type BranchUncheckedUpdateManyWithoutTenantInput = {
@@ -2905,6 +3223,7 @@ export type BranchUncheckedUpdateManyWithoutTenantInput = {
   isFreeTier?: Prisma.BoolFieldUpdateOperationsInput | boolean
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pickupSlots?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workDays?: Prisma.BranchUpdateworkDaysInput | number[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -2925,6 +3244,7 @@ export type BranchCountOutputType = {
   depositTransactions: number
   serviceGroups: number
   pickupRequests: number
+  clockEvents: number
 }
 
 export type BranchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2938,6 +3258,7 @@ export type BranchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   depositTransactions?: boolean | BranchCountOutputTypeCountDepositTransactionsArgs
   serviceGroups?: boolean | BranchCountOutputTypeCountServiceGroupsArgs
   pickupRequests?: boolean | BranchCountOutputTypeCountPickupRequestsArgs
+  clockEvents?: boolean | BranchCountOutputTypeCountClockEventsArgs
 }
 
 /**
@@ -3020,6 +3341,13 @@ export type BranchCountOutputTypeCountPickupRequestsArgs<ExtArgs extends runtime
   where?: Prisma.PickupRequestWhereInput
 }
 
+/**
+ * BranchCountOutputType without action
+ */
+export type BranchCountOutputTypeCountClockEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClockEventWhereInput
+}
+
 
 export type BranchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3044,6 +3372,7 @@ export type BranchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   isFreeTier?: boolean
   slug?: boolean
   pickupSlots?: boolean
+  workDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -3057,6 +3386,7 @@ export type BranchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   depositTransactions?: boolean | Prisma.Branch$depositTransactionsArgs<ExtArgs>
   serviceGroups?: boolean | Prisma.Branch$serviceGroupsArgs<ExtArgs>
   pickupRequests?: boolean | Prisma.Branch$pickupRequestsArgs<ExtArgs>
+  clockEvents?: boolean | Prisma.Branch$clockEventsArgs<ExtArgs>
   _count?: boolean | Prisma.BranchCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["branch"]>
 
@@ -3083,6 +3413,7 @@ export type BranchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isFreeTier?: boolean
   slug?: boolean
   pickupSlots?: boolean
+  workDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -3111,6 +3442,7 @@ export type BranchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isFreeTier?: boolean
   slug?: boolean
   pickupSlots?: boolean
+  workDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -3139,11 +3471,12 @@ export type BranchSelectScalar = {
   isFreeTier?: boolean
   slug?: boolean
   pickupSlots?: boolean
+  workDays?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BranchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "address" | "phone" | "invoiceFooter" | "isActive" | "tenantId" | "latitude" | "longitude" | "operatingHours" | "whatsappLink" | "googleMapsLink" | "printerHost" | "printerPort" | "printerName" | "printerEnabled" | "printerLastSeen" | "printerPaperSize" | "coverageEnd" | "isFreeTier" | "slug" | "pickupSlots" | "createdAt" | "updatedAt", ExtArgs["result"]["branch"]>
+export type BranchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "address" | "phone" | "invoiceFooter" | "isActive" | "tenantId" | "latitude" | "longitude" | "operatingHours" | "whatsappLink" | "googleMapsLink" | "printerHost" | "printerPort" | "printerName" | "printerEnabled" | "printerLastSeen" | "printerPaperSize" | "coverageEnd" | "isFreeTier" | "slug" | "pickupSlots" | "workDays" | "createdAt" | "updatedAt", ExtArgs["result"]["branch"]>
 export type BranchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   users?: boolean | Prisma.Branch$usersArgs<ExtArgs>
@@ -3156,6 +3489,7 @@ export type BranchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   depositTransactions?: boolean | Prisma.Branch$depositTransactionsArgs<ExtArgs>
   serviceGroups?: boolean | Prisma.Branch$serviceGroupsArgs<ExtArgs>
   pickupRequests?: boolean | Prisma.Branch$pickupRequestsArgs<ExtArgs>
+  clockEvents?: boolean | Prisma.Branch$clockEventsArgs<ExtArgs>
   _count?: boolean | Prisma.BranchCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BranchIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3179,6 +3513,7 @@ export type $BranchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     depositTransactions: Prisma.$DepositTransactionPayload<ExtArgs>[]
     serviceGroups: Prisma.$ServiceGroupPayload<ExtArgs>[]
     pickupRequests: Prisma.$PickupRequestPayload<ExtArgs>[]
+    clockEvents: Prisma.$ClockEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3219,6 +3554,10 @@ export type $BranchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
      * Pickup scheduling config, e.g. [{day:"MON", slots:["10:00-12:00","14:00-16:00"]}]
      */
     pickupSlots: runtime.JsonValue | null
+    /**
+     * Attendance: expected work days (1=Mon…7=Sun) for the no-show heuristic.
+     */
+    workDays: number[]
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["branch"]>
@@ -3626,6 +3965,7 @@ export interface Prisma__BranchClient<T, Null = never, ExtArgs extends runtime.T
   depositTransactions<T extends Prisma.Branch$depositTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$depositTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DepositTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   serviceGroups<T extends Prisma.Branch$serviceGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$serviceGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ServiceGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   pickupRequests<T extends Prisma.Branch$pickupRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$pickupRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PickupRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  clockEvents<T extends Prisma.Branch$clockEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Branch$clockEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClockEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3677,6 +4017,7 @@ export interface BranchFieldRefs {
   readonly isFreeTier: Prisma.FieldRef<"Branch", 'Boolean'>
   readonly slug: Prisma.FieldRef<"Branch", 'String'>
   readonly pickupSlots: Prisma.FieldRef<"Branch", 'Json'>
+  readonly workDays: Prisma.FieldRef<"Branch", 'Int[]'>
   readonly createdAt: Prisma.FieldRef<"Branch", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Branch", 'DateTime'>
 }
@@ -4317,6 +4658,30 @@ export type Branch$pickupRequestsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.PickupRequestScalarFieldEnum | Prisma.PickupRequestScalarFieldEnum[]
+}
+
+/**
+ * Branch.clockEvents
+ */
+export type Branch$clockEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClockEvent
+   */
+  select?: Prisma.ClockEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClockEvent
+   */
+  omit?: Prisma.ClockEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClockEventInclude<ExtArgs> | null
+  where?: Prisma.ClockEventWhereInput
+  orderBy?: Prisma.ClockEventOrderByWithRelationInput | Prisma.ClockEventOrderByWithRelationInput[]
+  cursor?: Prisma.ClockEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClockEventScalarFieldEnum | Prisma.ClockEventScalarFieldEnum[]
 }
 
 /**

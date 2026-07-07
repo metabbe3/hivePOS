@@ -426,6 +426,23 @@ export type EnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumUserRoleFilter<$PrismaModel>
 }
 
+export type EnumClockTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClockType | Prisma.EnumClockTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClockTypeFilter<$PrismaModel> | $Enums.ClockType
+}
+
+export type EnumClockTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClockType | Prisma.EnumClockTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClockTypeWithAggregatesFilter<$PrismaModel> | $Enums.ClockType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumClockTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumClockTypeFilter<$PrismaModel>
+}
+
 export type EnumPricingTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.PricingType | Prisma.EnumPricingTypeFieldRefInput<$PrismaModel>
   in?: $Enums.PricingType[] | Prisma.ListEnumPricingTypeFieldRefInput<$PrismaModel>
@@ -1076,6 +1093,23 @@ export type NestedEnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumUserRoleFilter<$PrismaModel>
   _max?: Prisma.NestedEnumUserRoleFilter<$PrismaModel>
+}
+
+export type NestedEnumClockTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClockType | Prisma.EnumClockTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClockTypeFilter<$PrismaModel> | $Enums.ClockType
+}
+
+export type NestedEnumClockTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClockType | Prisma.EnumClockTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClockType[] | Prisma.ListEnumClockTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClockTypeWithAggregatesFilter<$PrismaModel> | $Enums.ClockType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumClockTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumClockTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumPricingTypeFilter<$PrismaModel = never> = {

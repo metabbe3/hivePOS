@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useGuardedPage } from "@/hooks/use-guarded-page";
 import { useTranslation } from "@/hooks/use-translation";
+import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
@@ -49,6 +50,7 @@ const ProfitReport = dyn(() => import("@/components/reports/profit-report").then
 const InventoryReport = dyn(() => import("@/components/reports/inventory-report").then(m => ({ default: m.InventoryReport })));
 const MonthlyPnlReport = dyn(() => import("@/components/reports/monthly-pnl-report").then(m => ({ default: m.MonthlyPnlReport })));
 const PiutangTrackerReport = dyn(() => import("@/components/reports/piutang-tracker-report").then(m => ({ default: m.PiutangTrackerReport })));
+const AttendanceReport = dyn(() => import("@/components/reports/attendance-report").then(m => ({ default: m.AttendanceReport })));
 
 interface TabItem {
   value: string;
@@ -59,6 +61,7 @@ interface TabItem {
 export default function ReportingPage() {
   const { shouldRender } = useGuardedPage("reports", "read", "/laundry/orders");
   const { t } = useTranslation();
+  const attendanceOn = useFeatureFlag("staffAttendance");
 
   const thisMonth = getDateRangePreset("thisMonth");
   const [from, setFrom] = useState(thisMonth.from);
@@ -79,6 +82,7 @@ export default function ReportingPage() {
     { value: "commission", label: t("reporting.commission"), icon: HandCoins },
     { value: "piutang", label: t("reporting.outstanding"), icon: Clock },
     { value: "monthlyPnl", label: t("reporting.monthlyPnl"), icon: FileSpreadsheet },
+    ...(attendanceOn ? [{ value: "attendance", label: t("attendance.report"), icon: Clock }] : []),
   ];
 
   async function handleExportAll() {
@@ -186,6 +190,11 @@ export default function ReportingPage() {
         <TabsContent value="piutang">
           <PiutangTrackerReport />
         </TabsContent>
+        {attendanceOn ? (
+          <TabsContent value="attendance">
+            <AttendanceReport from={from} to={to} />
+          </TabsContent>
+        ) : null}
       </Tabs>
     </div>
   );

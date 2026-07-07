@@ -63,6 +63,7 @@ export const ModelName = {
   Subscription: 'Subscription',
   Branch: 'Branch',
   User: 'User',
+  ClockEvent: 'ClockEvent',
   Role: 'Role',
   Customer: 'Customer',
   Service: 'Service',
@@ -311,6 +312,7 @@ export const BranchScalarFieldEnum = {
   isFreeTier: 'isFreeTier',
   slug: 'slug',
   pickupSlots: 'pickupSlots',
+  workDays: 'workDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -336,10 +338,25 @@ export const UserScalarFieldEnum = {
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  lastTicketEventReadAt: 'lastTicketEventReadAt'
+  lastTicketEventReadAt: 'lastTicketEventReadAt',
+  pinHash: 'pinHash',
+  qrToken: 'qrToken'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const ClockEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tenantId: 'tenantId',
+  branchId: 'branchId',
+  type: 'type',
+  timestamp: 'timestamp',
+  createdAt: 'createdAt'
+} as const
+
+export type ClockEventScalarFieldEnum = (typeof ClockEventScalarFieldEnum)[keyof typeof ClockEventScalarFieldEnum]
 
 
 export const RoleScalarFieldEnum = {

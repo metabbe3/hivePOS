@@ -67,6 +67,14 @@ export const SubscriptionStatus = {
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
 
 
+export const ClockType = {
+  CLOCK_IN: 'CLOCK_IN',
+  CLOCK_OUT: 'CLOCK_OUT'
+} as const
+
+export type ClockType = (typeof ClockType)[keyof typeof ClockType]
+
+
 export const PickupRequestStatus = {
   PENDING: 'PENDING',
   ACCEPTED: 'ACCEPTED',
