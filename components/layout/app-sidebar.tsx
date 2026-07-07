@@ -22,6 +22,7 @@ import {
   LifeBuoy,
   Printer,
   Clock,
+  ClipboardList,
 } from "lucide-react";
 import { BrandMark } from "@/components/public/brand-logo";
 import {
@@ -83,6 +84,7 @@ const MODULE_NAV: Record<string, NavItem[]> = {
 const SHARED_NAV: NavItem[] = [
   { titleKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, color: "text-indigo-600", resource: "dashboard", action: "read", flag: "dashboard" },
   { titleKey: "nav.attendance", href: "/attendance/clock", icon: Clock, color: "text-amber-600", resource: "attendance", action: "read", flag: "staffAttendance" },
+  { titleKey: "nav.attendanceManage", href: "/attendance/manage", icon: ClipboardList, color: "text-indigo-600", resource: "attendance", action: "edit", flag: "staffAttendance" },
   { titleKey: "nav.customers", href: "/customers", icon: Users, color: "text-indigo-600", resource: "customers", action: "read", flag: "customers" },
   { titleKey: "nav.reporting", href: "/reporting", icon: BarChart3, color: "text-violet-600", resource: "reports", action: "read", flag: "reports" },
   // ponytail: printer settings is device-level (localStorage) so it stays visible
