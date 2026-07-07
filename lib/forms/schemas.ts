@@ -357,9 +357,9 @@ export const registerSchema: FormSchema = {
       label: "Password",
       type: "password",
       showPasswordToggle: true,
-      placeholder: "Minimal 8 karakter",
+      placeholder: "Minimal 6 karakter",
       condition: (values) => !values.googleId,
-      validate: (v, all) => !all.googleId && (!v || String(v).length < 8) ? "Kata sandi minimal 8 karakter." : null,
+      validate: (v, all) => !all.googleId && (!v || String(v).length < 6) ? "Kata sandi minimal 6 karakter." : null,
     },
     {
       name: "agreeTerms",

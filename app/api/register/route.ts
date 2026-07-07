@@ -13,9 +13,9 @@ const registerSchema = z.object({
   slug: z.string().min(2).regex(/^[a-z0-9-]+$/),
   branchName: z.string().min(1),
   ownerName: z.string().min(2),
-  ownerPhone: z.string().min(8),
+  ownerPhone: z.string().optional(),
   email: z.string().email(),
-  password: z.string().min(8).optional().or(z.literal("")),
+  password: z.string().min(6).optional().or(z.literal("")),
   googleId: z.string().optional(),
   /// Which tier to trial: "PRO" (default — full features for 14 days) or "GROWTH".
   trialTier: z.enum(["GROWTH", "PRO"]).optional(),
