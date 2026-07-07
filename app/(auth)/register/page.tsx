@@ -64,32 +64,45 @@ function RegisterForm() {
   async function handleRegister(values: Record<string, unknown>) {
     setLoading(true);
     try {
+      // Auto-generate fields the user no longer fills manually.
+      const businessName = String(values.businessName ?? "").trim();
+      const slugBase = businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "laundry";
+      const slug = `${slugBase}-${Math.random().toString(36).slice(2, 6)}`;
+      const ownerName = googleName || businessName;
+
       await apiFetch("/api/register", {
         method: "POST",
         body: {
           ...values,
+          businessName,
+          slug,
+          branchName: "Outlet Pusat",
+          ownerName,
+          ownerPhone: "",
           trialTier,
           ...(referralCode ? { referralCode } : {}),
           ...(googleId ? { googleId } : {}),
         },
       });
 
-      // Credentials sign-up: auto sign-in so the user skips the manual /login
-      // step (one fewer screen on day one). Google-OAuth sign-up can't auto-sign
-      // in — it needs this register-completion step first — so it falls through.
-      if (!isGoogleFlow) {
-        const res = await signIn("credentials", {
-          email: String(values.email),
-          password: String(values.password ?? ""),
-          redirect: false,
-        });
-        if (!res?.error) {
-          toast.success("Pendaftaran berhasil! Mengarahkan ke dashboard…");
-          router.push("/dashboard");
-          return;
-        }
-        // Auto sign-in failed (rare) — fall back to manual login below.
+      if (isGoogleFlow) {
+        // Google flow: re-authenticate via Google OAuth → auto-login → dashboard.
+        toast.success("Pendaftaran berhasil! Mengarahkan ke dashboard…");
+        await signIn("google", { callbackUrl: "/dashboard" });
+        return;
       }
+      // Email flow: auto sign-in with credentials.
+      const res = await signIn("credentials", {
+        email: String(values.email),
+        password: String(values.password ?? ""),
+        redirect: false,
+      });
+      if (!res?.error) {
+        toast.success("Pendaftaran berhasil! Mengarahkan ke dashboard…");
+        router.push("/dashboard");
+        return;
+      }
+      // Auto sign-in failed (rare) — fall back to manual login.
       toast.success("Pendaftaran berhasil! Akun langsung aktif — silakan masuk.");
       router.push("/login");
     } catch (err) {
@@ -111,7 +124,7 @@ function RegisterForm() {
           </Link>
           <h1 className="text-3xl font-bold mt-6">Daftar Bisnis Laundry Anda</h1>
           <p className="text-[var(--color-muted-foreground)] mt-2">
-            Gratis 1 outlet selamanya. Setup 2 menit, aktif langsung — 14 hari Growth gratis.
+            Gratis 1 outlet selamanya. Setup 2 menit, aktif langsung.
           </p>
         </div>
 
