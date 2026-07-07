@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Force the browser to ALWAYS re-fetch /sw.js — detects VERSION bump
+        // on every navigation → auto-updates the SW + clears old caches.
+        // Without this, the browser HTTP-caches sw.js → stale SW → stale content.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           // HSTS: 1yr + preload. Verified working at 5min first; now that Cloudflare

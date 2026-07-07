@@ -13,7 +13,7 @@ import { useEffect } from "react";
 // `updatefound`. Upgrade path: WebSocket / SSE broadcast from admin action.
 
 const STORAGE_KEY = "hivepos.pwaNonce";
-const POLL_MS = 10 * 60 * 1000; // 10 min
+const POLL_MS = 3 * 60 * 1000; // 3 min
 const NONCE_URL = "/api/pwa/nonce";
 
 async function checkAndMaybeNuke() {
