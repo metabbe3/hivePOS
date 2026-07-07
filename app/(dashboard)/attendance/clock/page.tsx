@@ -5,15 +5,16 @@ import { apiFetch, ApiClientError } from "@/modules/shared";
 import { useTranslation } from "@/hooks/use-translation";
 import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { toast } from "sonner";
-import { Clock3, Delete, Loader2 } from "lucide-react";
-import { PageHeader } from "@/components/shared/page-header";
+import { Delete, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDuration } from "@/lib/format";
+import { Clock3 } from "lucide-react";
 
-// Kiosk clock page: tap name → PIN → clocked in/out. Shows today's worked hours
-// per staff + live elapsed for clocked-in. Undo on accidental clock-out.
+// Bolder kiosk: live clock + committed status band + avatar grid. The page IS a
+// time-clock station — make it feel like one. Amplification within the indigo +
+// emerald system (no new tokens, no new deps).
 
 type StaffStatus = { id: string; name: string; since: string | null; todayMs: number };
 type ClockResult = { type: "CLOCK_IN" | "CLOCK_OUT"; userName: string; sessionMs?: number };
@@ -31,9 +32,9 @@ export default function AttendanceClockPage() {
   const [now, setNow] = useState(() => Date.now());
   const lastActionRef = useRef<{ userId: string; pin: string } | null>(null);
 
-  // Tick once a minute so elapsed durations stay fresh.
+  // 1s tick — drives the live clock + durations.
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 60_000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -49,7 +50,7 @@ export default function AttendanceClockPage() {
     else setLoading(false);
   }, [enabled, refresh]);
 
-  // Keyboard input on the PIN pad (0-9 + backspace; no Enter-submit → prevents accidental clock-out).
+  // Keyboard input (0-9 + backspace; no Enter → no accidental clock-out).
   useEffect(() => {
     if (!selected) return;
     const handler = (e: KeyboardEvent) => {
@@ -60,6 +61,9 @@ export default function AttendanceClockPage() {
     return () => window.removeEventListener("keydown", handler);
   }, [selected]);
 
+  const nowDate = new Date(now);
+  const timeStr = nowDate.toLocaleTimeString(lang === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const dateStr = nowDate.toLocaleDateString(lang === "id" ? "id-ID" : "en-US", { weekday: "long", day: "numeric", month: "long" });
   const timeFmt = (iso: string) =>
     new Date(iso).toLocaleTimeString(lang === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit" });
 
@@ -78,7 +82,6 @@ export default function AttendanceClockPage() {
       });
       const label = r.data.type === "CLOCK_IN" ? t("attendance.clockIn") : t("attendance.clockOut");
       const dur = r.data.type === "CLOCK_OUT" && r.data.sessionMs ? ` (${formatDuration(r.data.sessionMs, lang)})` : "";
-      // Undo for clock-out: store the pin so the undo action can re-clock-in.
       if (r.data.type === "CLOCK_OUT") lastActionRef.current = { userId: selected.id, pin };
       toast.success(`${label} — ${r.data.userName}${dur}`, {
         duration: 8000,
@@ -112,10 +115,20 @@ export default function AttendanceClockPage() {
     return a.name.localeCompare(b.name);
   });
   const inNow = sorted.filter((s) => s.since !== null);
+  const selectedIsIn = selected?.since !== null;
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t("attendance.title")} />
+      {/* Live clock header — the kiosk identity */}
+      <div className="rounded-2xl bg-foreground p-6 text-background">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-lg font-semibold text-background/70">{t("attendance.title")}</h1>
+            <p className="text-sm text-background/50">{dateStr}</p>
+          </div>
+          <p className="sa-tnum text-4xl font-extrabold tracking-tight sm:text-5xl">{timeStr}</p>
+        </div>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
@@ -123,18 +136,18 @@ export default function AttendanceClockPage() {
         </div>
       ) : (
         <>
-          {/* Clocked in now */}
+          {/* Clocked-in band — committed emerald, prominent */}
           {inNow.length > 0 ? (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                {t("attendance.whoIn")}
+            <div className="rounded-2xl bg-emerald-500 p-4 text-white shadow-lg shadow-emerald-500/20">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-emerald-50">
+                {t("attendance.whoIn")} · {inNow.length}
               </p>
               <div className="flex flex-wrap gap-2">
                 {inNow.map((s) => (
-                  <span key={s.id} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    {s.name}
-                    <span className="sa-tnum text-xs text-emerald-600">
+                  <span key={s.id} className="inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-1.5 backdrop-blur-sm">
+                    <span className="h-2.5 w-2.5 rounded-full bg-white" />
+                    <span className="text-sm font-bold">{s.name}</span>
+                    <span className="sa-tnum text-xs text-emerald-50">
                       {timeFmt(s.since!)} · {formatDuration(now - new Date(s.since!).getTime(), lang)}
                     </span>
                   </span>
@@ -143,32 +156,37 @@ export default function AttendanceClockPage() {
             </div>
           ) : null}
 
-          {/* Staff grid */}
+          {/* Staff grid — avatar + decisive state */}
           {sorted.length === 0 ? (
             <EmptyState icon={Clock3} title={t("attendance.title")} description={t("attendance.noStaff")} />
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {sorted.map((s) => {
                 const in_ = s.since !== null;
+                const initials = s.name.charAt(0).toUpperCase();
                 return (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => { setSelected(s); setPin(""); }}
-                    className={`flex h-20 flex-col items-center justify-center rounded-xl border-2 text-center transition-all active:scale-95 ${
+                    className={`flex h-24 flex-col items-center justify-center gap-1.5 rounded-2xl text-center transition-all active:scale-95 ${
                       in_
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                        : "border-border bg-card text-foreground hover:border-primary/40 hover:bg-accent/40"
+                        ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
+                        : "border-2 border-border bg-card text-foreground hover:border-primary/40 hover:bg-accent/40"
                     }`}
                   >
-                    <span className="px-2 text-sm font-semibold leading-tight">{s.name}</span>
+                    <span className={`flex h-10 w-10 items-center justify-center rounded-full text-base font-bold ${
+                      in_ ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                    }`}>
+                      {initials}
+                    </span>
+                    <span className="px-2 text-sm font-bold leading-tight">{s.name}</span>
                     {in_ ? (
-                      <span className="mt-1 flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                      <span className="sa-tnum text-xs font-medium text-emerald-50">
                         {formatDuration(s.todayMs, lang)}
                       </span>
                     ) : (
-                      <span className="mt-1 sa-tnum text-[11px] text-muted-foreground">
+                      <span className="sa-tnum text-xs text-muted-foreground">
                         {s.todayMs > 0 ? formatDuration(s.todayMs, lang) : "—"}
                       </span>
                     )}
@@ -184,13 +202,18 @@ export default function AttendanceClockPage() {
       <Dialog open={!!selected} onOpenChange={(o) => { if (!o) { setSelected(null); setPin(""); } }}>
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
-            <DialogTitle>{selected?.name} — {t("attendance.enterPin")}</DialogTitle>
+            <DialogTitle className="text-center">
+              {selected?.name}
+            </DialogTitle>
+            <p className="text-center text-sm font-medium text-muted-foreground">
+              {selectedIsIn ? t("attendance.clockOut") : t("attendance.clockIn")}
+            </p>
           </DialogHeader>
           <div className="space-y-4">
-            {/* PIN dots — fixed 4 (don't reveal PIN length to shoulder-surfers) */}
+            {/* PIN dots — fixed 4 */}
             <div className="flex justify-center gap-3">
               {[0, 1, 2, 3].map((i) => (
-                <span key={i} className={`h-3 w-3 rounded-full ${i < pin.length ? "bg-primary" : "bg-muted"}`} />
+                <span key={i} className={`h-3.5 w-3.5 rounded-full transition-colors ${i < pin.length ? "bg-primary" : "bg-muted"}`} />
               ))}
             </div>
             {/* Keypad */}
@@ -203,16 +226,22 @@ export default function AttendanceClockPage() {
                     key={i}
                     type="button"
                     onClick={() => press(d)}
-                    className="flex h-14 items-center justify-center rounded-lg border border-border bg-card text-lg font-bold transition-colors hover:bg-accent/60 active:scale-95"
+                    className="flex h-16 items-center justify-center rounded-xl border border-border bg-card text-xl font-bold transition-all hover:bg-accent/60 active:scale-90"
                   >
                     {d === "del" ? <Delete className="h-5 w-5" /> : d}
                   </button>
                 ),
               )}
             </div>
-            <Button onClick={submit} disabled={pin.length < 4 || submitting} className="w-full" size="lg">
+            <Button
+              onClick={submit}
+              disabled={pin.length < 4 || submitting}
+              className="w-full"
+              size="lg"
+              variant={selectedIsIn ? "destructive" : "default"}
+            >
               {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              {t("common.confirm")}
+              {selectedIsIn ? t("attendance.clockOut") : t("attendance.clockIn")}
             </Button>
           </div>
         </DialogContent>
