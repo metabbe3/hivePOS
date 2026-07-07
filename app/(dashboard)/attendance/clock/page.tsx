@@ -5,7 +5,7 @@ import { apiFetch, ApiClientError } from "@/modules/shared";
 import { useTranslation } from "@/hooks/use-translation";
 import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { toast } from "sonner";
-import { Delete, Loader2 } from "lucide-react";
+import { Delete, Loader2, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -166,33 +166,26 @@ export default function AttendanceClockPage() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {sorted.map((s) => {
                 const in_ = s.since !== null;
-                const initials = s.name.charAt(0).toUpperCase();
                 return (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => { setSelected(s); setPin(""); }}
-                    className={`flex h-24 flex-col items-center justify-center gap-1.5 rounded-2xl text-center transition-all active:scale-95 ${
+                    className={`flex h-24 flex-col items-center justify-center gap-2 rounded-2xl text-center transition-all active:scale-95 ${
                       in_
                         ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
-                        : "border-2 border-border bg-card text-foreground hover:border-primary/40 hover:bg-accent/40"
+                        : "border-2 border-primary/30 bg-primary/5 text-primary hover:bg-primary/10"
                     }`}
                   >
-                    <span className={`flex h-10 w-10 items-center justify-center rounded-full text-base font-bold ${
-                      in_ ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
-                    }`}>
-                      {initials}
+                    {/* ACTION — the dominant element (what happens when you tap) */}
+                    <span className="flex items-center gap-1.5 text-base font-extrabold uppercase tracking-wide">
+                      {in_ ? <LogOut className="h-5 w-5" /> : <LogIn className="h-5 w-5" />}
+                      {in_ ? t("attendance.clockOut") : t("attendance.clockIn")}
                     </span>
-                    <span className="px-2 text-sm font-bold leading-tight">{s.name}</span>
-                    {in_ ? (
-                      <span className="sa-tnum text-xs font-medium text-emerald-50">
-                        {formatDuration(s.todayMs, lang)}
-                      </span>
-                    ) : (
-                      <span className="sa-tnum text-xs text-muted-foreground">
-                        {s.todayMs > 0 ? formatDuration(s.todayMs, lang) : "—"}
-                      </span>
-                    )}
+                    {/* CONTEXT — name + status (secondary) */}
+                    <span className={`sa-tnum text-xs font-medium ${in_ ? "text-emerald-50" : "text-primary/60"}`}>
+                      {s.name}{in_ ? ` · ${formatDuration(s.todayMs, lang)}` : (s.todayMs > 0 ? ` · ${formatDuration(s.todayMs, lang)}` : "")}
+                    </span>
                   </button>
                 );
               })}
@@ -205,11 +198,12 @@ export default function AttendanceClockPage() {
       <Dialog open={!!selected} onOpenChange={(o) => { if (!o) { setSelected(null); setPin(""); } }}>
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
-            <DialogTitle className="text-center">
-              {selected?.name}
+            <DialogTitle className="flex items-center justify-center gap-2 text-center">
+              {selectedIsIn ? <LogOut className="h-5 w-5 text-destructive" /> : <LogIn className="h-5 w-5 text-primary" />}
+              {selectedIsIn ? t("attendance.clockOut") : t("attendance.clockIn")}
             </DialogTitle>
             <p className="text-center text-sm font-medium text-muted-foreground">
-              {selectedIsIn ? t("attendance.clockOut") : t("attendance.clockIn")}
+              {selected?.name} · {t("attendance.enterPin")}
             </p>
           </DialogHeader>
           <div className="space-y-4">
