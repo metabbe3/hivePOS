@@ -119,14 +119,17 @@ export default function AttendanceClockPage() {
 
   return (
     <div className="space-y-6">
-      {/* Live clock header — the kiosk identity */}
-      <div className="rounded-2xl bg-foreground p-6 text-background">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      {/* Live clock header — monospace LED kiosk display with indigo glow */}
+      <div
+        className="relative overflow-hidden rounded-2xl bg-foreground p-6 text-background"
+        style={{ backgroundImage: "radial-gradient(ellipse at top right, rgba(99,102,241,0.18), transparent 55%)" }}
+      >
+        <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-lg font-semibold text-background/70">{t("attendance.title")}</h1>
             <p className="text-sm text-background/50">{dateStr}</p>
           </div>
-          <p className="sa-tnum text-4xl font-extrabold tracking-tight sm:text-5xl">{timeStr}</p>
+          <p className="sa-tnum font-mono text-4xl font-bold tracking-wider tabular-nums sm:text-5xl">{timeStr}</p>
         </div>
       </div>
 
