@@ -5,7 +5,7 @@ import { apiFetch } from "@/modules/shared";
 import { useTranslation } from "@/hooks/use-translation";
 import { useFeatureFlag } from "@/hooks/use-feature-flag";
 import { useGuardedPage } from "@/hooks/use-guarded-page";
-import { useDeleteConfirm } from "@/hooks/use-delete-confirm";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
@@ -17,11 +17,19 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatDuration } from "@/lib/format";
 
 type Event = {
   id: string; userId: string; userName: string;
   type: "CLOCK_IN" | "CLOCK_OUT"; timestamp: string;
   branchId: string; branchName: string;
+};
+type Session = {
+  inEvent?: Event;
+  outEvent?: Event;
+  userId: string;
+  userName: string;
+  branchName: string;
 };
 type Staff = { id: string; name: string };
 
@@ -31,10 +39,54 @@ const toLocalInput = (iso: string) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+// Pair individual CLOCK_IN/CLOCK_OUT events into sessions (one row per shift).
+function pairEvents(events: Event[]): Session[] {
+  const byUser = new Map<string, Event[]>();
+  for (const e of events) {
+    const arr = byUser.get(e.userId) ?? [];
+    arr.push(e);
+    byUser.set(e.userId, arr);
+  }
+  const sessions: Session[] = [];
+  for (const userEvents of byUser.values()) {
+    userEvents.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    let openIn: Event | null = null;
+    for (const e of userEvents) {
+      if (e.type === "CLOCK_IN") {
+        if (openIn) {
+          // Previous IN without OUT — open session
+          sessions.push({ inEvent: openIn, userId: openIn.userId, userName: openIn.userName, branchName: openIn.branchName });
+        }
+        openIn = e;
+      } else if (e.type === "CLOCK_OUT") {
+        sessions.push({
+          inEvent: openIn ?? undefined,
+          outEvent: e,
+          userId: (openIn ?? e).userId,
+          userName: (openIn ?? e).userName,
+          branchName: (openIn ?? e).branchName,
+        });
+        openIn = null;
+      }
+    }
+    if (openIn) {
+      sessions.push({ inEvent: openIn, userId: openIn.userId, userName: openIn.userName, branchName: openIn.branchName });
+    }
+  }
+  // Most recent first (by IN time, fallback to OUT).
+  sessions.sort((a, b) => {
+    const aT = a.inEvent?.timestamp ?? a.outEvent?.timestamp ?? "";
+    const bT = b.inEvent?.timestamp ?? b.outEvent?.timestamp ?? "";
+    return bT.localeCompare(aT);
+  });
+  return sessions;
+}
+
 export default function AttendanceManagePage() {
   const enabled = useFeatureFlag("staffAttendance");
   const { shouldRender } = useGuardedPage("attendance", "edit");
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
+  const confirm = useConfirm();
   const [events, setEvents] = useState<Event[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,13 +116,6 @@ export default function AttendanceManagePage() {
     } else { setLoading(false); }
   }, [shouldRender, enabled, refresh]);
 
-  const { confirmAndDelete } = useDeleteConfirm({
-    endpoint: "/api/attendance/events",
-    successMessage: t("attendance.eventDeleted"),
-    errorMessage: t("common.networkError"),
-    onDeleted: refresh,
-  });
-
   const saveTimestamp = async (id: string, value: string) => {
     try {
       await apiFetch(`/api/attendance/events/${id}`, {
@@ -79,6 +124,19 @@ export default function AttendanceManagePage() {
       });
       toast.success(t("attendance.eventSaved"));
     } catch { toast.error(t("common.networkError")); }
+  };
+
+  const deleteSession = async (s: Session) => {
+    const ok = await confirm({
+      title: t("attendance.confirmDeleteEvent"),
+      destructive: true,
+      confirmLabel: t("common.delete"),
+    });
+    if (!ok) return;
+    if (s.inEvent) await apiFetch(`/api/attendance/events/${s.inEvent.id}`, { method: "DELETE" }).catch(() => {});
+    if (s.outEvent) await apiFetch(`/api/attendance/events/${s.outEvent.id}`, { method: "DELETE" }).catch(() => {});
+    toast.success(t("attendance.eventDeleted"));
+    void refresh();
   };
 
   const addManual = async () => {
@@ -98,6 +156,8 @@ export default function AttendanceManagePage() {
 
   if (!enabled || !shouldRender) return null;
   if (loading) return <PageLoading />;
+
+  const sessions = pairEvents(events);
 
   return (
     <div className="space-y-6">
@@ -119,8 +179,8 @@ export default function AttendanceManagePage() {
         <Button variant="outline" size="sm" onClick={() => void refresh()}>Refresh</Button>
       </div>
 
-      {/* Events table */}
-      {events.length === 0 ? (
+      {/* Sessions table — one row per IN→OUT shift */}
+      {sessions.length === 0 ? (
         <EmptyState title={t("attendance.manage")} description={t("attendance.noEvents")} />
       ) : (
         <Card>
@@ -130,41 +190,70 @@ export default function AttendanceManagePage() {
                 <thead className="border-b border-border/60">
                   <tr className="text-left text-muted-foreground">
                     <th className="px-4 py-2.5 font-medium">Staff</th>
-                    <th className="px-4 py-2.5 font-medium">Type</th>
-                    <th className="px-4 py-2.5 font-medium">{t("attendance.dateTime")}</th>
+                    <th className="px-4 py-2.5 font-medium">{t("attendance.clockIn")}</th>
+                    <th className="px-4 py-2.5 font-medium">{t("attendance.clockOut")}</th>
+                    <th className="px-4 py-2.5 font-medium">{t("attendance.hoursWorked")}</th>
                     <th className="px-4 py-2.5 font-medium">Outlet</th>
                     <th className="px-4 py-2.5" />
                   </tr>
                 </thead>
                 <tbody>
-                  {events.map((e) => (
-                    <tr key={e.id} className="border-b border-border/40 last:border-0">
-                      <td className="px-4 py-2 font-medium">{e.userName}</td>
-                      <td className="px-4 py-2">
-                        <Badge variant="outline" className={e.type === "CLOCK_IN" ? "border-emerald-300 text-emerald-700" : "border-slate-300 text-slate-600"}>
-                          {e.type === "CLOCK_IN" ? t("attendance.clockIn") : t("attendance.clockOut")}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
-                          type="datetime-local"
-                          defaultValue={toLocalInput(e.timestamp)}
-                          onBlur={(ev) => {
-                            if (ev.target.value && ev.target.value !== toLocalInput(e.timestamp)) {
-                              void saveTimestamp(e.id, ev.target.value);
-                            }
-                          }}
-                          className="rounded-lg border border-border/60 bg-transparent px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                      </td>
-                      <td className="px-4 py-2 text-muted-foreground">{e.branchName}</td>
-                      <td className="px-4 py-2 text-right">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => confirmAndDelete(e.id, t("attendance.confirmDeleteEvent"))}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                  {sessions.map((s, i) => {
+                    const inTime = s.inEvent ? toLocalInput(s.inEvent.timestamp) : "";
+                    const outTime = s.outEvent ? toLocalInput(s.outEvent.timestamp) : "";
+                    const isOpen = !s.outEvent;
+                    const duration = s.inEvent && s.outEvent
+                      ? formatDuration(new Date(s.outEvent.timestamp).getTime() - new Date(s.inEvent.timestamp).getTime(), lang)
+                      : null;
+                    return (
+                      <tr key={`${s.userId}-${i}`} className="border-b border-border/40 last:border-0">
+                        <td className="px-4 py-2 font-medium">{s.userName}</td>
+                        <td className="px-4 py-2">
+                          {s.inEvent ? (
+                            <input
+                              type="datetime-local"
+                              defaultValue={inTime}
+                              onBlur={(e) => {
+                                if (e.target.value && e.target.value !== inTime) void saveTimestamp(s.inEvent!.id, e.target.value);
+                              }}
+                              className="rounded-lg border border-border/60 bg-transparent px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                            />
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          {s.outEvent ? (
+                            <input
+                              type="datetime-local"
+                              defaultValue={outTime}
+                              onBlur={(e) => {
+                                if (e.target.value && e.target.value !== outTime) void saveTimestamp(s.outEvent!.id, e.target.value);
+                              }}
+                              className="rounded-lg border border-border/60 bg-transparent px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                            />
+                          ) : isOpen ? (
+                            <Badge variant="outline" className="border-emerald-300 text-emerald-600">Active</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          {duration ? (
+                            <span className="sa-tnum font-medium">{duration}</span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-muted-foreground">{s.branchName}</td>
+                        <td className="px-4 py-2 text-right">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteSession(s)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
