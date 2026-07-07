@@ -157,7 +157,7 @@ export const POST = withErrorHandler(async (req) => {
     });
 
     // Link to referrer if a code was supplied (self-referral → REJECTED, no reward).
-    await attachReferral(tx, tenant.id, data.referralCode, data.email, data.ownerPhone);
+    await attachReferral(tx, tenant.id, data.referralCode, data.email, data.ownerPhone ?? "");
 
     return tenant;
   });
