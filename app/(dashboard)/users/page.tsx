@@ -234,7 +234,7 @@ export default function UsersPage() {
               <Label>{t("attendance.enterPin")}</Label>
               <Input
                 inputMode="numeric"
-                maxLength={8}
+                maxLength={4}
                 placeholder="••••"
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ""))}
@@ -283,7 +283,7 @@ export default function UsersPage() {
               <Label>{t("attendance.enterPin")}</Label>
               <Input
                 inputMode="numeric"
-                maxLength={8}
+                maxLength={4}
                 value={qPin}
                 onChange={(e) => setQPin(e.target.value.replace(/\D/g, ""))}
                 placeholder="••••"

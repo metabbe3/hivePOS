@@ -54,7 +54,7 @@ export default function AttendanceClockPage() {
   useEffect(() => {
     if (!selected) return;
     const handler = (e: KeyboardEvent) => {
-      if (/^[0-9]$/.test(e.key)) setPin((p) => (p.length < 8 ? p + e.key : p));
+      if (/^[0-9]$/.test(e.key)) setPin((p) => (p.length < 4 ? p + e.key : p));
       else if (e.key === "Backspace") { e.preventDefault(); setPin((p) => p.slice(0, -1)); }
     };
     window.addEventListener("keydown", handler);
@@ -69,7 +69,7 @@ export default function AttendanceClockPage() {
 
   const press = (d: string) => {
     if (d === "del") setPin((p) => p.slice(0, -1));
-    else if (d && pin.length < 8) setPin((p) => p + d);
+    else if (d && pin.length < 4) setPin((p) => p + d);
   };
 
   const submit = async () => {

@@ -13,7 +13,7 @@ const COOLDOWN_MS = 60_000;
 const bodySchema = z
   .object({
     userId: z.string().uuid().optional(),
-    pin: z.string().min(4).max(8).optional(),
+    pin: z.string().min(4).max(4).optional(),
     qrToken: z.string().min(8).optional(),
   })
   .refine((d) => (d.userId && d.pin) || d.qrToken, {

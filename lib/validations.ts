@@ -12,7 +12,7 @@ const isWeakPin = (p: string) => {
 };
 export const pinField = z
   .string()
-  .regex(/^\d{4,8}$/, "PIN harus 4-8 digit angka.")
+  .regex(/^\d{4}$/, "PIN harus tepat 4 digit angka.")
   .refine((p) => !isWeakPin(p), "PIN terlalu mudah ditebak (jangan 1111/1234).");
 const slugField = z
   .string()
