@@ -39,6 +39,7 @@ export const GET = withErrorHandler(async (req) => {
     if (workDays.includes(wd)) totalWorkDays++;
   }
 
+  const now = new Date();
   const rows = staff.map((s) => {
     let hoursMs = 0;
     const daysWorkedSet = new Set<string>();
@@ -51,6 +52,10 @@ export const GET = withErrorHandler(async (req) => {
         hoursMs += ev.timestamp.getTime() - openIn.getTime();
         openIn = null;
       }
+    }
+    // Count the OPEN session (clocked in but not out yet) up to now.
+    if (openIn) {
+      hoursMs += now.getTime() - openIn.getTime();
     }
     const daysWorked = daysWorkedSet.size;
     const noShow = Math.max(0, totalWorkDays - daysWorked);
