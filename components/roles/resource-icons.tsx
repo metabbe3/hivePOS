@@ -12,6 +12,7 @@ import {
   UserCog,
   Shield,
   Truck,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 import type { Resource } from "@/lib/permissions/definitions";
@@ -30,4 +31,5 @@ export const RESOURCE_ICONS: Record<Resource, LucideIcon> = {
   users: UserCog,
   roles: Shield,
   pickupRequests: Truck,
+  attendance: Clock,
 };

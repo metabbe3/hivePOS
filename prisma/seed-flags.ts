@@ -32,6 +32,7 @@ const FLAGS = [
   { key: "customersImportExport", name: "Customer CSV Import/Export", category: "operations" },
   { key: "onboardingWizard", name: "Onboarding Wizard", category: "growth" },
   { key: "orderFlowV2", name: "Order Flow V2 (leaner steps)", category: "operations" },
+  { key: "staffAttendance", name: "Staff Attendance (clock-in)", category: "operations" },
 ] as const;
 
 async function main() {
@@ -42,9 +43,9 @@ async function main() {
       update: { name: f.name, category: f.category },
       create: {
         ...f,
-        // ponytail: offlineOrderCreate defaults OFF globally — flip per-tenant
-        // via super-admin override during dogfood phase. Other flags default ON.
-        enabled: f.key !== "offlineOrderCreate",
+        // ponytail: offlineOrderCreate + staffAttendance default OFF globally —
+        // flip per-tenant via super-admin override during dogfood phase.
+        enabled: f.key !== "offlineOrderCreate" && f.key !== "staffAttendance",
       },
     });
     console.log(`  ✓ ${f.key}`);

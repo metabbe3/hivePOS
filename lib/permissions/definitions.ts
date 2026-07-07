@@ -19,6 +19,7 @@ export const RESOURCES = [
   "roles", // role management (this feature)
   "billing", // SaaS subscription
   "pickupRequests", // customer pickup request workflow
+  "attendance", // staff clock-in/out + attendance reports
 ] as const;
 
 export const ACTIONS = [
@@ -52,6 +53,7 @@ export const RESOURCE_ACTIONS: Record<Resource, Action[]> = {
   roles: ["read", "create", "edit", "delete"],
   billing: ["read"],
   pickupRequests: ["read", "create", "edit", "delete"],
+  attendance: ["read", "edit"],
 };
 
 /** Human-readable labels for each resource (for the permission matrix UI). */
@@ -69,6 +71,7 @@ export const RESOURCE_LABELS: Record<Resource, string> = {
   roles: "Roles & Permissions",
   billing: "Billing",
   pickupRequests: "Pickup Requests",
+  attendance: "Absensi",
 };
 
 /** Human-readable labels for each action. */

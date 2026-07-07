@@ -349,6 +349,8 @@ model Branch {
   slug             String?  @unique
   /// Pickup scheduling config, e.g. [{day:"MON", slots:["10:00-12:00","14:00-16:00"]}]
   pickupSlots      Json?
+  /// Attendance: expected work days (1=Mon…7=Sun) for the no-show heuristic.
+  workDays         Int[]    @default([1, 2, 3, 4, 5, 6])
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -364,6 +366,7 @@ model Branch {
   depositTransactions DepositTransaction[]
   serviceGroups     ServiceGroup[]
   pickupRequests    PickupRequest[]
+  clockEvents       ClockEvent[]
 
   @@unique([tenantId, name])
   @@index([isActive])
@@ -398,15 +401,45 @@ model User {
   /// Ticket notification bell: timestamps of the last event the user has "seen".
   /// Null = never opened the bell → all events appear unread.
   lastTicketEventReadAt DateTime?
+  /// Attendance: bcrypt-hashed clock PIN (separate from login passwordHash).
+  pinHash         String?
+  /// Attendance: opaque random token for QR-based clock-in (null = QR disabled).
+  qrToken         String?  @unique
 
   tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch  Branch? @relation(fields: [branchId], references: [id])
   roleRef Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
   submittedTickets SupportTicket[]
+  clockEvents     ClockEvent[]
 
   @@index([branchId])
   @@index([tenantId])
   @@index([roleId])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MODULE: ATTENDANCE (staff clock-in/out — no-login, PIN/QR identified)
+// ─────────────────────────────────────────────────────────────────
+
+model ClockEvent {
+  id        String    @id @default(uuid())
+  userId    String
+  tenantId  String   // plain scalar (scoped from session ctx.tenantId; no Tenant relation)
+  branchId  String
+  type      ClockType
+  timestamp DateTime  @default(now())
+  createdAt DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@index([userId, timestamp])
+  @@index([tenantId, branchId, timestamp])
+}
+
+enum ClockType {
+  CLOCK_IN
+  CLOCK_OUT
 }
 
 // ─────────────────────────────────────────────────────────────────

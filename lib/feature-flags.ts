@@ -114,6 +114,7 @@ export const FLAG_KEYS = [
   "customersImportExport",
   "onboardingWizard",
   "orderFlowV2",
+  "staffAttendance",
 ] as const;
 
 export type FlagKey = (typeof FLAG_KEYS)[number];

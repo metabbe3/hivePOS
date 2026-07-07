@@ -69,6 +69,8 @@ export const DEFAULT_ROLES: DefaultRole[] = [
       "pickupRequests:create",
       "pickupRequests:edit",
       "pickupRequests:delete",
+      "attendance:read",
+      "attendance:edit",
     ],
   },
   {
@@ -88,6 +90,7 @@ export const DEFAULT_ROLES: DefaultRole[] = [
       "deposits:create",
       "pickupRequests:read",
       "pickupRequests:edit",
+      "attendance:read",
     ],
   },
   {
@@ -105,6 +108,7 @@ export const DEFAULT_ROLES: DefaultRole[] = [
       "customers:create",
       "inventory:read",
       "pickupRequests:read",
+      "attendance:read",
     ],
   },
 ];
