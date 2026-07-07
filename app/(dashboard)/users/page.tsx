@@ -51,6 +51,12 @@ export default function UsersPage() {
 
   const attendanceOn = useFeatureFlag("staffAttendance");
   const can = usePermissions().can;
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [qName, setQName] = useState("");
+  const [qPhone, setQPhone] = useState("");
+  const [qPin, setQPin] = useState("");
+  const [qBranch, setQBranch] = useState("");
+  const [quickSaving, setQuickSaving] = useState(false);
 
   const { items: users, loading, refresh } = useCrudResource<UserRow>({
     endpoint: "/api/users",
@@ -99,9 +105,37 @@ export default function UsersPage() {
     }
   }
 
+  async function saveQuick() {
+    if (!qName.trim() || !/^\d{4,6}$/.test(qPin)) return;
+    setQuickSaving(true);
+    try {
+      await apiFetch("/api/attendance/quick-staff", {
+        method: "POST",
+        body: { name: qName.trim(), phone: qPhone.trim() || undefined, pin: qPin, branchId: qBranch || undefined },
+      });
+      toast.success(t("attendance.pinSet"));
+      setQuickOpen(false);
+      setQName(""); setQPhone(""); setQPin(""); setQBranch("");
+      refresh();
+    } catch {
+      toast.error(t("common.networkError"));
+    } finally {
+      setQuickSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title={t("users.title")} description={t("users.description")} action={{ label: t("users.addUser"), onClick: openCreate }} />
+
+      {attendanceOn && can("attendance", "edit") ? (
+        <div className="flex justify-end -mt-2">
+          <Button variant="outline" size="sm" onClick={() => setQuickOpen(true)}>
+            <KeyRound className="h-4 w-4 mr-2" />
+            {t("attendance.quickAdd")}
+          </Button>
+        </div>
+      ) : null}
 
       {users.length === 0 ? (
         <EmptyState
@@ -131,6 +165,11 @@ export default function UsersPage() {
                         <Badge variant="outline" className="text-[10px] border-border/60">
                           {u.branch?.name ?? t("branches.noBranch")}
                         </Badge>
+                        {u.email.endsWith("@no-login.local") ? (
+                          <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-700">
+                            {t("attendance.attendanceOnly")}
+                          </Badge>
+                        ) : null}
                       </div>
                       <p className="text-sm text-muted-foreground">{u.email}</p>
                     </div>
@@ -202,6 +241,55 @@ export default function UsersPage() {
               />
             </div>
             <Button onClick={savePin} disabled={!/^\d{4,6}$/.test(pinInput) || pinSaving} className="w-full">
+              {t("common.confirm")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick add — attendance only (no email/login) */}
+      <Dialog open={quickOpen} onOpenChange={(o) => { setQuickOpen(o); if (!o) { setQName(""); setQPhone(""); setQPin(""); setQBranch(""); } }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              {t("attendance.quickAdd")}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="-mt-1 text-xs text-muted-foreground">{t("attendance.quickAddDesc")}</p>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Nama</Label>
+              <Input value={qName} onChange={(e) => setQName(e.target.value)} placeholder="Nama staff" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Telepon</Label>
+              <Input value={qPhone} onChange={(e) => setQPhone(e.target.value)} placeholder="08xx (opsional)" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Outlet</Label>
+              <select
+                value={qBranch}
+                onChange={(e) => setQBranch(e.target.value)}
+                className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
+              >
+                <option value="">—</option>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("attendance.enterPin")}</Label>
+              <Input
+                inputMode="numeric"
+                maxLength={6}
+                value={qPin}
+                onChange={(e) => setQPin(e.target.value.replace(/\D/g, ""))}
+                placeholder="••••"
+              />
+            </div>
+            <Button onClick={saveQuick} disabled={!qName.trim() || !/^\d{4,6}$/.test(qPin) || quickSaving} className="w-full">
               {t("common.confirm")}
             </Button>
           </div>

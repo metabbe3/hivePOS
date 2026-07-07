@@ -192,6 +192,16 @@ export const staffSchema: FormSchema = {
       optionsLabelKey: "name",
     },
     {
+      name: "branchId",
+      label: "Outlet",
+      type: "select",
+      required: true,
+      placeholder: "Pilih outlet",
+      optionsEndpoint: "/api/branches",
+      optionsValueKey: "id",
+      optionsLabelKey: "name",
+    },
+    {
       name: "password",
       label: "Password",
       type: "password",
