@@ -140,13 +140,20 @@ export const POST = withErrorHandler(async (req) => {
       });
     }
 
-    // Seed default laundry services for the branch
+    // Seed default service groups + services for the branch
+    const kiloanGroup = await tx.serviceGroup.create({
+      data: { name: "Cuci Kiloan", branchId: branch.id },
+    });
+    const lainnyaGroup = await tx.serviceGroup.create({
+      data: { name: "Lainnya", branchId: branch.id },
+    });
+
     const defaultServices = [
-      { name: "Cuci Kering", pricingType: "PER_KG" as const, basePrice: 7000 },
-      { name: "Cuci Setrika", pricingType: "PER_KG" as const, basePrice: 10000 },
-      { name: "Cuci Setrika Express", pricingType: "PER_KG" as const, basePrice: 15000 },
-      { name: "Cuci Sepatu", pricingType: "PER_ITEM" as const, basePrice: 25000 },
-      { name: "Cuci Bedcover", pricingType: "PER_ITEM" as const, basePrice: 30000 },
+      { name: "Cuci Kering", pricingType: "PER_KG" as const, basePrice: 7000, groupId: kiloanGroup.id },
+      { name: "Cuci Setrika", pricingType: "PER_KG" as const, basePrice: 10000, groupId: kiloanGroup.id },
+      { name: "Cuci Setrika Express", pricingType: "PER_KG" as const, basePrice: 15000, groupId: kiloanGroup.id },
+      { name: "Cuci Sepatu", pricingType: "PER_ITEM" as const, basePrice: 25000, groupId: lainnyaGroup.id },
+      { name: "Cuci Bedcover", pricingType: "PER_ITEM" as const, basePrice: 30000, groupId: lainnyaGroup.id },
     ];
 
     await tx.service.createMany({
