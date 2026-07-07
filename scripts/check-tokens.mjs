@@ -31,8 +31,9 @@ const BARE_BG_WHITE = /\bbg-white(?!\/)/;
 
 // Explicit intentional bg-white allowlist (path substrings).
 const ALLOW_BG_WHITE = [
-  "laundry/orders/[id]/receipt/page.tsx", // thermal receipt paper
-  "branches/[id]/page.tsx",               // receipt-paper size preview swatch
+  "laundry/orders/[id]/receipt/page.tsx",     // thermal receipt paper
+  "branches/[id]/page.tsx",                   // receipt-paper size preview swatch
+  "attendance/clock/page.tsx",                // white status dot on emerald band
 ];
 
 const allowlistHit = (p) => ALLOW_BG_WHITE.some((a) => p.includes(a));
