@@ -2,23 +2,41 @@ import { withErrorHandler, apiSuccess } from "@/modules/shared";
 import { requireWithBranchOrThrow } from "@/lib/permissions/check";
 import { prisma } from "@/lib/prisma";
 
-// Who is currently clocked in (last event = CLOCK_IN) at the active branch(es).
+// All clock-eligible staff + their status for the kiosk grid:
+// { id, name, since (null if clocked out), todayMs (worked-hours-today incl. open session) }
 export const GET = withErrorHandler(async () => {
   const ctx = await requireWithBranchOrThrow("attendance", "read");
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const now = new Date();
+
   const users = await prisma.user.findMany({
     where: { tenantId: ctx.tenantId, isActive: true, pinHash: { not: null } },
     select: {
       id: true,
       name: true,
       clockEvents: {
-        where: { branchId: { in: ctx.branchIds } },
-        orderBy: { timestamp: "desc" },
-        take: 1,
+        where: { timestamp: { gte: startOfToday }, branchId: { in: ctx.branchIds } },
+        orderBy: { timestamp: "asc" },
       },
     },
   });
-  const inNow = users
-    .filter((u) => u.clockEvents[0]?.type === "CLOCK_IN")
-    .map((u) => ({ id: u.id, name: u.name, since: u.clockEvents[0]!.timestamp }));
-  return apiSuccess(inNow);
+
+  const rows = users.map((u) => {
+    let todayMs = 0;
+    let openIn: Date | null = null;
+    for (const ev of u.clockEvents) {
+      if (ev.type === "CLOCK_IN") {
+        openIn = ev.timestamp;
+      } else if (ev.type === "CLOCK_OUT" && openIn) {
+        todayMs += ev.timestamp.getTime() - openIn.getTime();
+        openIn = null;
+      }
+    }
+    // Add the open session up to now if currently clocked in.
+    if (openIn) todayMs += now.getTime() - openIn.getTime();
+    return { id: u.id, name: u.name, since: openIn ? openIn.toISOString() : null, todayMs };
+  });
+
+  return apiSuccess(rows);
 });
