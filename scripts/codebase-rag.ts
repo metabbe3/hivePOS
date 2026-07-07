@@ -331,6 +331,26 @@ const K1 = 1.2;
 const B = 0.75;
 const RECALL_N = 25;
 
+// Deterministic synonym map for pseudo-semantic recall. Maps common dev terms to
+// their synonyms so BM25 can match "performance" queries against symbols named
+// "optimize" or "latency". Zero LLM — just a static lookup table. Synonyms score
+// at 0.5× BM25 weight (exact identifier matches still rank higher).
+const SYNONYMS: Record<string, string[]> = {
+  performance: ["latency", "speed", "slow", "fast", "optimize", "throughput", "perf"],
+  auth: ["login", "session", "token", "password", "credentials", "oauth", "jwt"],
+  payment: ["checkout", "stripe", "midtrans", "qris", "invoice", "transaction", "pay"],
+  error: ["fail", "crash", "bug", "exception", "throw", "catch", "validation"],
+  attendance: ["clock", "absen", "absensi", "pin", "timesheet", "shift"],
+  offline: ["idb", "indexeddb", "sync", "outbox", "cache", "pending"],
+  dashboard: ["metric", "stat", "chart", "report", "summary", "overview"],
+  order: ["cart", "checkout", "lineitem", "garment", "laundry", "kiloan"],
+  customer: ["pelanggan", "contact", "deposit", "wallet"],
+  config: ["setting", "preference", "option", "env", "featureflag", "flag"],
+  search: ["query", "find", "filter", "grep", "locate", "lookup"],
+  export: ["csv", "excel", "download", "pdf", "print"],
+  import: ["upload", "csv", "bulk", "batch"],
+};
+
 export function tokenize(raw: string): string[] {
   return raw
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2") // camelCase → space
@@ -377,9 +397,37 @@ export function rerank(qLower: string, s: Symbol): number {
   return score;
 }
 
-function query(term: string, k = 10): void {
+// Slice a symbol's code for --summarize mode: keep the signature line(s) + JSDoc,
+// collapse the function body into a comment. Saves tokens for pure navigation queries.
+function sliceCode(s: Symbol): string {
+  const lines = s.code.split("\n");
+  if (lines.length <= 8) return s.code; // short enough — don't slice
+  // Keep the first line (signature) + any continuation lines until the first { or =>,
+  // then collapse the rest.
+  let cutAt = lines.length;
+  for (let i = 0; i < Math.min(lines.length, 5); i++) {
+    if (lines[i].includes("{") || lines[i].includes("=>")) { cutAt = i + 1; break; }
+  }
+  const head = lines.slice(0, cutAt).join("\n");
+  const collapsed = lines.length - cutAt;
+  return `${head}\n  // [...] ${collapsed} lines collapsed (use without --summarize for full code)\n}`;
+}
+
+function query(term: string, k = 10, summarize = false): void {
   const qLower = term.toLowerCase().trim();
   const qTokens = tokenize(qLower);
+  // Expand query tokens with synonyms (pseudo-semantic). Synonym tokens are tagged
+  // so they can be scored at a lower weight than the original query tokens.
+  const expanded: { token: string; weight: number }[] = qTokens.map((t) => ({ token: t, weight: 1 }));
+  for (const qt of qTokens) {
+    const syns = SYNONYMS[qt];
+    if (syns) for (const s of syns) {
+      if (!qTokens.includes(s) && !expanded.some((e) => e.token === s)) {
+        expanded.push({ token: s, weight: 0.5 });
+      }
+    }
+  }
+
   const symbols = loadSymbols();
   const N = symbols.length;
 
@@ -400,15 +448,13 @@ function query(term: string, k = 10): void {
     const d = docs.get(s.id)!;
     const dl = [...d.values()].reduce((a, b) => a + b, 0) || 1;
     let bm = 0;
-    for (const t of qTokens) {
+    for (const { token: t, weight } of expanded) {
       const tf = d.get(t);
       if (!tf) continue;
       const dft = df.get(t) ?? 0;
       const idf = Math.log((N - dft + 0.5) / (dft + 0.5) + 1);
-      bm += idf * ((tf * (K1 + 1)) / (tf + K1 * (1 - B + (B * dl) / avgdl)));
+      bm += weight * idf * ((tf * (K1 + 1)) / (tf + K1 * (1 - B + (B * dl) / avgdl)));
     }
-    // Fallback: raw substring on name+summary so single-stop-token / short
-    // queries (which tokenize may drop) still surface.
     if (bm === 0 && qLower.length >= 2 &&
         (s.name.toLowerCase().includes(qLower) || s.summary.toLowerCase().includes(qLower))) {
       bm = 0.01;
@@ -423,7 +469,7 @@ function query(term: string, k = 10): void {
     .map(({ s, bm }) => ({ s, rr: rerank(qLower, s), bm }))
     .sort((a, b) => b.rr - a.rr || b.bm - a.bm);
 
-  printHits(ranked.slice(0, k).map((x) => x.s), term);
+  printHits(ranked.slice(0, k).map((x) => x.s), term, summarize);
 }
 
 function findByName(name: string): Symbol[] {
@@ -445,20 +491,19 @@ function edges(name: string, field: "called_by" | "calls", arrow: "←" | "→",
 function callers(name: string): void { edges(name, "called_by", "←", "referenced by"); }
 function callees(name: string): void { edges(name, "calls", "→", "calls"); }
 
-function printHits(hits: Symbol[], label: string): void {
+function printHits(hits: Symbol[], label: string, summarize = false): void {
   if (!hits.length) { console.log(`No matches for "${label}".`); return; }
   const byId = new Map(loadSymbols().map((s) => [s.id, s]));
   const fmt = (id: string) => {
     const r = byId.get(id);
     return r ? `${r.kind} ${r.name} ${r.file_path}:${r.startLine}` : "";
   };
-  console.log(`\nTop ${hits.length} for "${label}":\n`);
+  console.log(`\nTop ${hits.length} for "${label}"${summarize ? " (summarized)" : ""}:\n`);
   for (const s of hits) {
     console.log(`▸ ${s.kind} ${s.name}  —  ${s.file_path}:${s.startLine}-${s.endLine}`);
     if (s.inputs.length) console.log(`  in:  ${s.inputs.map((p) => `${p.name}${p.type ? ": " + p.type : ""}`).join(", ")}`);
     if (s.outputs) console.log(`  out: ${s.outputs}`);
-    console.log(`  ${s.summary.slice(0, 160)}`);
-    // Mini execution trace — callers (←) + callees (→), top 3 each.
+    console.log(`  ${summarize ? sliceCode(s).slice(0, 200) : s.summary.slice(0, 160)}`);
     const callers3 = (s.called_by ?? []).slice(0, 3).map(fmt).filter(Boolean).join("  ,  ");
     const callees3 = (s.calls ?? []).slice(0, 3).map(fmt).filter(Boolean).join("  ,  ");
     if (callers3) console.log(`  ← callers:  ${callers3}`);
@@ -480,9 +525,11 @@ function stats(): void {
 // ── CLI ──────────────────────────────────────────────────────────────────
 const argv = process.argv.slice(2);
 let k = 10;
+let summarize = false;
 const positional: string[] = [];
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === "-n") k = parseInt(argv[++i], 10) || 10;
+  else if (argv[i] === "--summarize") summarize = true;
   else positional.push(argv[i]);
 }
 const [cmd, ...rest] = positional;
@@ -496,11 +543,11 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
       break;
     case "query":
       if (!rest.length) { console.log("usage: query <term>"); break; }
-      query(rest.join(" "), k);
+      query(rest.join(" "), k, summarize);
       break;
     case "symbol":
       if (!rest.length) { console.log("usage: symbol <name>"); break; }
-      printHits(findByName(rest[0]), rest[0]);
+      printHits(findByName(rest[0]), rest[0], summarize);
       break;
     case "callers":
       if (!rest.length) { console.log("usage: callers <name>"); break; }
